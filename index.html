@@ -398,82 +398,121 @@ function renderGroupedMonthlyChart(data){
   });
   return svg;
 }
-  // ---------- Relatório com IA ----------
-let aiState={open:false, loading:false, text:'', error:''};
 
-async function callClaudeAPI(prompt){
-  const res=await fetch('/api/claude',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt}),
-  });
-  const data=await res.json();
-  if(!res.ok) throw new Error(data.error||'Erro ao gerar o relatório.');
-  return data.response||'';
-}
+// ---------- Relatório automático (sem IA, sem custo) ----------
+let aiState={open:false, text:''};
 
-function buildContasPrompt(key){
+function pct(parte, total){ return total>0 ? (parte/total)*100 : 0; }
+
+function buildContasReportText(key){
   const cfg=TABS[key];
   const recs=appState.data[key].records;
   const totalOriginal=recs.reduce((s,r)=>s+r.valorOriginal,0);
   const totalFeito=recs.reduce((s,r)=>s+r.valorFeito,0);
   const totalAberto=recs.filter(r=>r.situacao==='Em aberto').reduce((s,r)=>s+r.valorAberto,0);
   const totalAtrasado=recs.filter(r=>r.situacao==='Atrasado').reduce((s,r)=>s+r.valorAberto,0);
-  const somaPor=(campo)=>{
+  const entCount=new Set(recs.map(r=>r.entidade)).size;
+
+  const somaPorMapa=(campo)=>{
     const m=new Map();
     recs.forEach(r=>m.set(r[campo],(m.get(r[campo])||0)+r.valorOriginal));
-    return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,v])=>`${n}: ${brl(v)}`).join('; ');
+    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
   };
+  const topEnt=somaPorMapa('entidade').slice(0,3);
+  const topCat=somaPorMapa('categoria').slice(0,3);
+  const topEntShare=pct(topEnt.reduce((s,[,v])=>s+v,0), totalOriginal);
+
   const porMes=new Map();
   recs.forEach(r=>porMes.set(r.mesKey,(porMes.get(r.mesKey)||0)+r.valorOriginal));
-  const evolucao=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1).map(([k,v])=>`${k}: ${brl(v)}`).join('; ');
-  return `Você é um analista financeiro. Escreva em português do Brasil, em texto corrido e sem markdown (250 a 400 palavras), uma análise dos dados de ${cfg.label} de uma empresa. Cubra: visão geral do total no período; situação de valores em aberto e atrasados (aponte riscos se houver valores atrasados relevantes); concentração em poucos ${cfg.entityLabel.toLowerCase()}s; categorias que mais pesam; evolução mês a mês. Termine com 2 a 3 recomendações práticas.
-Dados:
-- Total geral no período: ${brl(totalOriginal)}
-- Total ${cfg.doneLabel.toLowerCase()}: ${brl(totalFeito)}
-- Total ${cfg.openLabel.toLowerCase()}: ${brl(totalAberto)}
-- Total ${cfg.lateLabel.toLowerCase()}: ${brl(totalAtrasado)}
-- Top ${cfg.entityLabel.toLowerCase()}s por valor: ${somaPor('entidade')}
-- Top categorias por valor: ${somaPor('categoria')}
-- Evolução mensal (ano-mês: valor): ${evolucao}`;
+  const mesesOrdenados=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1);
+  let tendenciaTxt='';
+  if(mesesOrdenados.length>=2){
+    const primeiro=mesesOrdenados[0][1], ultimo=mesesOrdenados[mesesOrdenados.length-1][1];
+    if(ultimo>primeiro*1.1) tendenciaTxt='em tendência de alta';
+    else if(ultimo<primeiro*0.9) tendenciaTxt='em tendência de queda';
+    else tendenciaTxt='relativamente estável';
+  }
+
+  const p=[];
+  p.push(`No período analisado, o total de ${cfg.label.toLowerCase()} somou ${brl(totalOriginal)}, distribuído em ${recs.length} lançamentos e ${entCount} ${cfg.entityCountLabel.toLowerCase()}. Desse total, ${brl(totalFeito)} já foi ${cfg.doneLabel.toLowerCase()} e ${brl(totalAberto)} segue ${cfg.openLabel.toLowerCase()}.`);
+
+  if(totalAtrasado>0){
+    p.push(`Chama atenção o valor ${cfg.lateLabel.toLowerCase()} de ${brl(totalAtrasado)}${totalOriginal>0?` (${pct(totalAtrasado,totalOriginal).toFixed(1)}% do total)`:''}, o que representa um risco de fluxo de caixa que merece atenção prioritária.`);
+  } else {
+    p.push(`Não há valores ${cfg.lateLabel.toLowerCase()}s registrados no período, o que é um bom sinal de controle.`);
+  }
+
+  if(topEnt.length>0){
+    const nomes=topEnt.map(([n])=>n).join(', ');
+    p.push(`${cfg.entityLabel} concentração: os ${Math.min(topEnt.length,3)} maiores ${cfg.entityLabel.toLowerCase()}s (${nomes}) somam cerca de ${topEntShare.toFixed(1)}% do valor total, o que indica ${topEntShare>50?'uma concentração relevante e maior dependência desses parceiros':'uma distribuição relativamente equilibrada'}.`);
+  }
+  if(topCat.length>0){
+    p.push(`As categorias com maior peso são: ${topCat.map(([n])=>n).join(', ')}.`);
+  }
+  if(tendenciaTxt){
+    p.push(`Ao longo dos meses, os valores estão ${tendenciaTxt}.`);
+  }
+
+  const rec=[];
+  if(totalAtrasado>0) rec.push(`Priorizar a regularização dos valores ${cfg.lateLabel.toLowerCase()}s para reduzir riscos.`);
+  if(topEntShare>50) rec.push(`Avaliar a diversificação de ${cfg.entityCountLabel.toLowerCase()} para reduzir a dependência dos principais.`);
+  rec.push(`Acompanhar mensalmente a evolução dos valores para antecipar variações.`);
+  p.push(`Recomendações: ${rec.join(' ')}`);
+
+  return p.join('\n\n');
 }
 
-function buildExtratoPrompt(){
+function buildExtratoReportText(){
   const st=appState.data.extrato;
   const recs=st.records;
   const entradas=recs.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+r.valorAbs,0);
   const saidas=recs.filter(r=>r.tipo==='saida').reduce((s,r)=>s+r.valorAbs,0);
-  const somaPorDesc=(tipo)=>{
+  const saldoPeriodo=entradas-saidas;
+
+  const somaPorDescMapa=(tipo)=>{
     const m=new Map();
     recs.filter(r=>r.tipo===tipo).forEach(r=>m.set(r.descricao,(m.get(r.descricao)||0)+r.valorAbs));
-    return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,v])=>`${n}: ${brl(v)}`).join('; ');
+    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
   };
+  const topSaidas=somaPorDescMapa('saida').slice(0,3);
+  const topEntradas=somaPorDescMapa('entrada').slice(0,3);
+
   const porMes=new Map();
   recs.forEach(r=>{
     const cur=porMes.get(r.mesKey)||{entrada:0,saida:0};
     if(r.tipo==='entrada') cur.entrada+=r.valorAbs; else cur.saida+=r.valorAbs;
     porMes.set(r.mesKey,cur);
   });
-  const evolucao=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1).map(([k,v])=>`${k}: entradas ${brl(v.entrada)} / saídas ${brl(v.saida)}`).join('; ');
-  return `Você é um analista financeiro. Escreva em português do Brasil, em texto corrido e sem markdown (250 a 400 palavras), uma análise do extrato bancário de uma empresa. Cubra: visão geral de entradas e saídas no período; saldo do período e saldo final; maiores fontes de saída e de entrada; evolução mês a mês; aponte riscos de fluxo de caixa se houver. Termine com 2 a 3 recomendações práticas.
-Dados:
-- Total de entradas: ${brl(entradas)}
-- Total de saídas: ${brl(saidas)}
-- Saldo do período: ${brl(entradas-saidas)}
-- Saldo final do extrato: ${st.saldoFinal!=null?brl(st.saldoFinal):'não informado'}
-- Maiores saídas por descrição: ${somaPorDesc('saida')}
-- Maiores entradas por descrição: ${somaPorDesc('entrada')}
-- Evolução mensal (ano-mês: entradas/saídas): ${evolucao}`;
+  const mesesOrdenados=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1);
+
+  const p=[];
+  p.push(`No período analisado, o extrato registrou ${brl(entradas)} em entradas e ${brl(saidas)} em saídas, resultando em um saldo de ${brl(saldoPeriodo)}.${st.saldoFinal!=null?` O saldo final informado no extrato é de ${brl(st.saldoFinal)}.`:''}`);
+
+  if(saldoPeriodo<0){
+    p.push(`O saldo do período é negativo, ou seja, as saídas superaram as entradas — vale investigar as causas e ajustar o fluxo de caixa.`);
+  } else {
+    p.push(`O saldo do período é positivo, indicando que as entradas superaram as saídas.`);
+  }
+
+  if(topSaidas.length>0) p.push(`As maiores saídas foram: ${topSaidas.map(([n,v])=>`${n} (${brl(v)})`).join(', ')}.`);
+  if(topEntradas.length>0) p.push(`As maiores entradas foram: ${topEntradas.map(([n,v])=>`${n} (${brl(v)})`).join(', ')}.`);
+
+  if(mesesOrdenados.length>=2){
+    const primeiro=mesesOrdenados[0][1], ultimo=mesesOrdenados[mesesOrdenados.length-1][1];
+    const saldoPrimeiro=primeiro.entrada-primeiro.saida, saldoUltimo=ultimo.entrada-ultimo.saida;
+    p.push(`Comparando o primeiro e o último mês do período, o saldo mensal passou de ${brl(saldoPrimeiro)} para ${brl(saldoUltimo)}.`);
+  }
+
+  const rec=[`Acompanhar mensalmente a relação entre entradas e saídas para antecipar períodos de aperto de caixa.`];
+  if(saldoPeriodo<0) rec.unshift(`Revisar as maiores saídas listadas acima e avaliar cortes ou renegociações.`);
+  p.push(`Recomendações: ${rec.join(' ')}`);
+
+  return p.join('\n\n');
 }
 
-function openAIReport(prompt){
-  aiState={open:true, loading:true, text:'', error:''};
+function openReport(text){
+  aiState={open:true, text};
   renderAIModal();
-  callClaudeAPI(prompt).then(text=>{
-    aiState.loading=false; aiState.text=text||'A IA não retornou nenhum texto.'; renderAIModal();
-  }).catch(e=>{
-    aiState.loading=false; aiState.error=e.message||'Erro ao gerar relatório.'; renderAIModal();
-  });
 }
 function closeAIReport(){
   aiState.open=false;
@@ -490,16 +529,10 @@ function renderAIModal(){
   overlay.innerHTML='';
   const box=el('div',{class:'modal-box'});
   box.appendChild(el('div',{class:'modal-head'},[
-    el('div',{},[el('div',{class:'eyebrow'},'RELATÓRIO GERADO POR IA'), el('h2',{style:'margin:2px 0 0;font-family:\'Fraunces\',serif;font-size:19px;'},'Análise financeira')]),
+    el('div',{},[el('div',{class:'eyebrow'},'RELATÓRIO AUTOMÁTICO'), el('h2',{style:'margin:2px 0 0;font-family:\'Fraunces\',serif;font-size:19px;'},'Análise financeira')]),
     el('button',{class:'btn ghost', onclick:closeAIReport},'Fechar'),
   ]));
-  if(aiState.loading){
-    box.appendChild(el('div',{class:'modal-loading'},'⏳ Gerando análise… isso pode levar alguns segundos.'));
-  } else if(aiState.error){
-    box.appendChild(el('div',{class:'err'}, `⚠ ${aiState.error}`));
-  } else {
-    box.appendChild(el('div',{class:'modal-text'}, aiState.text));
-  }
+  box.appendChild(el('div',{class:'modal-text'}, aiState.text));
   overlay.appendChild(box);
 }
 
@@ -532,7 +565,7 @@ function renderContasTab(key){
       el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`),
     ]),
     el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openAIReport(buildContasPrompt(key))},'🤖 Relatório com IA'),
+      el('button',{class:'btn ai', onclick:()=>openReport(buildContasReportText(key))},'📄 Gerar relatório'),
       el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-'+key).click()},'⟳ Atualizar dados'),
       el('button',{class:'btn ghost', onclick:()=>onResetContas(key)},'🗑 Limpar'),
     ]),
@@ -598,11 +631,10 @@ function renderContasTab(key){
   }
   app.appendChild(el('div',{class: hasCentro?'grid3':'grid2'}, cols));
 
-  app.appendChild(el('div',{class:'footer'},'Dados carregados localmente a partir do export do Conta Azul · o relatório de IA envia um resumo desses dados para a API da Anthropic'));
+  app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
   app.appendChild(el('input',{type:'file', id:'fileInput-'+key, accept:'.xlsx,.xls,.csv', onchange:e=>onFileContas(key,e.target.files[0])}));
 }
-
-function renderContasEmpty(key){
+  function renderContasEmpty(key){
   const cfg=TABS[key];
   const st=appState.data[key];
   const wrap=el('div',{class:'empty'});
@@ -660,7 +692,7 @@ function renderExtratoTab(){
   app.appendChild(el('div',{class:'headerRow'},[
     el('div',{},[el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`)]),
     el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openAIReport(buildExtratoPrompt())},'🤖 Relatório com IA'),
+      el('button',{class:'btn ai', onclick:()=>openReport(buildExtratoReportText())},'📄 Gerar relatório'),
       el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-extrato').click()},'⟳ Atualizar dados'),
       el('button',{class:'btn ghost', onclick:onResetExtrato},'🗑 Limpar'),
     ]),
@@ -712,7 +744,7 @@ function renderExtratoTab(){
     el('div',{},[sectionHead('RANKING','Maiores entradas'), el('div',{class:'card'},[renderBars(topByDesc('entrada'),'#5C7A63')])]),
   ]));
 
-  app.appendChild(el('div',{class:'footer'},'Dados carregados localmente a partir do extrato exportado · o relatório de IA envia um resumo desses dados para a API da Anthropic'));
+  app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
   app.appendChild(el('input',{type:'file', id:'fileInput-extrato', accept:'.xlsx,.xls,.csv', onchange:e=>onFileExtrato(e.target.files[0])}));
 }
 
