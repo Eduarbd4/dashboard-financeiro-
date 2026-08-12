@@ -2,1103 +2,2821 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard Financeiro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-  :root{
-    --ink:#16233F; --paper:#FAF7F1; --paper-dim:#F1ECE2; --gold:#BB8A34;
-    --sage:#5C7A63; --rust:#A8462E; --line:#DED6C4; --muted:#5C5748;
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root {
+  --ink: #16233f;
+  --paper: #faf7f1;
+  --dim: #f1ece2;
+  --gold: #bb8a34;
+  --sage: #5c7a63;
+  --rust: #a8462e;
+  --line: #ded6c4;
+  --muted: #5c5748;
+  --white: #fff;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, sans-serif;
+}
+.wrap {
+  max-width: 1220px;
+  margin: auto;
+  padding: 28px 24px 50px;
+}
+.eyebrow {
+  font: 11px "IBM Plex Mono";
+  color: var(--gold);
+  letter-spacing: .08em;
+}
+.title {
+  font: 600 27px Fraunces;
+  margin: 3px 0;
+}
+.sub {
+  font: 12px "IBM Plex Mono";
+  opacity: .62;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 9px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn.secondary {
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn.danger {
+  background: transparent;
+  color: var(--rust);
+  border-color: var(--rust);
+}
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+.tab {
+  white-space: nowrap;
+  border: 0;
+  background: none;
+  padding: 11px 15px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 12px "IBM Plex Mono";
+}
+.tab.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--gold);
+}
+.viewtabs {
+  margin-top: -8px;
+  margin-bottom: 22px;
+}
+.viewtabs .tab {
+  font-size: 11px;
+}
+.filterbox {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 22px;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 145px;
+}
+.field label {
+  font: 10px "IBM Plex Mono";
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.field input,
+.field select {
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 9px;
+  font: 12px Inter;
+}
+.compareToggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  font-size: 12px;
+}
+.compareDates {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 5px 13px 5px 13px;
+  padding: 18px;
+  min-width: 0;
+}
+.kpi.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.kpi .label {
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+.kpi .value {
+  font: 600 24px Fraunces;
+  margin: 8px 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.change {
+  font: 11px "IBM Plex Mono";
+}
+.positive {
+  color: var(--sage);
+}
+.negative {
+  color: var(--rust);
+}
+.primary .positive {
+  color: #a8d5b0;
+}
+.primary .negative {
+  color: #ffb3a1;
+}
+.neutral {
+  color: var(--muted);
+}
+.section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 25px 0 13px;
+}
+.section h2 {
+  font: 600 19px Fraunces;
+  margin: 0;
+}
+.rule {
+  height: 1px;
+  background: var(--line);
+  flex: 1;
+}
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 17px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.chart {
+  width: 100%;
+  overflow-x: auto;
+}
+.chart svg {
+  display: block;
+  min-width: 620px;
+}
+.legend {
+  display: flex;
+  gap: 16px;
+  font: 11px "IBM Plex Mono";
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 5px;
+}
+.tablewrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+.table th,
+.table td {
+  text-align: right;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table th {
+  font: 10px "IBM Plex Mono";
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.analysis {
+  line-height: 1.65;
+  font-size: 13px;
+}
+.analysisLead {
+  font: 600 17px Fraunces;
+  margin-bottom: 12px;
+}
+.analysisList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.insight {
+  background: var(--dim);
+  border-radius: 7px;
+  padding: 11px;
+}
+.empty {
+  text-align: center;
+  max-width: 680px;
+  margin: 45px auto;
+}
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 38px 20px;
+  cursor: pointer;
+}
+.drop.over {
+  border-color: var(--gold);
+  background: var(--dim);
+}
+.error {
+  color: var(--rust);
+  font-size: 12px;
+  margin: 10px;
+}
+.ranking {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 9px 0;
+}
+.rankname {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.track {
+  height: 22px;
+  background: var(--dim);
+  border-radius: 4px;
+  flex: 1;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  border-radius: 4px;
+}
+.rankval {
+  width: 105px;
+  text-align: right;
+  font: 11px "IBM Plex Mono";
+}
+.footer {
+  text-align: center;
+  font: 10px "IBM Plex Mono";
+  opacity: .5;
+  margin-top: 28px;
+}
+input[type=file] {
+  display: none;
+}
+@media (max-width: 800px) {
+  .wrap {
+    padding: 20px 14px 40px;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;}
-  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 50px;}
-  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.08em;margin-bottom:4px;}
-  h1{font-family:'Fraunces',serif;font-weight:600;font-size:26px;margin:0;}
-  .sub{font-family:'IBM Plex Mono',monospace;font-size:12px;opacity:.6;margin-top:4px;}
-  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--paper);}
-  .btn.ghost{background:transparent;color:var(--rust);border-color:var(--rust);}
-  .headerRow{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
-  .tabbar{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--line);}
-  .tabbtn{font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:10px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
-  .tabbtn.active{color:var(--ink);border-bottom-color:var(--gold);font-weight:600;}
-  .filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
-  .filter{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 10px;}
-  .filter label{font-size:11px;font-family:'IBM Plex Mono',monospace;opacity:.55;text-transform:uppercase;}
-  .filter select{border:none;background:transparent;font-size:13px;color:var(--ink);outline:none;cursor:pointer;font-family:'Inter',sans-serif;max-width:220px;}
-  .filter input[type=date]{border:none;background:transparent;font-size:12.5px;color:var(--ink);outline:none;cursor:pointer;font-family:'Inter',sans-serif;}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:32px;}
-  .tag{position:relative;border-radius:4px 12px 4px 12px;padding:18px 20px 16px;border:1px solid var(--ink);box-shadow:2px 3px 0 rgba(22,35,63,.08);}
-  .tag .dot{position:absolute;top:10px;left:10px;width:6px;height:6px;border-radius:50%;background:rgba(250,247,241,.4);}
-  .tag.ink{background:var(--ink);color:var(--paper);}
-  .tag.gold{background:var(--gold);color:#1B1305;border-color:var(--gold);}
-  .tag.rust{background:var(--rust);color:var(--paper);border-color:var(--rust);}
-  .tag.paper{background:var(--paper);color:var(--ink);border-color:var(--line);}
-  .tag.paper .dot, .tag.gold .dot{background:rgba(27,19,5,.3);}
-  .tag .label{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-bottom:8px;}
-  .tag .value{font-family:'Fraunces',serif;font-weight:600;font-size:23px;line-height:1.1;font-variant-numeric:tabular-nums;}
-  .tag .subv{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.7;margin-top:6px;}
-  .sectionHead{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
-  .sectionHead .eyebrow{margin:0;}
-  .sectionHead h2{font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin:0;}
-  .sectionHead .rule{flex:1;height:1px;background:var(--line);}
-  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 16px;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
-  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
-  .barRow{display:flex;align-items:center;gap:10px;margin:10px 0;}
-  .barLabel{width:128px;flex-shrink:0;font-size:11.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .barTrack{flex:1;background:var(--paper-dim);border-radius:4px;height:22px;overflow:hidden;min-width:40px;}
-  .barFill{height:100%;border-radius:4px;}
-  .barVal{width:92px;flex-shrink:0;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
-  .legend{display:flex;gap:16px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
-  .legend span{display:inline-flex;align-items:center;gap:6px;}
-  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
-  .drop{border:2px dashed var(--line);border-radius:12px;padding:40px 20px;cursor:pointer;text-align:center;transition:all .15s;}
-  .drop.over{border-color:var(--gold);background:var(--paper-dim);}
-  .empty{max-width:640px;margin:30px auto;text-align:center;}
-  .err{margin-top:14px;color:var(--rust);font-size:13px;display:flex;align-items:center;gap:6px;justify-content:center;}
-  .footer{margin-top:30px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.45;}
-  input[type=file]{display:none;}
-  .btn.ai{background:var(--sage);border-color:var(--sage);color:var(--paper);}
-  .btn:disabled{opacity:.5;cursor:not-allowed;}
-  .modal-overlay{position:fixed;inset:0;background:rgba(22,35,63,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
-  .modal-box{background:var(--paper);border-radius:12px;max-width:640px;width:100%;max-height:82vh;overflow-y:auto;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
-  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:14px;}
-  .modal-loading{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);padding:36px 0;text-align:center;}
-  .modal-text{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--ink);white-space:pre-wrap;}
-  .catTable{width:100%;}
-  .catTable .grupoRow{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-bottom:5px;border-bottom:1px solid var(--line);}
-  .catTable .grupoRow:first-child{margin-top:0;}
-  .catTable .grupoNome{font-family:'Fraunces',serif;font-weight:600;font-size:13.5px;}
-  .catTable .grupoVal{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;}
-  .catTable .subRow{display:flex;justify-content:space-between;padding:5px 0 5px 14px;font-size:12px;color:var(--muted);}
-  .catTable .subVal{font-family:'IBM Plex Mono',monospace;}
-  .msfilter{position:relative;background:#fff;border:1px solid var(--line);border-radius:6px;}
-  .msfilter summary{list-style:none;cursor:pointer;padding:6px 10px;display:flex;align-items:center;gap:7px;user-select:none;}
-  .msfilter summary::-webkit-details-marker{display:none;}
-  .msfilter summary .msfilter-label{font-size:11px;font-family:'IBM Plex Mono',monospace;opacity:.55;text-transform:uppercase;white-space:nowrap;}
-  .msfilter summary .msfilter-val{font-size:13px;color:var(--ink);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .msfilter summary:after{content:'▾';font-size:9px;opacity:.5;margin-left:1px;}
-  .msfilter[open] summary:after{content:'▴';}
-  .msfilter-panel{position:absolute;top:calc(100% + 5px);left:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 28px rgba(22,35,63,.15);min-width:220px;max-width:290px;padding:8px;max-height:280px;overflow-y:auto;}
-  .msfilter-actions{display:flex;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);position:sticky;top:-8px;background:#fff;padding-top:2px;}
-  .msfilter-actions button{flex:1;font-size:10.5px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);background:var(--paper-dim);border-radius:4px;padding:5px 4px;cursor:pointer;color:var(--ink);}
-  .msfilter-opt{display:flex;align-items:center;gap:7px;padding:5px 4px;font-size:12.5px;cursor:pointer;border-radius:4px;}
-  .msfilter-opt:hover{background:var(--paper-dim);}
-  .msfilter-opt input{cursor:pointer;flex-shrink:0;}
-  .msfilter-opt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .rankSearch{width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:var(--ink);}
-  .rankSearch:focus{border-color:var(--gold);}
-  .rankScroll{max-height:300px;overflow-y:auto;padding-right:4px;}
-  .rankScroll::-webkit-scrollbar{width:6px;}
-  .rankScroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid2,
+  .analysisList {
+    grid-template-columns: 1fr;
+  }
+  .actions {
+    width: 100%;
+  }
+  .actions .btn {
+    flex: 1;
+  }
+  .field {
+    flex: 1 1 140px;
+  }
+  .compareDates .field {
+    flex: 1 1 140px;
+  }
+}
+@media (max-width: 450px) {
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+  .kpi .value {
+    font-size: 22px;
+  }
+  .filterbox {
+    padding: 12px;
+  }
+  .tabs .tab {
+    padding: 10px 12px;
+  }
+}
 </style>
 </head>
 <body>
-<div class="wrap" id="app"></div>
-
+<main class="wrap" id="app"></main>
 <script>
-const MONTH_ABBR=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-const MONTH_FULL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-const brl=(v)=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v||0);
-
-function parseNumberBR(val){
-  if(typeof val==='number') return val;
-  if(val==null||val==='') return 0;
-  let s=val.toString().trim();
-  if(s.includes(',') && s.lastIndexOf(',')>s.lastIndexOf('.')){
-    s=s.replace(/\./g,'').replace(',', '.');
-  }
-  const n=parseFloat(s.replace(/[^\d.\-]/g,''));
-  return isNaN(n)?0:n;
-}
-
-function el(tag, attrs={}, children=[]){
-  const e=document.createElement(tag);
-  for(const k in attrs){
-    if(attrs[k]==null) continue;
-    if(k==='class') e.className=attrs[k];
-    else if(k==='html') e.innerHTML=attrs[k];
-    else if(k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
-    else e.setAttribute(k, attrs[k]);
-  }
-  (Array.isArray(children)?children:[children]).forEach(c=>{
-    if(c==null) return;
-    e.appendChild(typeof c==='string'?document.createTextNode(c):c);
+const MONTHS = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro"
+];
+const ABBR = [
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez"
+];
+const brl = value =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0
+  }).format(Number(value) || 0);
+const pctText = value =>
+  Number.isFinite(value)
+    ? `${value >= 0 ? "+" : ""}${value.toFixed(1).replace(".", ",")}%`
+    : "—";
+function node(tag, attrs = {}, children = []) {
+  const element = document.createElement(tag);
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (key.startsWith("on")) {
+      element.addEventListener(key.slice(2), value);
+    } else if (key === "class") {
+      element.className = value;
+    } else if (key === "html") {
+      element.innerHTML = value;
+    } else {
+      element.setAttribute(key, value);
+    }
   });
-  return e;
-}
-
-function findAnyCol(headers, names){
-  const norm=s=>(s||'').toString().trim().toLowerCase();
-  const wanted=names.map(norm);
-  return headers.findIndex(h=>wanted.includes(norm(h)));
-}
-
-// ---------- Categorias (plano de contas do Conta Azul) ----------
-// IMPORTANTE: cada código do plano de contas (ex: "2.12.001 Alimentação",
-// "2.12.005 Uber, taxi, combustível", "2.12.006 Antecipação dos Lucros") é
-// tratado como categoria própria. Categorias NÃO são mais fundidas por
-// prefixo do código — no plano de contas real elas frequentemente agrupam
-// itens sem relação nenhuma entre si (ex: "2.03" mistura Salário, Vale
-// Alimentação, INSS, Comissão...), então fundir por prefixo misturava
-// categorias diferentes num único rótulo.
-function parseCategoriaInfo(raw){
-  const s=(raw||'').toString().trim();
-  if(!s) return {codigo:'', nome:''};
-  const m=s.match(/^(\d+(?:\.\d+)+)\s*[-–.]?\s*(.*)$/);
-  if(m && m[2]){
-    return {codigo:m[1], nome:m[2].trim()||s};
-  }
-  return {codigo:'', nome:s.replace(/^[\d.]+\s*/,'').trim()||s};
-}
-// Lê o rateio completo de um lançamento: para cada par Categoria N / Valor
-// na Categoria N preenchido, retorna {nome, codigo, valor} com o valor
-// ATRIBUÍDO àquela categoria (não o valor total da parcela). Se o arquivo
-// não trouxer os valores de rateio (ou vierem todos zerados), cai no
-// comportamento antigo: valor total da parcela na primeira categoria.
-function parseAlocacoesCategoria(row, catCols, valorOriginal){
-  const alocacoes=[];
-  catCols.forEach(({cIdx,vIdx})=>{
-    const raw=cIdx>-1?(row[cIdx]||'').toString():'';
-    if(!raw.trim()) return;
-    const info=parseCategoriaInfo(raw);
-    const valor= vIdx>-1 ? Math.abs(Number(row[vIdx])||0) : 0;
-    alocacoes.push({nome:info.nome, codigo:info.codigo, valor});
+  const childList = Array.isArray(children) ? children : [children];
+  childList.forEach(child => {
+    if (child == null || child === false) return;
+    element.appendChild(
+      typeof child === "string"
+        ? document.createTextNode(child)
+        : child
+    );
   });
-  if(alocacoes.length===0) return [{nome:'Sem categoria', codigo:'', valor:valorOriginal}];
-  const somaAlocada=alocacoes.reduce((s,a)=>s+a.valor,0);
-  if(somaAlocada===0){
-    // arquivo sem colunas "Valor na Categoria N" (ou todas zeradas): usa o valor total na 1ª categoria
-    return [{nome:alocacoes[0].nome, codigo:alocacoes[0].codigo, valor:valorOriginal}];
+  return element;
+}
+const normalize = value =>
+  (value || "").toString().trim().toLowerCase();
+function findColumn(headers, names) {
+  const normalizedNames = names.map(normalize);
+  return headers.findIndex(header =>
+    normalizedNames.includes(normalize(header))
+  );
+}
+function parseNumber(value) {
+  if (typeof value === "number") return value;
+  let text = (value || "").toString().trim();
+  if (
+    text.includes(",") &&
+    text.lastIndexOf(",") > text.lastIndexOf(".")
+  ) {
+    text = text.replace(/\./g, "").replace(",", ".");
   }
-  return alocacoes;
+  const number = parseFloat(text.replace(/[^\d.-]/g, ""));
+  return Number.isNaN(number) ? 0 : number;
 }
-function parseDateBR(str){
-  const s=(str||'').toString().trim();
-  if(!s||!s.includes('/')) return null;
-  const parts=s.split('/');
-  if(parts.length<3) return null;
-  const [dd,mm,yyyy]=parts;
-  if(!dd||!mm||!yyyy) return null;
-  const d=new Date(parseInt(yyyy,10), parseInt(mm,10)-1, parseInt(dd,10));
-  if(isNaN(d.getTime())) return null;
-  return d;
-}
-function dateToISO(d){
-  if(!d) return '';
-  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-// ---------- Config das abas Contas a Pagar / Contas a Receber ----------
-const TABS = {
-  pagar: {
-    key:'pagar', label:'Contas a Pagar', storageKey:'dash-pagar-v3',
-    sheetRegex:/contas a pagar/i,
-    entityHeaders:['Nome do fornecedor'],
-    doneHeaders:['Valor total pago da parcela (R$)'],
-    emptyEntityLabel:'Sem fornecedor identificado',
-    parseErrorMsg:'Não reconheci as colunas deste arquivo. Envie o export "Visão Contas a Pagar" do Conta Azul, sem editar os cabeçalhos.',
-    entityLabel:'Fornecedor', entityCountLabel:'Fornecedores',
-    doneLabel:'Pago', openLabel:'Em aberto', lateLabel:'Atrasado',
-    chartTitle:'Gastos por mês', rankEntityTitle:'Gastos por fornecedor',
-    rankCategoryTitle:'Gastos por categoria', rankCentroTitle:'Gastos por centro de custo',
-    detailCategoryTitle:'Detalhamento por categoria (grupo › categoria)',
-    emptyHint:'Envie o arquivo exportado do Conta Azul ("Visão Contas a Pagar") para montar o painel.',
-    chartColor:'#16233F',
-  },
-  receber: {
-    key:'receber', label:'Contas a Receber', storageKey:'dash-receber-v3',
-    sheetRegex:/contas a receber/i,
-    entityHeaders:['Nome do cliente','Nome do contato','Nome do fornecedor'],
-    doneHeaders:['Valor total recebido da parcela (R$)','Valor total pago da parcela (R$)'],
-    emptyEntityLabel:'Sem cliente identificado',
-    parseErrorMsg:'Não reconheci as colunas deste arquivo. Envie o export "Visão Contas a Receber" do Conta Azul, sem editar os cabeçalhos.',
-    entityLabel:'Cliente', entityCountLabel:'Clientes',
-    doneLabel:'Recebido', openLabel:'A receber', lateLabel:'Atrasado',
-    chartTitle:'Recebimentos por mês', rankEntityTitle:'Recebimentos por cliente',
-    rankCategoryTitle:'Recebimentos por categoria', rankCentroTitle:'Recebimentos por centro de custo',
-    detailCategoryTitle:'Detalhamento por categoria (grupo › categoria)',
-    emptyHint:'Envie o arquivo exportado do Conta Azul ("Visão Contas a Receber") para montar o painel.',
-    chartColor:'#5C7A63',
-  },
-};
-
-async function parseContasGeneric(file, cfg){
-  const buf=await file.arrayBuffer();
-  const wb=XLSX.read(buf,{type:'array'});
-  const sheetName=wb.SheetNames.find(n=>cfg.sheetRegex.test(n))||wb.SheetNames[0];
-  const ws=wb.Sheets[sheetName];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1, raw:true, defval:''});
-  const headerIdx=rows.findIndex(r=>Array.isArray(r) && cfg.entityHeaders.some(name=>r.some(c=>(c||'').toString().trim()===name)));
-  if(headerIdx===-1) throw new Error(cfg.parseErrorMsg);
-  const headers=rows[headerIdx];
-  const col={
-    entidade: findAnyCol(headers, cfg.entityHeaders),
-    vencimento: findAnyCol(headers, ['Data de vencimento']),
-    situacao: findAnyCol(headers, ['Situação']),
-    valorOriginal: findAnyCol(headers, ['Valor original da parcela (R$)']),
-    valorFeito: findAnyCol(headers, cfg.doneHeaders),
-    valorAberto: findAnyCol(headers, ['Valor total da parcela em aberto (R$)']),
-    centro: findAnyCol(headers, ['Centro de Custo 1']),
-  };
-  // colunas de categoria com rateio: Categoria 1..12 + Valor na Categoria 1..12
-  const catCols=[];
-  for(let i=1;i<=12;i++){
-    const cIdx=findAnyCol(headers, ['Categoria '+i]);
-    if(cIdx===-1) continue;
-    const vIdx=findAnyCol(headers, ['Valor na Categoria '+i]);
-    catCols.push({cIdx, vIdx});
+function parseDate(value) {
+  if (value instanceof Date) return value;
+  if (typeof value === "number" && value > 20000) {
+    const converted = new Date(
+      Math.round((value - 25569) * 86400000)
+    );
+    return new Date(
+      converted.getUTCFullYear(),
+      converted.getUTCMonth(),
+      converted.getUTCDate()
+    );
   }
-  if(col.entidade===-1||col.vencimento===-1||col.valorOriginal===-1) throw new Error(cfg.parseErrorMsg);
-  const records=[];
-  for(let i=headerIdx+1;i<rows.length;i++){
-    const r=rows[i];
-    if(!r||r.length===0) continue;
-    const venc=(r[col.vencimento]||'').toString().trim();
-    const dataObj=parseDateBR(venc);
-    if(!dataObj) continue;
-    const entidade=(r[col.entidade]||'').toString().trim()||cfg.emptyEntityLabel;
-    const situacao=(r[col.situacao]||'Não informado').toString().trim()||'Não informado';
-    const centro=col.centro>-1?((r[col.centro]||'').toString().trim()||'Sem centro de custo'):null;
-    const valorOriginal=Number(r[col.valorOriginal])||0;
-    const valorFeito=col.valorFeito>-1?(Number(r[col.valorFeito])||0):0;
-    const valorAberto=col.valorAberto>-1?(Number(r[col.valorAberto])||0):0;
-    const mm=String(dataObj.getMonth()+1).padStart(2,'0'), yyyy=String(dataObj.getFullYear());
-    const categoriasAlocadas=parseAlocacoesCategoria(r, catCols, valorOriginal);
-    records.push({entidade,situacao,
-      categoria:categoriasAlocadas[0].nome, categoriaCodigo:categoriasAlocadas[0].codigo,
-      categoriaGlobal:categoriasAlocadas[0].nome, categoriasAlocadas,
-      centro,valorOriginal,valorFeito,valorAberto,
-      mesNum:dataObj.getMonth()+1, ano:dataObj.getFullYear(), mesKey:`${yyyy}-${mm}`,
-      dataISO:dateToISO(dataObj)});
+  const text = (value || "").toString().trim();
+  let match = text.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/
+  );
+  if (match) {
+    const year =
+      match[3].length === 2
+        ? Number(`20${match[3]}`)
+        : Number(match[3]);
+    return new Date(
+      year,
+      Number(match[2]) - 1,
+      Number(match[1])
+    );
   }
-  if(records.length===0) throw new Error('Não encontrei linhas de lançamento válidas neste arquivo.');
-  return records;
-}
-
-// ---------- Config da aba Extrato Bancário ----------
-const EXTRATO_CFG = {
-  dataHeaders:['Data','Data do Lançamento','Data Lançamento','Data lançamento','Data lancamento'],
-  descHeaders:['Descrição','Histórico','Descricao','Historico','Complemento','Detalhes'],
-  valorHeaders:['Valor','Valor (R$)','Valor R$','Valor da Transação','Valor da transacao','Montante'],
-  tipoHeaders:['Tipo','Natureza','D/C','Tipo Lançamento','Tipo lancamento'],
-  saldoHeaders:['Saldo','Saldo (R$)','Saldo Final','Saldo final'],
-};
-
-function parseExtratoDate(raw){
-  if(raw instanceof Date) return {dd:raw.getDate(), mm:raw.getMonth()+1, yyyy:raw.getFullYear()};
-  const s=(raw||'').toString().trim();
-  if(!s) return null;
-  if(s.includes('/')){
-    const [dd,mm,yyyy]=s.split('/');
-    if(yyyy&&mm) return {dd:parseInt(dd,10), mm:parseInt(mm,10), yyyy:parseInt(yyyy.length===2?('20'+yyyy):yyyy,10)};
-  } else if(s.includes('-')){
-    const p=s.split('-');
-    if(p[0].length===4){ return {dd:parseInt(p[2],10), mm:parseInt(p[1],10), yyyy:parseInt(p[0],10)}; }
-  } else if(!isNaN(Number(s)) && Number(s)>20000 && Number(s)<60000){
-    const d=new Date(Math.round((Number(s)-25569)*86400*1000));
-    return {dd:d.getUTCDate(), mm:d.getUTCMonth()+1, yyyy:d.getUTCFullYear()};
+  match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    return new Date(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3])
+    );
   }
   return null;
 }
-
-async function parseExtrato(file){
-  const buf=await file.arrayBuffer();
-  const wb=XLSX.read(buf,{type:'array'});
-  const sheetName=wb.SheetNames.find(n=>/extrato/i.test(n))||wb.SheetNames[0];
-  const ws=wb.Sheets[sheetName];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1, raw:true, defval:''});
-  const cfg=EXTRATO_CFG;
-  const headerIdx=rows.findIndex(r=>Array.isArray(r)
-    && cfg.dataHeaders.some(name=>r.some(c=>(c||'').toString().trim()===name))
-    && cfg.valorHeaders.some(name=>r.some(c=>(c||'').toString().trim()===name)));
-  const errMsg='Não reconheci as colunas deste extrato. Preciso de pelo menos uma coluna de Data e uma de Valor (exportação em .xlsx ou .csv — OFX ainda não é suportado).';
-  if(headerIdx===-1) throw new Error(errMsg);
-  const headers=rows[headerIdx];
-  const col={
-    data: findAnyCol(headers, cfg.dataHeaders),
-    desc: findAnyCol(headers, cfg.descHeaders),
-    valor: findAnyCol(headers, cfg.valorHeaders),
-    tipo: findAnyCol(headers, cfg.tipoHeaders),
-    saldo: findAnyCol(headers, cfg.saldoHeaders),
-  };
-  if(col.data===-1||col.valor===-1) throw new Error(errMsg);
-  const records=[];
-  let lastSaldo=null;
-  for(let i=headerIdx+1;i<rows.length;i++){
-    const r=rows[i];
-    if(!r||r.length===0) continue;
-    const d=parseExtratoDate(r[col.data]);
-    if(!d) continue;
-    let valor=parseNumberBR(r[col.valor]);
-    if(valor===0 && col.valor===-1) continue;
-    const descricao=(col.desc>-1?(r[col.desc]||'').toString().trim():'') || 'Sem descrição';
-    let tipo;
-    if(col.tipo>-1){
-      const t=(r[col.tipo]||'').toString().trim().toLowerCase();
-      if(t.startsWith('d')) tipo='saida';
-      else if(t.startsWith('c')) tipo='entrada';
-      else tipo = valor<0?'saida':'entrada';
-    } else {
-      tipo = valor<0?'saida':'entrada';
-    }
-    if(col.saldo>-1){
-      const sv=parseNumberBR(r[col.saldo]);
-      if(r[col.saldo]!=='' ) lastSaldo=sv;
-    }
-    const isoDate=dateToISO(new Date(d.yyyy, d.mm-1, d.dd));
-    records.push({
-      descricao, tipo, valorAbs: Math.abs(valor),
-      mesNum:d.mm, ano:d.yyyy, mesKey:`${d.yyyy}-${String(d.mm).padStart(2,'0')}`,
-      dataISO:isoDate,
-    });
-  }
-  if(records.length===0) throw new Error('Não encontrei lançamentos válidos neste extrato.');
-  return {records, saldoFinal:lastSaldo};
+function dateToISO(date) {
+  if (!date) return "";
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
 }
-
-// ---------- Estado ----------
-function freshContasFilters(){ return {situacao:[], mes:[], entidade:[], categoria:[], centro:[], dataDe:'', dataAte:''}; }
-function freshExtratoFilters(){ return {mes:[], tipo:[], dataDe:'', dataAte:''}; }
-
-let appState={
-  activeTab:'pagar',
-  data:{
-    pagar:{records:null, updatedAt:null, error:'', f:freshContasFilters()},
-    receber:{records:null, updatedAt:null, error:'', f:freshContasFilters()},
-    extrato:{records:null, saldoFinal:null, updatedAt:null, error:'', f:freshExtratoFilters()},
+function parseCategory(raw) {
+  const text = (raw || "").toString().trim();
+  const match = text.match(
+    /^(\d+(?:\.\d+)+)\s*[-–.]?\s*(.*)$/
+  );
+  if (match && match[2]) {
+    return {
+      code: match[1],
+      name: match[2].trim()
+    };
+  }
+  return {
+    code: "",
+    name:
+      text.replace(/^[\d.]+\s*/, "").trim() ||
+      "Sem categoria"
+  };
+}
+const CONFIG = {
+  pagar: {
+    label: "Contas a Pagar",
+    sheet: /contas a pagar/i,
+    entityHeaders: ["Nome do fornecedor"],
+    doneHeaders: [
+      "Valor total pago da parcela (R$)"
+    ],
+    entityLabel: "Fornecedor",
+    color: "#16233f"
+  },
+  receber: {
+    label: "Contas a Receber",
+    sheet: /contas a receber/i,
+    entityHeaders: [
+      "Nome do cliente",
+      "Nome do contato",
+      "Nome do fornecedor"
+    ],
+    doneHeaders: [
+      "Valor total recebido da parcela (R$)",
+      "Valor total pago da parcela (R$)"
+    ],
+    entityLabel: "Cliente",
+    color: "#5c7a63"
   }
 };
-
-function loadAll(){
-  ['pagar','receber'].forEach(k=>{
-    try{
-      const raw=localStorage.getItem(TABS[k].storageKey);
-      if(raw){ const p=JSON.parse(raw); appState.data[k].records=p.records; appState.data[k].updatedAt=p.updatedAt; }
-    }catch(e){}
-  });
-  try{
-    const raw=localStorage.getItem('dash-extrato-v2');
-    if(raw){ const p=JSON.parse(raw); appState.data.extrato.records=p.records; appState.data.extrato.updatedAt=p.updatedAt; appState.data.extrato.saldoFinal=p.saldoFinal; }
-  }catch(e){}
-}
-function saveTab(k){
-  const d=appState.data[k];
-  const key = k==='extrato' ? 'dash-extrato-v2' : TABS[k].storageKey;
-  try{ localStorage.setItem(key, JSON.stringify({records:d.records, updatedAt:d.updatedAt, saldoFinal:d.saldoFinal})); }
-  catch(e){ console.error('Falha ao salvar', e); }
-}
-
-// ---------- Componentes utilitários ----------
-function kpiTag(label,value,tone,sub){
-  const t=el('div',{class:'tag '+tone});
-  t.appendChild(el('div',{class:'dot'}));
-  t.appendChild(el('div',{class:'label'},label));
-  t.appendChild(el('div',{class:'value'},value));
-  if(sub) t.appendChild(el('div',{class:'subv'},sub));
-  return t;
-}
-function sectionHead(eyebrow,title){
-  return el('div',{class:'sectionHead'},[el('span',{class:'eyebrow'},eyebrow), el('h2',{},title), el('div',{class:'rule'})]);
-}
-function filterDate(label, value, onChange){
-  return el('div',{class:'filter'},[el('label',{},label), el('input',{type:'date', value:value||'', onchange:e=>onChange(e.target.value)})]);
-}
-// Filtro de múltipla seleção: array vazio = "Todas" (sem restrição). options: [{key,label}] ou strings.
-let uiOpenFilter=null;
-function toOpts(arr){ return arr.map(v=> typeof v==='string' ? {key:v,label:v} : v); }
-function multiSelectFilter(id, label, selectedArr, onChange, optionsRaw){
-  const options=toOpts(optionsRaw);
-  const countLabel = selectedArr.length===0 ? 'Todas'
-    : selectedArr.length===1 ? ((options.find(o=>o.key===selectedArr[0])||{}).label||selectedArr[0])
-    : `${selectedArr.length} selecionadas`;
-  const details=el('details',{class:'msfilter'});
-  if(uiOpenFilter===id) details.setAttribute('open','open');
-  details.addEventListener('toggle', ()=>{
-    if(details.open) uiOpenFilter=id; else if(uiOpenFilter===id) uiOpenFilter=null;
-  });
-  details.appendChild(el('summary',{},[el('span',{class:'msfilter-label'},label+':'), el('span',{class:'msfilter-val', title:countLabel},countLabel)]));
-  const panel=el('div',{class:'msfilter-panel'});
-  panel.appendChild(el('div',{class:'msfilter-actions'},[
-    el('button',{type:'button', onclick:e=>{e.preventDefault(); e.stopPropagation(); onChange([]);}},'Todas'),
-    el('button',{type:'button', onclick:e=>{e.preventDefault(); e.stopPropagation(); onChange(options.map(o=>o.key));}},'Marcar tudo'),
-  ]));
-  options.forEach(opt=>{
-    const cb=el('input',{type:'checkbox'});
-    cb.checked=selectedArr.includes(opt.key);
-    cb.addEventListener('change', ()=>{
-      const next = cb.checked ? [...selectedArr, opt.key] : selectedArr.filter(v=>v!==opt.key);
-      onChange(next);
-    });
-    panel.appendChild(el('label',{class:'msfilter-opt'},[cb, el('span',{title:opt.label}, opt.label)]));
-  });
-  details.appendChild(panel);
-  return details;
-}
-function renderBars(data, color){
-  const max=Math.max(...data.map(d=>d.valor),1);
-  const wrap=el('div',{});
-  if(data.length===0){ wrap.appendChild(el('div',{style:'font-size:12px;opacity:.5;padding:8px 0;'},'Nada encontrado.')); return wrap; }
-  data.forEach(d=>{
-    const pct=Math.max((d.valor/max)*100, 2);
-    wrap.appendChild(el('div',{class:'barRow'},[
-      el('div',{class:'barLabel', title:d.nomeCompleto||d.nome}, d.nome),
-      el('div',{class:'barTrack'},[ el('div',{class:'barFill', style:`width:${pct}%;background:${color};`}) ]),
-      el('div',{class:'barVal'}, brl(d.valor)),
-    ]));
-  });
-  return wrap;
-}
-// Ranking completo, sem agrupar o restante em "Outros"
-function topAll(list, dim){
-  const map=new Map();
-  list.forEach(r=>map.set(r[dim], (map.get(r[dim])||0)+r.valorOriginal));
-  return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome: nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
-}
-// Ranking por categoria: usa o valor REALMENTE alocado a cada categoria
-// (rateio), não o valor total do lançamento repetido em cada categoria.
-function topAllCategorias(list){
-  const map=somaAlocacoesPorCategoria(list);
-  return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome: nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
-}
-// Card de ranking com campo de busca (filtra do 1º ao último item, sem agrupar "Outros" e sem estourar o layout)
-let rankingDataStore={};
-function renderRankingCard(eyebrow, title, data, color, idSuffix){
-  rankingDataStore[idSuffix]=data;
-  const boxId='rankbox-'+idSuffix;
-  return el('div',{},[
-    sectionHead(eyebrow, title),
-    el('div',{class:'card'},[
-      el('input',{type:'text', class:'rankSearch', placeholder:'Buscar…', oninput:e=>{
-        const q=e.target.value.trim().toLowerCase();
-        const full=rankingDataStore[idSuffix]||[];
-        const list=q? full.filter(d=>(d.nomeCompleto||d.nome).toLowerCase().includes(q)) : full;
-        const box=document.getElementById(boxId);
-        if(box){ box.innerHTML=''; box.appendChild(renderBars(list, color)); }
-      }}),
-      el('div',{id:boxId, class:'rankScroll'}, renderBars(data,color)),
-    ]),
-  ]);
-}
-function renderMonthlyChart(data, highlightKeys, color){
-  const w=1000, h=230, padL=64, padB=26, padT=10;
-  const max=Math.max(...data.map(d=>d.valor), 1);
-  const gap=(w-padL-20)/Math.max(data.length,1);
-  const barW=gap*0.6;
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.setAttribute('width','100%'); svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-  for(let i=0;i<=4;i++){
-    const y=padT+(h-padT-padB)*(1-i/4);
-    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',padL); line.setAttribute('x2',w-10); line.setAttribute('y1',y); line.setAttribute('y2',y);
-    line.setAttribute('stroke','#EFEAE0'); svg.appendChild(line);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',padL-8); t.setAttribute('y',y+3); t.setAttribute('text-anchor','end');
-    t.setAttribute('font-family','IBM Plex Mono'); t.setAttribute('font-size','9'); t.setAttribute('fill','#5C5748');
-    t.textContent=brl(max*(i/4)); svg.appendChild(t);
+async function parseAccounts(file, key) {
+  const config = CONFIG[key];
+  const workbook = XLSX.read(
+    await file.arrayBuffer(),
+    { type: "array" }
+  );
+  const sheetName =
+    workbook.SheetNames.find(name =>
+      config.sheet.test(name)
+    ) || workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(
+    worksheet,
+    {
+      header: 1,
+      raw: true,
+      defval: ""
+    }
+  );
+  const headerIndex = rows.findIndex(row =>
+    config.entityHeaders.some(name =>
+      row.some(cell => normalize(cell) === normalize(name))
+    )
+  );
+  if (headerIndex < 0) {
+    throw new Error(
+      `Não reconheci o relatório de ${config.label}. ` +
+      "Exporte novamente pelo Conta Azul sem alterar os cabeçalhos."
+    );
   }
-  data.forEach((d,i)=>{
-    const bh=(h-padT-padB)*(d.valor/max);
-    const x=padL+i*gap+(gap-barW)/2, y=h-padB-bh;
-    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',barW); rect.setAttribute('height',bh); rect.setAttribute('rx',3);
-    rect.setAttribute('fill', (highlightKeys&&highlightKeys.includes(d.key))?'#BB8A34':color);
-    const title=document.createElementNS('http://www.w3.org/2000/svg','title'); title.textContent=`${d.mes}: ${brl(d.valor)}`; rect.appendChild(title);
-    svg.appendChild(rect);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',x+barW/2); t.setAttribute('y',h-8); t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-family','IBM Plex Mono'); t.setAttribute('font-size','9.5'); t.setAttribute('fill','#5C5748');
-    t.textContent=d.mes; svg.appendChild(t);
-  });
-  return svg;
-}
-function renderGroupedMonthlyChart(data){
-  const w=1000, h=230, padL=64, padB=26, padT=10;
-  const max=Math.max(...data.map(d=>Math.max(d.entrada,d.saida)), 1);
-  const gap=(w-padL-20)/Math.max(data.length,1);
-  const barW=Math.min(gap*0.34, 26);
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.setAttribute('width','100%'); svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-  for(let i=0;i<=4;i++){
-    const y=padT+(h-padT-padB)*(1-i/4);
-    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-    line.setAttribute('x1',padL); line.setAttribute('x2',w-10); line.setAttribute('y1',y); line.setAttribute('y2',y);
-    line.setAttribute('stroke','#EFEAE0'); svg.appendChild(line);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',padL-8); t.setAttribute('y',y+3); t.setAttribute('text-anchor','end');
-    t.setAttribute('font-family','IBM Plex Mono'); t.setAttribute('font-size','9'); t.setAttribute('fill','#5C5748');
-    t.textContent=brl(max*(i/4)); svg.appendChild(t);
+  const headers = rows[headerIndex];
+  const columns = {
+    entity: findColumn(
+      headers,
+      config.entityHeaders
+    ),
+    date: findColumn(
+      headers,
+      ["Data de vencimento"]
+    ),
+    status: findColumn(
+      headers,
+      ["Situação"]
+    ),
+    original: findColumn(
+      headers,
+      ["Valor original da parcela (R$)"]
+    ),
+    done: findColumn(
+      headers,
+      config.doneHeaders
+    ),
+    open: findColumn(
+      headers,
+      ["Valor total da parcela em aberto (R$)"]
+    ),
+    costCenter: findColumn(
+      headers,
+      ["Centro de Custo 1"]
+    )
+  };
+  if (
+    columns.entity < 0 ||
+    columns.date < 0 ||
+    columns.original < 0
+  ) {
+    throw new Error(
+      "Faltam colunas obrigatórias no arquivo."
+    );
   }
-  data.forEach((d,i)=>{
-    const cx=padL+i*gap+gap/2;
-    [['entrada','#5C7A63'],['saida','#A8462E']].forEach(([key,color],j)=>{
-      const val=d[key];
-      const bh=(h-padT-padB)*(val/max);
-      const x=cx - barW - 2 + j*(barW+4);
-      const y=h-padB-bh;
-      const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-      rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',barW); rect.setAttribute('height',bh); rect.setAttribute('rx',3);
-      rect.setAttribute('fill',color);
-      const title=document.createElementNS('http://www.w3.org/2000/svg','title'); title.textContent=`${d.mes} · ${key==='entrada'?'Entradas':'Saídas'}: ${brl(val)}`; rect.appendChild(title);
-      svg.appendChild(rect);
+  const categoryColumns = [];
+  for (let index = 1; index <= 12; index++) {
+    const categoryIndex = findColumn(
+      headers,
+      [`Categoria ${index}`]
+    );
+    if (categoryIndex >= 0) {
+      categoryColumns.push({
+        categoryIndex,
+        valueIndex: findColumn(
+          headers,
+          [`Valor na Categoria ${index}`]
+        )
+      });
+    }
+  }
+  const records = [];
+  rows.slice(headerIndex + 1).forEach(row => {
+    const date = parseDate(row[columns.date]);
+    if (!date) return;
+    const original = Math.abs(
+      parseNumber(row[columns.original])
+    );
+    const allocations = [];
+    categoryColumns.forEach(categoryColumn => {
+      const rawCategory =
+        row[categoryColumn.categoryIndex];
+      if (!String(rawCategory || "").trim()) return;
+      const category = parseCategory(rawCategory);
+      allocations.push({
+        code: category.code,
+        name: category.name,
+        value: Math.abs(
+          parseNumber(
+            row[categoryColumn.valueIndex]
+          )
+        )
+      });
     });
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',cx); t.setAttribute('y',h-8); t.setAttribute('text-anchor','middle');
-    t.setAttribute('font-family','IBM Plex Mono'); t.setAttribute('font-size','9.5'); t.setAttribute('fill','#5C5748');
-    t.textContent=d.mes; svg.appendChild(t);
+    if (!allocations.length) {
+      allocations.push({
+        code: "",
+        name: "Sem categoria",
+        value: original
+      });
+    } else if (
+      !allocations.some(allocation => allocation.value)
+    ) {
+      allocations[0].value = original;
+    }
+    const isoDate = dateToISO(date);
+    records.push({
+      entity:
+        String(
+          row[columns.entity] ||
+          `Sem ${config.entityLabel.toLowerCase()}`
+        ).trim(),
+      status:
+        String(
+          row[columns.status] ||
+          "Não informado"
+        ).trim(),
+      original,
+      done: Math.abs(
+        parseNumber(row[columns.done])
+      ),
+      open: Math.abs(
+        parseNumber(row[columns.open])
+      ),
+      costCenter:
+        columns.costCenter >= 0
+          ? String(
+              row[columns.costCenter] ||
+              "Sem centro de custo"
+            ).trim()
+          : "Sem centro de custo",
+      allocations,
+      date: isoDate,
+      month: isoDate.slice(0, 7)
+    });
   });
-  return svg;
+  if (!records.length) {
+    throw new Error(
+      "Nenhum lançamento válido foi encontrado."
+    );
+  }
+  return records;
 }
-
-// Tabela completa por categoria, somando o valor REALMENTE alocado a cada
-// categoria (respeita rateio de lançamentos com mais de uma categoria).
-function recordTemCategoria(r, nomesSelecionados){
-  return r.categoriasAlocadas.some(a=>nomesSelecionados.includes(a.nome));
+async function parseStatement(file) {
+  const workbook = XLSX.read(
+    await file.arrayBuffer(),
+    { type: "array" }
+  );
+  const sheetName =
+    workbook.SheetNames.find(name =>
+      /extrato/i.test(name)
+    ) || workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(
+    worksheet,
+    {
+      header: 1,
+      raw: true,
+      defval: ""
+    }
+  );
+  const dateHeaders = [
+    "Data",
+    "Data do Lançamento",
+    "Data Lançamento",
+    "Data lançamento"
+  ];
+  const valueHeaders = [
+    "Valor",
+    "Valor (R$)",
+    "Valor R$",
+    "Valor da Transação",
+    "Valor da transacao"
+  ];
+  const headerIndex = rows.findIndex(row =>
+    findColumn(row, dateHeaders) >= 0 &&
+    findColumn(row, valueHeaders) >= 0
+  );
+  if (headerIndex < 0) {
+    throw new Error(
+      "Não reconheci o extrato. " +
+      "Preciso das colunas Data e Valor."
+    );
+  }
+  const headers = rows[headerIndex];
+  const columns = {
+    date: findColumn(headers, dateHeaders),
+    value: findColumn(headers, valueHeaders),
+    description: findColumn(
+      headers,
+      [
+        "Descrição",
+        "Histórico",
+        "Descricao",
+        "Historico",
+        "Complemento",
+        "Detalhes"
+      ]
+    ),
+    type: findColumn(
+      headers,
+      [
+        "Tipo",
+        "Natureza",
+        "D/C",
+        "Tipo Lançamento"
+      ]
+    ),
+    balance: findColumn(
+      headers,
+      [
+        "Saldo",
+        "Saldo (R$)",
+        "Saldo Final",
+        "Saldo final"
+      ]
+    )
+  };
+  let balance = null;
+  const records = [];
+  rows.slice(headerIndex + 1).forEach(row => {
+    const date = parseDate(row[columns.date]);
+    if (!date) return;
+    const rawValue = parseNumber(
+      row[columns.value]
+    );
+    const rawType = normalize(
+      row[columns.type]
+    );
+    let type;
+    if (rawType.startsWith("d")) {
+      type = "saida";
+    } else if (rawType.startsWith("c")) {
+      type = "entrada";
+    } else {
+      type = rawValue < 0
+        ? "saida"
+        : "entrada";
+    }
+    if (
+      columns.balance >= 0 &&
+      row[columns.balance] !== ""
+    ) {
+      balance = parseNumber(
+        row[columns.balance]
+      );
+    }
+    const isoDate = dateToISO(date);
+    records.push({
+      date: isoDate,
+      month: isoDate.slice(0, 7),
+      value: Math.abs(rawValue),
+      type,
+      description:
+        String(
+          row[columns.description] ||
+          "Sem descrição"
+        ).trim()
+    });
+  });
+  if (!records.length) {
+    throw new Error(
+      "Nenhum lançamento válido foi encontrado no extrato."
+    );
+  }
+  return {
+    records,
+    balance
+  };
 }
-function somaAlocacoesPorCategoria(list){
-  const map=new Map();
-  list.forEach(r=>{
-    r.categoriasAlocadas.forEach(a=>{
-      map.set(a.nome, (map.get(a.nome)||0)+a.valor);
+function freshFilters() {
+  return {
+    dateFrom: "",
+    dateTo: "",
+    month1: "",
+    month2: "",
+    compare: false,
+    period1From: "",
+    period1To: "",
+    period2From: "",
+    period2To: "",
+    status: "",
+    entity: "",
+    category: "",
+    costCenter: "",
+    type: ""
+  };
+}
+let state = {
+  source: "geral",
+  view: "dashboard",
+  data: {
+    pagar: null,
+    receber: null,
+    extrato: null
+  },
+  updated: {},
+  balance: null,
+  error: "",
+  filters: freshFilters()
+};
+function loadSavedData() {
+  ["pagar", "receber", "extrato"].forEach(key => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(
+          `dashboard-financeiro-${key}-v6`
+        )
+      );
+      if (!saved) return;
+      state.data[key] = saved.records;
+      state.updated[key] = saved.updated;
+      if (key === "extrato") {
+        state.balance = saved.balance;
+      }
+    } catch (error) {
+      console.error(
+        "Não foi possível recuperar os dados.",
+        error
+      );
+    }
+  });
+}
+function saveData(key) {
+  localStorage.setItem(
+    `dashboard-financeiro-${key}-v6`,
+    JSON.stringify({
+      records: state.data[key],
+      updated: state.updated[key],
+      balance: state.balance
+    })
+  );
+}
+function getMonthOptions() {
+  const allRecords = Object.values(state.data)
+    .filter(Boolean)
+    .flat();
+  return [
+    ...new Set(
+      allRecords.map(record => record.month)
+    )
+  ]
+    .sort()
+    .map(key => ({
+      key,
+      label:
+        `${MONTHS[Number(key.slice(5)) - 1]}/` +
+        key.slice(0, 4)
+    }));
+}
+function baseFilter(records) {
+  const filters = state.filters;
+  return (records || [])
+    .filter(record =>
+      !filters.status ||
+      record.status === filters.status
+    )
+    .filter(record =>
+      !filters.entity ||
+      record.entity === filters.entity
+    )
+    .filter(record =>
+      !filters.costCenter ||
+      record.costCenter === filters.costCenter
+    )
+    .filter(record =>
+      !filters.category ||
+      record.allocations?.some(
+        allocation =>
+          allocation.name === filters.category
+      )
+    )
+    .filter(record =>
+      !filters.type ||
+      record.type === filters.type
+    );
+}
+function periodFilter(records, periodNumber = 0) {
+  const filters = state.filters;
+  let from = "";
+  let to = "";
+  let month = "";
+  if (filters.compare) {
+    from =
+      periodNumber === 1
+        ? filters.period1From
+        : filters.period2From;
+    to =
+      periodNumber === 1
+        ? filters.period1To
+        : filters.period2To;
+  } else {
+    from = filters.dateFrom;
+    to = filters.dateTo;
+    month =
+      periodNumber === 1
+        ? filters.month1
+        : periodNumber === 2
+          ? filters.month2
+          : "";
+  }
+  return baseFilter(records)
+    .filter(record =>
+      !from || record.date >= from
+    )
+    .filter(record =>
+      !to || record.date <= to
+    )
+    .filter(record =>
+      !month || record.month === month
+    );
+}
+function updateDateFilter(key, value) {
+  state.filters[key] = value;
+  if (!state.filters.compare && value) {
+    const month = value.slice(0, 7);
+    if (key === "dateFrom") {
+      state.filters.month1 = month;
+    }
+    if (key === "dateTo") {
+      state.filters.month2 = month;
+    }
+  }
+  render();
+}
+function variation(firstValue, secondValue) {
+  if (firstValue === 0) {
+    return secondValue === 0 ? 0 : NaN;
+  }
+  return (
+    (secondValue - firstValue) /
+    Math.abs(firstValue)
+  ) * 100;
+}
+function calculateMetrics(periodNumber) {
+  const receivables = periodFilter(
+    state.data.receber,
+    periodNumber
+  );
+  const payables = periodFilter(
+    state.data.pagar,
+    periodNumber
+  );
+  const statement = periodFilter(
+    state.data.extrato,
+    periodNumber
+  );
+  const revenue = receivables.length
+    ? receivables.reduce(
+        (sum, record) =>
+          sum + record.original,
+        0
+      )
+    : statement
+        .filter(record => record.type === "entrada")
+        .reduce(
+          (sum, record) =>
+            sum + record.value,
+          0
+        );
+  const expense = payables.length
+    ? payables.reduce(
+        (sum, record) =>
+          sum + record.original,
+        0
+      )
+    : statement
+        .filter(record => record.type === "saida")
+        .reduce(
+          (sum, record) =>
+            sum + record.value,
+          0
+        );
+  const result = revenue - expense;
+  const margin = revenue
+    ? (result / revenue) * 100
+    : 0;
+  return {
+    revenue,
+    expense,
+    result,
+    margin,
+    receivables,
+    payables,
+    statement
+  };
+}
+function getPeriodLabels() {
+  const filters = state.filters;
+  const months = getMonthOptions();
+  const monthLabel = key =>
+    months.find(month => month.key === key)?.label ||
+    "Período";
+  if (filters.compare) {
+    return [
+      `${filters.period1From || "início"} a ` +
+      `${filters.period1To || "fim"}`,
+      `${filters.period2From || "início"} a ` +
+      `${filters.period2To || "fim"}`
+    ];
+  }
+  return [
+    monthLabel(filters.month1),
+    monthLabel(filters.month2)
+  ];
+}
+function sectionHeader(eyebrow, title) {
+  return node(
+    "div",
+    { class: "section" },
+    [
+      node(
+        "span",
+        { class: "eyebrow" },
+        eyebrow
+      ),
+      node("h2", {}, title),
+      node(
+        "div",
+        { class: "rule" }
+      )
+    ]
+  );
+}
+function changeElement(
+  firstValue,
+  secondValue,
+  invert = false
+) {
+  const value = variation(
+    firstValue,
+    secondValue
+  );
+  const isGood =
+    Number.isFinite(value) &&
+    (
+      invert
+        ? value <= 0
+        : value >= 0
+    );
+  const className =
+    !Number.isFinite(value) || value === 0
+      ? "neutral"
+      : isGood
+        ? "positive"
+        : "negative";
+  const icon =
+    !Number.isFinite(value)
+      ? "•"
+      : value > 0
+        ? "↑"
+        : value < 0
+          ? "↓"
+          : "•";
+  return node(
+    "div",
+    {
+      class: `change ${className}`
+    },
+    `${icon} ${pctText(value)}`
+  );
+}
+function kpiCard(
+  label,
+  value,
+  firstValue,
+  secondValue,
+  invert = false,
+  primary = false
+) {
+  const comparisonEnabled =
+    (
+      state.filters.month1 &&
+      state.filters.month2
+    ) ||
+    state.filters.compare;
+  return node(
+    "div",
+    {
+      class: `kpi${primary ? " primary" : ""}`
+    },
+    [
+      node(
+        "div",
+        { class: "label" },
+        label
+      ),
+      node(
+        "div",
+        { class: "value" },
+        value
+      ),
+      comparisonEnabled
+        ? changeElement(
+            firstValue,
+            secondValue,
+            invert
+          )
+        : node(
+            "div",
+            { class: "change neutral" },
+            "Selecione dois períodos"
+          )
+    ]
+  );
+}
+function selectField(
+  label,
+  value,
+  options,
+  onChange
+) {
+  const optionElements = [
+    node(
+      "option",
+      { value: "" },
+      "Todos"
+    )
+  ];
+  options.forEach(option => {
+    const optionElement = node(
+      "option",
+      { value: option.key },
+      option.label
+    );
+    if (option.key === value) {
+      optionElement.selected = true;
+    }
+    optionElements.push(optionElement);
+  });
+  return node(
+    "div",
+    { class: "field" },
+    [
+      node("label", {}, label),
+      node(
+        "select",
+        {
+          onchange: event =>
+            onChange(event.target.value)
+        },
+        optionElements
+      )
+    ]
+  );
+}
+function dateField(label, key) {
+  return node(
+    "div",
+    { class: "field" },
+    [
+      node("label", {}, label),
+      node("input", {
+        type: "date",
+        value: state.filters[key],
+        onchange: event =>
+          updateDateFilter(
+            key,
+            event.target.value
+          )
+      })
+    ]
+  );
+}
+function renderFilters() {
+  const filters = state.filters;
+  const months = getMonthOptions();
+  const sourceRecords =
+    state.source === "pagar" ||
+    state.source === "receber"
+      ? state.data[state.source] || []
+      : Object.values(state.data)
+          .filter(Boolean)
+          .flat();
+  const uniqueOptions = property =>
+    [
+      ...new Set(
+        sourceRecords
+          .map(record => record[property])
+          .filter(Boolean)
+      )
+    ]
+      .sort((a, b) =>
+        a.localeCompare(b, "pt-BR")
+      )
+      .map(value => ({
+        key: value,
+        label: value
+      }));
+  const categoryOptions = [
+    ...new Set(
+      sourceRecords.flatMap(record =>
+        record.allocations?.map(
+          allocation => allocation.name
+        ) || []
+      )
+    )
+  ]
+    .sort((a, b) =>
+      a.localeCompare(b, "pt-BR")
+    )
+    .map(value => ({
+      key: value,
+      label: value
+    }));
+  const container = node(
+    "div",
+    { class: "filterbox" }
+  );
+  const row = node(
+    "div",
+    { class: "filters" }
+  );
+  if (!filters.compare) {
+    row.append(
+      dateField(
+        "Data inicial",
+        "dateFrom"
+      ),
+      dateField(
+        "Data final",
+        "dateTo"
+      ),
+      selectField(
+        "Mês 1",
+        filters.month1,
+        months,
+        value => {
+          filters.month1 = value;
+          render();
+        }
+      ),
+      selectField(
+        "Mês 2",
+        filters.month2,
+        months,
+        value => {
+          filters.month2 = value;
+          render();
+        }
+      )
+    );
+  }
+  const compareCheckbox = node(
+    "input",
+    {
+      type: "checkbox",
+      onchange: event => {
+        filters.compare =
+          event.target.checked;
+        render();
+      }
+    }
+  );
+  compareCheckbox.checked = filters.compare;
+  row.append(
+    node(
+      "label",
+      { class: "compareToggle" },
+      [
+        compareCheckbox,
+        "Comparar períodos"
+      ]
+    )
+  );
+  if (filters.compare) {
+    row.append(
+      node(
+        "div",
+        { class: "compareDates" },
+        [
+          dateField(
+            "Período 1 — início",
+            "period1From"
+          ),
+          dateField(
+            "Período 1 — fim",
+            "period1To"
+          ),
+          dateField(
+            "Período 2 — início",
+            "period2From"
+          ),
+          dateField(
+            "Período 2 — fim",
+            "period2To"
+          )
+        ]
+      )
+    );
+  }
+  if (
+    state.source === "pagar" ||
+    state.source === "receber"
+  ) {
+    row.append(
+      selectField(
+        "Situação",
+        filters.status,
+        uniqueOptions("status"),
+        value => {
+          filters.status = value;
+          render();
+        }
+      ),
+      selectField(
+        CONFIG[state.source].entityLabel,
+        filters.entity,
+        uniqueOptions("entity"),
+        value => {
+          filters.entity = value;
+          render();
+        }
+      ),
+      selectField(
+        "Categoria",
+        filters.category,
+        categoryOptions,
+        value => {
+          filters.category = value;
+          render();
+        }
+      ),
+      selectField(
+        "Centro de custo",
+        filters.costCenter,
+        uniqueOptions("costCenter"),
+        value => {
+          filters.costCenter = value;
+          render();
+        }
+      )
+    );
+  }
+  if (state.source === "extrato") {
+    row.append(
+      selectField(
+        "Tipo",
+        filters.type,
+        [
+          {
+            key: "entrada",
+            label: "Entradas"
+          },
+          {
+            key: "saida",
+            label: "Saídas"
+          }
+        ],
+        value => {
+          filters.type = value;
+          render();
+        }
+      )
+    );
+  }
+  row.append(
+    node(
+      "button",
+      {
+        class: "btn secondary",
+        onclick: () => {
+          state.filters = freshFilters();
+          render();
+        }
+      },
+      "Limpar filtros"
+    )
+  );
+  container.append(row);
+  return container;
+}
+function renderLineChart(data, field, color) {
+  const width = 900;
+  const height = 260;
+  const left = 62;
+  const bottom = 32;
+  const top = 18;
+  const maximum = Math.max(
+    1,
+    ...data.map(item =>
+      Math.max(0, item[field])
+    )
+  );
+  const gap =
+    (width - left - 20) /
+    Math.max(1, data.length - 1);
+  const svg = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
+  let points = "";
+  data.forEach((item, index) => {
+    const x =
+      left +
+      (
+        data.length === 1
+          ? (width - left - 20) / 2
+          : index * gap
+      );
+    const y =
+      height -
+      bottom -
+      (
+        (height - bottom - top) *
+        (
+          Math.max(0, item[field]) /
+          maximum
+        )
+      );
+    points += `${x},${y} `;
+    const circle = document.createElementNS(
+      svg.namespaceURI,
+      "circle"
+    );
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 4);
+    circle.setAttribute("fill", color);
+    const tooltip =
+      document.createElementNS(
+        svg.namespaceURI,
+        "title"
+      );
+    tooltip.textContent =
+      `${item.label}: ${brl(item[field])}`;
+    circle.append(tooltip);
+    svg.append(circle);
+    const text = document.createElementNS(
+      svg.namespaceURI,
+      "text"
+    );
+    text.setAttribute("x", x);
+    text.setAttribute("y", height - 9);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "10");
+    text.textContent = item.label;
+    svg.append(text);
+  });
+  const line = document.createElementNS(
+    svg.namespaceURI,
+    "polyline"
+  );
+  line.setAttribute("points", points);
+  line.setAttribute("fill", "none");
+  line.setAttribute("stroke", color);
+  line.setAttribute("stroke-width", "3");
+  svg.prepend(line);
+  return node(
+    "div",
+    { class: "chart" },
+    svg
+  );
+}
+function renderGroupedChart(data) {
+  const width = 900;
+  const height = 260;
+  const left = 50;
+  const bottom = 32;
+  const maximum = Math.max(
+    1,
+    ...data.flatMap(item => [
+      item.revenue,
+      item.expense
+    ])
+  );
+  const gap =
+    (width - left - 20) /
+    Math.max(1, data.length);
+  const svg = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
+  data.forEach((item, index) => {
+    [
+      ["revenue", "#5c7a63"],
+      ["expense", "#a8462e"]
+    ].forEach(([field, color], barIndex) => {
+      const barHeight =
+        (
+          (height - bottom - 18) *
+          item[field]
+        ) / maximum;
+      const x =
+        left +
+        index * gap +
+        gap / 2 -
+        24 +
+        barIndex * 26;
+      const rectangle =
+        document.createElementNS(
+          svg.namespaceURI,
+          "rect"
+        );
+      rectangle.setAttribute("x", x);
+      rectangle.setAttribute(
+        "y",
+        height - bottom - barHeight
+      );
+      rectangle.setAttribute("width", 22);
+      rectangle.setAttribute(
+        "height",
+        barHeight
+      );
+      rectangle.setAttribute(
+        "fill",
+        color
+      );
+      rectangle.setAttribute("rx", 3);
+      const tooltip =
+        document.createElementNS(
+          svg.namespaceURI,
+          "title"
+        );
+      tooltip.textContent =
+        `${item.label} · ` +
+        `${field === "revenue"
+          ? "Receitas"
+          : "Despesas"}: ` +
+        brl(item[field]);
+      rectangle.append(tooltip);
+      svg.append(rectangle);
+    });
+    const text = document.createElementNS(
+      svg.namespaceURI,
+      "text"
+    );
+    text.setAttribute(
+      "x",
+      left + index * gap + gap / 2
+    );
+    text.setAttribute("y", height - 9);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "10");
+    text.textContent = item.label;
+    svg.append(text);
+  });
+  return node(
+    "div",
+    { class: "chart" },
+    svg
+  );
+}
+function calculateMonthlyData() {
+  const allRecords = Object.values(state.data)
+    .filter(Boolean)
+    .flat();
+  const monthKeys = [
+    ...new Set(
+      allRecords.map(record => record.month)
+    )
+  ].sort();
+  return monthKeys.map(monthKey => {
+    const receivables = baseFilter(
+      state.data.receber
+    ).filter(
+      record => record.month === monthKey
+    );
+    const payables = baseFilter(
+      state.data.pagar
+    ).filter(
+      record => record.month === monthKey
+    );
+    const statement = baseFilter(
+      state.data.extrato
+    ).filter(
+      record => record.month === monthKey
+    );
+    const revenue = receivables.length
+      ? receivables.reduce(
+          (sum, record) =>
+            sum + record.original,
+          0
+        )
+      : statement
+          .filter(
+            record => record.type === "entrada"
+          )
+          .reduce(
+            (sum, record) =>
+              sum + record.value,
+            0
+          );
+    const expense = payables.length
+      ? payables.reduce(
+          (sum, record) =>
+            sum + record.original,
+          0
+        )
+      : statement
+          .filter(
+            record => record.type === "saida"
+          )
+          .reduce(
+            (sum, record) =>
+              sum + record.value,
+            0
+          );
+    return {
+      key: monthKey,
+      label:
+        `${ABBR[Number(monthKey.slice(5)) - 1]}/` +
+        monthKey.slice(2, 4),
+      revenue,
+      expense,
+      result: revenue - expense
+    };
+  });
+}
+function renderComparisonTable(
+  firstPeriod,
+  secondPeriod
+) {
+  const labels = getPeriodLabels();
+  const rows = [
+    [
+      "Faturamento",
+      firstPeriod.revenue,
+      secondPeriod.revenue,
+      false,
+      false
+    ],
+    [
+      "Despesas",
+      firstPeriod.expense,
+      secondPeriod.expense,
+      false,
+      true
+    ],
+    [
+      "Resultado",
+      firstPeriod.result,
+      secondPeriod.result,
+      false,
+      false
+    ],
+    [
+      "Margem",
+      firstPeriod.margin,
+      secondPeriod.margin,
+      true,
+      false
+    ]
+  ];
+  const header = node(
+    "thead",
+    {},
+    node(
+      "tr",
+      {},
+      [
+        "Indicador",
+        labels[0],
+        labels[1],
+        "Diferença",
+        "Variação"
+      ].map(value =>
+        node("th", {}, value)
+      )
+    )
+  );
+  const body = node(
+    "tbody",
+    {},
+    rows.map(
+      ([
+        name,
+        firstValue,
+        secondValue,
+        isPercentage,
+        invert
+      ]) => {
+        const difference =
+          secondValue - firstValue;
+        return node(
+          "tr",
+          {},
+          [
+            node("td", {}, name),
+            node(
+              "td",
+              {},
+              isPercentage
+                ? `${firstValue.toFixed(1)}%`
+                : brl(firstValue)
+            ),
+            node(
+              "td",
+              {},
+              isPercentage
+                ? `${secondValue.toFixed(1)}%`
+                : brl(secondValue)
+            ),
+            node(
+              "td",
+              {},
+              isPercentage
+                ? `${difference.toFixed(1)} p.p.`
+                : brl(difference)
+            ),
+            node(
+              "td",
+              {},
+              changeElement(
+                firstValue,
+                secondValue,
+                invert
+              )
+            )
+          ]
+        );
+      }
+    )
+  );
+  return node(
+    "div",
+    {
+      class: "card tablewrap"
+    },
+    node(
+      "table",
+      { class: "table" },
+      [header, body]
+    )
+  );
+}
+function categoryMap(records) {
+  const map = new Map();
+  records.forEach(record => {
+    record.allocations?.forEach(allocation => {
+      map.set(
+        allocation.name,
+        (
+          map.get(allocation.name) || 0
+        ) + allocation.value
+      );
     });
   });
   return map;
 }
-// Agrupamento visual por "departamento" (os 2 primeiros segmentos do código,
-// ex: "2.01", "2.12"). Diferente da versão anterior, o rótulo do grupo NÃO é
-// mais o nome de uma categoria específica dentro dele (isso é que misturava
-// categorias sem relação, ex: chamar o grupo de "Alimentação" quando também
-// tinha "Antecipação dos Lucros" e "Uber, taxi, combustível" dentro).
-// Os rótulos abaixo foram inferidos a partir das categorias que aparecem em
-// cada grupo no seu arquivo — ajuste os nomes se quiser outro texto.
-const DEPARTAMENTO_LABELS={
-  '2.01':'Ocupação e Instalações',
-  '2.02':'Produção e Insumos',
-  '2.03':'Folha de Pagamento e Encargos',
-  '2.04':'Comercial e Vendas',
-  '2.05':'Marketing e Publicidade',
-  '2.06':'Impostos sobre Vendas',
-  '2.07':'Parcelamentos Tributários',
-  '2.08':'Tarifas e Encargos Bancários',
-  '2.09':'Serviços Profissionais',
-  '2.10':'Softwares e TI',
-  '2.11':'Despesas Administrativas',
-  '2.12':'Despesas Variáveis / Sócios',
-};
-function departamentoDe(codigo){
-  if(!codigo) return null;
-  const parts=codigo.split('.');
-  return parts.length>=2 ? parts.slice(0,2).join('.') : null;
+function renderAnalysis(
+  firstPeriod,
+  secondPeriod
+) {
+  const comparisonEnabled =
+    state.filters.compare ||
+    (
+      state.filters.month1 &&
+      state.filters.month2
+    );
+  if (!comparisonEnabled) {
+    return node(
+      "div",
+      { class: "card analysis" },
+      "Selecione dois meses ou ative “Comparar períodos” para ver a análise."
+    );
+  }
+  const resultVariation = variation(
+    firstPeriod.result,
+    secondPeriod.result
+  );
+  const firstCategories = categoryMap(
+    firstPeriod.payables
+  );
+  const secondCategories = categoryMap(
+    secondPeriod.payables
+  );
+  const categoryChanges = [
+    ...new Set([
+      ...firstCategories.keys(),
+      ...secondCategories.keys()
+    ])
+  ]
+    .map(category => ({
+      category,
+      difference:
+        (
+          secondCategories.get(category) || 0
+        ) -
+        (
+          firstCategories.get(category) || 0
+        )
+    }))
+    .sort(
+      (first, second) =>
+        second.difference -
+        first.difference
+    );
+  const biggestIncrease =
+    categoryChanges.find(
+      item => item.difference > 0
+    );
+  const biggestReduction =
+    [...categoryChanges]
+      .reverse()
+      .find(item => item.difference < 0);
+  const biggestImpact =
+    [...categoryChanges].sort(
+      (first, second) =>
+        Math.abs(second.difference) -
+        Math.abs(first.difference)
+    )[0];
+  const labels = getPeriodLabels();
+  let resultText =
+    "resultado sem base comparável";
+  if (Number.isFinite(resultVariation)) {
+    resultText =
+      `${Math.abs(resultVariation)
+        .toFixed(1)
+        .replace(".", ",")}% de ` +
+      (
+        resultVariation >= 0
+          ? "melhora"
+          : "redução"
+      ) +
+      " no resultado";
+  }
+  return node(
+    "div",
+    {
+      class: "card analysis"
+    },
+    [
+      node(
+        "div",
+        { class: "analysisLead" },
+        `${labels[1]} apresentou ${resultText} ` +
+        `em relação a ${labels[0]}.`
+      ),
+      node(
+        "div",
+        { class: "analysisList" },
+        [
+          node(
+            "div",
+            { class: "insight" },
+            [
+              "Faturamento: ",
+              changeElement(
+                firstPeriod.revenue,
+                secondPeriod.revenue
+              )
+            ]
+          ),
+          node(
+            "div",
+            { class: "insight" },
+            [
+              "Despesas: ",
+              changeElement(
+                firstPeriod.expense,
+                secondPeriod.expense,
+                true
+              )
+            ]
+          ),
+          node(
+            "div",
+            { class: "insight" },
+            [
+              "Resultado: ",
+              changeElement(
+                firstPeriod.result,
+                secondPeriod.result
+              )
+            ]
+          )
+        ]
+      ),
+      node(
+        "p",
+        {},
+        `Maior aumento de despesa: ${
+          biggestIncrease
+            ? `${biggestIncrease.category} ` +
+              `(${brl(biggestIncrease.difference)})`
+            : "nenhum"
+        }. Maior redução: ${
+          biggestReduction
+            ? `${biggestReduction.category} ` +
+              `(${brl(
+                Math.abs(
+                  biggestReduction.difference
+                )
+              )})`
+            : "nenhuma"
+        }. Categoria de maior impacto: ${
+          biggestImpact
+            ? biggestImpact.category
+            : "sem dados"
+        }.`
+      )
+    ]
+  );
 }
-function departamentoLabel(depKey){
-  return DEPARTAMENTO_LABELS[depKey] || ('Grupo '+depKey);
-}
-// Tabela: departamento (grupo) -> categorias (subcategorias), com o valor
-// já correto de cada categoria (rateio real, não o valor total repetido).
-function renderCategoriaTable(list){
-  const grupos=new Map(); // depKey (ou nome, se sem código) -> {label, total, subs:Map(nome->valor)}
-  list.forEach(r=>{
-    r.categoriasAlocadas.forEach(a=>{
-      const dep=departamentoDe(a.codigo);
-      const key= dep || a.nome;
-      const label= dep ? departamentoLabel(dep) : a.nome;
-      let g=grupos.get(key);
-      if(!g){ g={label, total:0, subs:new Map()}; grupos.set(key,g); }
-      g.total+=a.valor;
-      g.subs.set(a.nome, (g.subs.get(a.nome)||0)+a.valor);
-    });
+function renderRanking() {
+  let records = [];
+  if (state.source === "pagar") {
+    records = periodFilter(
+      state.data.pagar,
+      0
+    );
+  }
+  if (state.source === "receber") {
+    records = periodFilter(
+      state.data.receber,
+      0
+    );
+  }
+  const map = new Map();
+  records.forEach(record => {
+    map.set(
+      record.entity,
+      (
+        map.get(record.entity) || 0
+      ) + record.original
+    );
   });
-  const listaGrupos=Array.from(grupos.values()).sort((a,b)=>b.total-a.total);
-  const wrap=el('div',{class:'catTable'});
-  if(listaGrupos.length===0){ wrap.appendChild(el('div',{style:'font-size:12px;opacity:.5;padding:8px 0;'},'Sem dados para os filtros atuais.')); return wrap; }
-  listaGrupos.forEach(g=>{
-    wrap.appendChild(el('div',{class:'grupoRow'},[
-      el('div',{class:'grupoNome'}, g.label),
-      el('div',{class:'grupoVal'}, brl(g.total)),
-    ]));
-    const subs=Array.from(g.subs.entries()).sort((a,b)=>b[1]-a[1]);
-    const ehSoUmaESimoNome = subs.length===1 && subs[0][0]===g.label;
-    if(!ehSoUmaESimoNome){
-      subs.forEach(([nomeSub,valor])=>{
-        wrap.appendChild(el('div',{class:'subRow'},[
-          el('div',{}, nomeSub),
-          el('div',{class:'subVal'}, brl(valor)),
-        ]));
-      });
+  const data = [...map.entries()].sort(
+    (first, second) =>
+      second[1] - first[1]
+  );
+  const maximum = Math.max(
+    1,
+    ...data.map(item => item[1])
+  );
+  if (!data.length) {
+    return node(
+      "div",
+      { class: "card" },
+      "Sem dados para os filtros atuais."
+    );
+  }
+  return node(
+    "div",
+    { class: "card" },
+    data.map(([name, value]) =>
+      node(
+        "div",
+        { class: "ranking" },
+        [
+          node(
+            "div",
+            {
+              class: "rankname",
+              title: name
+            },
+            name
+          ),
+          node(
+            "div",
+            { class: "track" },
+            node(
+              "div",
+              {
+                class: "fill",
+                style:
+                  `width:${(value / maximum) * 100}%;` +
+                  `background:${CONFIG[state.source].color}`
+              }
+            )
+          ),
+          node(
+            "div",
+            { class: "rankval" },
+            brl(value)
+          )
+        ]
+      )
+    )
+  );
+}
+function renderDashboard(app) {
+  const firstPeriod =
+    calculateMetrics(1);
+  const secondPeriod =
+    calculateMetrics(2);
+  const currentPeriod =
+    state.filters.compare ||
+    state.filters.month2
+      ? secondPeriod
+      : firstPeriod;
+  app.append(
+    node(
+      "div",
+      { class: "kpis" },
+      [
+        kpiCard(
+          "Faturamento",
+          brl(currentPeriod.revenue),
+          firstPeriod.revenue,
+          secondPeriod.revenue,
+          false,
+          true
+        ),
+        kpiCard(
+          "Despesas",
+          brl(currentPeriod.expense),
+          firstPeriod.expense,
+          secondPeriod.expense,
+          true
+        ),
+        kpiCard(
+          "Resultado",
+          brl(currentPeriod.result),
+          firstPeriod.result,
+          secondPeriod.result
+        ),
+        kpiCard(
+          "Margem",
+          `${currentPeriod.margin
+            .toFixed(1)
+            .replace(".", ",")}%`,
+          firstPeriod.margin,
+          secondPeriod.margin
+        )
+      ]
+    )
+  );
+  if (
+    state.source === "pagar" ||
+    state.source === "receber"
+  ) {
+    const config = CONFIG[state.source];
+    const selectedPeriod =
+      state.filters.compare ||
+      state.filters.month2
+        ? 2
+        : 1;
+    const records = periodFilter(
+      state.data[state.source],
+      selectedPeriod
+    );
+    const total = records.reduce(
+      (sum, record) =>
+        sum + record.original,
+      0
+    );
+    const done = records.reduce(
+      (sum, record) =>
+        sum + record.done,
+      0
+    );
+    const open = records
+      .filter(
+        record =>
+          record.status === "Em aberto"
+      )
+      .reduce(
+        (sum, record) =>
+          sum + record.open,
+        0
+      );
+    const late = records
+      .filter(
+        record =>
+          record.status === "Atrasado"
+      )
+      .reduce(
+        (sum, record) =>
+          sum + record.open,
+        0
+      );
+    app.append(
+      sectionHeader(
+        "CONTROLE",
+        config.label
+      ),
+      node(
+        "div",
+        { class: "kpis" },
+        [
+          kpiCard(
+            "Total no período",
+            brl(total),
+            0,
+            0
+          ),
+          kpiCard(
+            state.source === "pagar"
+              ? "Pago"
+              : "Recebido",
+            brl(done),
+            0,
+            0
+          ),
+          kpiCard(
+            state.source === "pagar"
+              ? "Em aberto"
+              : "A receber",
+            brl(open),
+            0,
+            0
+          ),
+          kpiCard(
+            "Atrasado",
+            brl(late),
+            0,
+            0
+          )
+        ]
+      )
+    );
+  }
+  if (state.source === "extrato") {
+    const selectedPeriod =
+      state.filters.compare ||
+      state.filters.month2
+        ? 2
+        : 1;
+    const records = periodFilter(
+      state.data.extrato,
+      selectedPeriod
+    );
+    const entries = records
+      .filter(
+        record => record.type === "entrada"
+      )
+      .reduce(
+        (sum, record) =>
+          sum + record.value,
+        0
+      );
+    const exits = records
+      .filter(
+        record => record.type === "saida"
+      )
+      .reduce(
+        (sum, record) =>
+          sum + record.value,
+        0
+      );
+    app.append(
+      sectionHeader(
+        "EXTRATO",
+        "Resumo bancário"
+      ),
+      node(
+        "div",
+        { class: "kpis" },
+        [
+          kpiCard(
+            "Entradas",
+            brl(entries),
+            0,
+            0
+          ),
+          kpiCard(
+            "Saídas",
+            brl(exits),
+            0,
+            0
+          ),
+          kpiCard(
+            "Saldo do período",
+            brl(entries - exits),
+            0,
+            0
+          ),
+          kpiCard(
+            "Saldo final",
+            state.balance == null
+              ? "—"
+              : brl(state.balance),
+            0,
+            0
+          )
+        ]
+      )
+    );
+  }
+  app.append(
+    sectionHeader(
+      "COMPARAÇÃO",
+      "Visão dos períodos"
+    ),
+    renderComparisonTable(
+      firstPeriod,
+      secondPeriod
+    ),
+    sectionHeader(
+      "ANÁLISE",
+      "Análise do período"
+    ),
+    renderAnalysis(
+      firstPeriod,
+      secondPeriod
+    )
+  );
+  if (
+    state.source === "pagar" ||
+    state.source === "receber"
+  ) {
+    app.append(
+      sectionHeader(
+        "RANKING",
+        `${CONFIG[state.source].entityLabel}s por valor`
+      ),
+      renderRanking()
+    );
+  }
+}
+function renderDetails(app) {
+  const firstPeriod =
+    calculateMetrics(1);
+  const secondPeriod =
+    calculateMetrics(2);
+  app.append(
+    sectionHeader(
+      "DETALHAMENTO",
+      "Comparação financeira"
+    ),
+    renderComparisonTable(
+      firstPeriod,
+      secondPeriod
+    )
+  );
+  const firstCategories = categoryMap(
+    firstPeriod.payables
+  );
+  const secondCategories = categoryMap(
+    secondPeriod.payables
+  );
+  const categoryNames = [
+    ...new Set([
+      ...firstCategories.keys(),
+      ...secondCategories.keys()
+    ])
+  ].sort(
+    (first, second) =>
+      (
+        secondCategories.get(second) || 0
+      ) -
+      (
+        secondCategories.get(first) || 0
+      )
+  );
+  const tableHeader = node(
+    "thead",
+    {},
+    node(
+      "tr",
+      {},
+      [
+        "Categoria",
+        getPeriodLabels()[0],
+        getPeriodLabels()[1],
+        "Diferença",
+        "Variação"
+      ].map(value =>
+        node("th", {}, value)
+      )
+    )
+  );
+  const tableBody = node(
+    "tbody",
+    {},
+    categoryNames.map(category => {
+      const firstValue =
+        firstCategories.get(category) || 0;
+      const secondValue =
+        secondCategories.get(category) || 0;
+      return node(
+        "tr",
+        {},
+        [
+          node("td", {}, category),
+          node(
+            "td",
+            {},
+            brl(firstValue)
+          ),
+          node(
+            "td",
+            {},
+            brl(secondValue)
+          ),
+          node(
+            "td",
+            {},
+            brl(secondValue - firstValue)
+          ),
+          node(
+            "td",
+            {},
+            changeElement(
+              firstValue,
+              secondValue,
+              true
+            )
+          )
+        ]
+      );
+    })
+  );
+  app.append(
+    sectionHeader(
+      "CATEGORIAS",
+      "Despesas por categoria"
+    ),
+    node(
+      "div",
+      {
+        class: "card tablewrap"
+      },
+      node(
+        "table",
+        { class: "table" },
+        [
+          tableHeader,
+          tableBody
+        ]
+      )
+    )
+  );
+}
+function renderCharts(app) {
+  const data = calculateMonthlyData();
+  const selectedData = data.filter(item =>
+    (
+      !state.filters.month1 &&
+      !state.filters.month2
+    ) ||
+    [
+      state.filters.month1,
+      state.filters.month2
+    ].includes(item.key)
+  );
+  app.append(
+    sectionHeader(
+      "EVOLUÇÃO",
+      "Faturamento por mês"
+    ),
+    node(
+      "div",
+      { class: "card" },
+      renderLineChart(
+        data,
+        "revenue",
+        "#5c7a63"
+      )
+    ),
+    sectionHeader(
+      "COMPARAÇÃO",
+      "Receitas x despesas"
+    ),
+    node(
+      "div",
+      { class: "card" },
+      [
+        node(
+          "div",
+          {
+            class: "legend",
+            html:
+              '<span><i class="swatch" style="background:#5c7a63"></i>Receitas</span>' +
+              '<span><i class="swatch" style="background:#a8462e"></i>Despesas</span>'
+          }
+        ),
+        renderGroupedChart(
+          selectedData.length
+            ? selectedData
+            : data
+        )
+      ]
+    ),
+    node(
+      "div",
+      { class: "grid2" },
+      [
+        node(
+          "div",
+          {},
+          [
+            sectionHeader(
+              "RESULTADO",
+              "Resultado mensal"
+            ),
+            node(
+              "div",
+              { class: "card" },
+              renderLineChart(
+                data,
+                "result",
+                "#bb8a34"
+              )
+            )
+          ]
+        ),
+        node(
+          "div",
+          {},
+          [
+            sectionHeader(
+              "DESPESAS",
+              "Evolução mensal"
+            ),
+            node(
+              "div",
+              { class: "card" },
+              renderLineChart(
+                data,
+                "expense",
+                "#a8462e"
+              )
+            )
+          ]
+        )
+      ]
+    )
+  );
+}
+function renderEmptyArea(source) {
+  const label =
+    CONFIG[source]?.label ||
+    "Extrato Bancário";
+  const container = node(
+    "div",
+    { class: "empty" },
+    [
+      node(
+        "p",
+        {},
+        `Carregue o arquivo de ${label} para visualizar esta área.`
+      )
+    ]
+  );
+  const dropArea = node(
+    "div",
+    { class: "drop" },
+    "⬆ Arraste o arquivo aqui ou clique para escolher"
+  );
+  const input = node(
+    "input",
+    {
+      type: "file",
+      accept: ".xlsx,.xls,.csv",
+      onchange: event =>
+        uploadFile(
+          source,
+          event.target.files[0]
+        )
     }
-  });
-  return wrap;
-}
-
-// ---------- Relatório automático (sem IA, sem custo) ----------
-let aiState={open:false, text:''};
-
-function pct(parte, total){ return total>0 ? (parte/total)*100 : 0; }
-
-// Monta uma linha legível com os filtros ativos (Contas a Pagar/Receber)
-function describeFiltrosContas(f, cfg, meses){
-  const partes=[];
-  if(f.situacao.length) partes.push(`Situação: ${f.situacao.join(', ')}`);
-  if(f.mes.length){
-    const labels=f.mes.map(k=>(meses.find(m=>m.key===k)||{}).label||k);
-    partes.push(`Mês: ${labels.join(', ')}`);
-  }
-  if(f.dataDe) partes.push(`De: ${f.dataDe.split('-').reverse().join('/')}`);
-  if(f.dataAte) partes.push(`Até: ${f.dataAte.split('-').reverse().join('/')}`);
-  if(f.entidade.length) partes.push(`${cfg.entityLabel}: ${f.entidade.join(', ')}`);
-  if(f.categoria.length) partes.push(`Categoria: ${f.categoria.join(', ')}`);
-  if(f.centro.length) partes.push(`Centro de custo: ${f.centro.join(', ')}`);
-  return partes.length ? partes.join(' · ') : 'Nenhum filtro aplicado (todos os lançamentos)';
-}
-
-function buildContasReportText(key, recs, filtroResumo){
-  const cfg=TABS[key];
-  if(!recs || recs.length===0){
-    return `Filtros aplicados: ${filtroResumo}\n\nNenhum lançamento encontrado com os filtros atuais. Ajuste os filtros para gerar o relatório.`;
-  }
-  const totalOriginal=recs.reduce((s,r)=>s+r.valorOriginal,0);
-  const totalFeito=recs.reduce((s,r)=>s+r.valorFeito,0);
-  const totalAberto=recs.filter(r=>r.situacao==='Em aberto').reduce((s,r)=>s+r.valorAberto,0);
-  const totalAtrasado=recs.filter(r=>r.situacao==='Atrasado').reduce((s,r)=>s+r.valorAberto,0);
-  const entCount=new Set(recs.map(r=>r.entidade)).size;
-
-  const somaPorMapa=(campo)=>{
-    const m=new Map();
-    recs.forEach(r=>m.set(r[campo],(m.get(r[campo])||0)+r.valorOriginal));
-    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
+  );
+  dropArea.onclick = () =>
+    input.click();
+  dropArea.ondragover = event => {
+    event.preventDefault();
+    dropArea.classList.add("over");
   };
-  const topEnt=somaPorMapa('entidade').slice(0,3);
-  const topCat=Array.from(somaAlocacoesPorCategoria(recs).entries()).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  const topEntShare=pct(topEnt.reduce((s,[,v])=>s+v,0), totalOriginal);
-
-  const porMes=new Map();
-  recs.forEach(r=>porMes.set(r.mesKey,(porMes.get(r.mesKey)||0)+r.valorOriginal));
-  const mesesOrdenados=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1);
-  let tendenciaTxt='';
-  if(mesesOrdenados.length>=2){
-    const primeiro=mesesOrdenados[0][1], ultimo=mesesOrdenados[mesesOrdenados.length-1][1];
-    if(ultimo>primeiro*1.1) tendenciaTxt='em tendência de alta';
-    else if(ultimo<primeiro*0.9) tendenciaTxt='em tendência de queda';
-    else tendenciaTxt='relativamente estável';
+  dropArea.ondragleave = () =>
+    dropArea.classList.remove("over");
+  dropArea.ondrop = event => {
+    event.preventDefault();
+    dropArea.classList.remove("over");
+    uploadFile(
+      source,
+      event.dataTransfer.files[0]
+    );
+  };
+  container.append(
+    dropArea,
+    input
+  );
+  return container;
+}
+async function uploadFile(key, file) {
+  if (!file) return;
+  try {
+    state.error = "";
+    if (key === "extrato") {
+      const result =
+        await parseStatement(file);
+      state.data.extrato =
+        result.records;
+      state.balance =
+        result.balance;
+    } else {
+      state.data[key] =
+        await parseAccounts(file, key);
+    }
+    state.updated[key] =
+      new Date().toISOString();
+    saveData(key);
+  } catch (error) {
+    state.error =
+      error.message ||
+      "Não foi possível ler o arquivo.";
   }
-
-  const p=[];
-  p.push(`Filtros aplicados: ${filtroResumo}`);
-  p.push(`No período analisado, o total de ${cfg.label.toLowerCase()} somou ${brl(totalOriginal)}, distribuído em ${recs.length} lançamentos e ${entCount} ${cfg.entityCountLabel.toLowerCase()}. Desse total, ${brl(totalFeito)} já foi ${cfg.doneLabel.toLowerCase()} e ${brl(totalAberto)} segue ${cfg.openLabel.toLowerCase()}.`);
-
-  if(totalAtrasado>0){
-    p.push(`Chama atenção o valor ${cfg.lateLabel.toLowerCase()} de ${brl(totalAtrasado)}${totalOriginal>0?` (${pct(totalAtrasado,totalOriginal).toFixed(1)}% do total)`:''}, o que representa um risco de fluxo de caixa que merece atenção prioritária.`);
+  render();
+}
+function resetCurrentSource() {
+  const key = state.source;
+  if (key === "geral") {
+    const confirmed = confirm(
+      "Apagar todos os dados carregados?"
+    );
+    if (!confirmed) return;
+    [
+      "pagar",
+      "receber",
+      "extrato"
+    ].forEach(source => {
+      localStorage.removeItem(
+        `dashboard-financeiro-${source}-v6`
+      );
+    });
+    state.data = {
+      pagar: null,
+      receber: null,
+      extrato: null
+    };
+    state.balance = null;
   } else {
-    p.push(`Não há valores ${cfg.lateLabel.toLowerCase()}s registrados no período, o que é um bom sinal de controle.`);
+    const label =
+      CONFIG[key]?.label ||
+      "Extrato Bancário";
+    const confirmed = confirm(
+      `Apagar os dados de ${label}?`
+    );
+    if (!confirmed) return;
+    localStorage.removeItem(
+      `dashboard-financeiro-${key}-v6`
+    );
+    state.data[key] = null;
+    if (key === "extrato") {
+      state.balance = null;
+    }
   }
-
-  if(topEnt.length>0){
-    const nomes=topEnt.map(([n])=>n).join(', ');
-    p.push(`${cfg.entityLabel} concentração: os ${Math.min(topEnt.length,3)} maiores ${cfg.entityLabel.toLowerCase()}s (${nomes}) somam cerca de ${topEntShare.toFixed(1)}% do valor total, o que indica ${topEntShare>50?'uma concentração relevante e maior dependência desses parceiros':'uma distribuição relativamente equilibrada'}.`);
-  }
-  if(topCat.length>0){
-    p.push(`As categorias com maior peso são: ${topCat.map(([n])=>n).join(', ')}.`);
-  }
-  if(tendenciaTxt){
-    p.push(`Ao longo dos meses, os valores estão ${tendenciaTxt}.`);
-  }
-
-  const rec=[];
-  if(totalAtrasado>0) rec.push(`Priorizar a regularização dos valores ${cfg.lateLabel.toLowerCase()}s para reduzir riscos.`);
-  if(topEntShare>50) rec.push(`Avaliar a diversificação de ${cfg.entityCountLabel.toLowerCase()} para reduzir a dependência dos principais.`);
-  rec.push(`Acompanhar mensalmente a evolução dos valores para antecipar variações.`);
-  p.push(`Recomendações: ${rec.join(' ')}`);
-
-  return p.join('\n\n');
+  state.filters = freshFilters();
+  render();
 }
-
-// Monta uma linha legível com os filtros ativos (Extrato Bancário)
-function describeFiltrosExtrato(f, meses){
-  const partes=[];
-  if(f.mes.length){
-    const labels=f.mes.map(k=>(meses.find(m=>m.key===k)||{}).label||k);
-    partes.push(`Mês: ${labels.join(', ')}`);
-  }
-  if(f.dataDe) partes.push(`De: ${f.dataDe.split('-').reverse().join('/')}`);
-  if(f.dataAte) partes.push(`Até: ${f.dataAte.split('-').reverse().join('/')}`);
-  if(f.tipo.length) partes.push(`Tipo: ${f.tipo.join(', ')}`);
-  return partes.length ? partes.join(' · ') : 'Nenhum filtro aplicado (todos os lançamentos)';
-}
-
-function buildExtratoReportText(recs, filtroResumo, saldoFinal){
-  if(!recs || recs.length===0){
-    return `Filtros aplicados: ${filtroResumo}\n\nNenhum lançamento encontrado com os filtros atuais. Ajuste os filtros para gerar o relatório.`;
-  }
-  const entradas=recs.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+r.valorAbs,0);
-  const saidas=recs.filter(r=>r.tipo==='saida').reduce((s,r)=>s+r.valorAbs,0);
-  const saldoPeriodo=entradas-saidas;
-
-  const somaPorDescMapa=(tipo)=>{
-    const m=new Map();
-    recs.filter(r=>r.tipo===tipo).forEach(r=>m.set(r.descricao,(m.get(r.descricao)||0)+r.valorAbs));
-    return [...m.entries()].sort((a,b)=>b[1]-a[1]);
-  };
-  const topSaidas=somaPorDescMapa('saida').slice(0,3);
-  const topEntradas=somaPorDescMapa('entrada').slice(0,3);
-
-  const porMes=new Map();
-  recs.forEach(r=>{
-    const cur=porMes.get(r.mesKey)||{entrada:0,saida:0};
-    if(r.tipo==='entrada') cur.entrada+=r.valorAbs; else cur.saida+=r.valorAbs;
-    porMes.set(r.mesKey,cur);
-  });
-  const mesesOrdenados=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1);
-
-  const p=[];
-  p.push(`Filtros aplicados: ${filtroResumo}`);
-  p.push(`No período filtrado, o extrato registrou ${brl(entradas)} em entradas e ${brl(saidas)} em saídas, resultando em um saldo de ${brl(saldoPeriodo)}.${saldoFinal!=null?` O saldo final informado no extrato (sem considerar os filtros) é de ${brl(saldoFinal)}.`:''}`);
-
-  if(saldoPeriodo<0){
-    p.push(`O saldo do período é negativo, ou seja, as saídas superaram as entradas — vale investigar as causas e ajustar o fluxo de caixa.`);
-  } else {
-    p.push(`O saldo do período é positivo, indicando que as entradas superaram as saídas.`);
-  }
-
-  if(topSaidas.length>0) p.push(`As maiores saídas foram: ${topSaidas.map(([n,v])=>`${n} (${brl(v)})`).join(', ')}.`);
-  if(topEntradas.length>0) p.push(`As maiores entradas foram: ${topEntradas.map(([n,v])=>`${n} (${brl(v)})`).join(', ')}.`);
-
-  if(mesesOrdenados.length>=2){
-    const primeiro=mesesOrdenados[0][1], ultimo=mesesOrdenados[mesesOrdenados.length-1][1];
-    const saldoPrimeiro=primeiro.entrada-primeiro.saida, saldoUltimo=ultimo.entrada-ultimo.saida;
-    p.push(`Comparando o primeiro e o último mês do período, o saldo mensal passou de ${brl(saldoPrimeiro)} para ${brl(saldoUltimo)}.`);
-  }
-
-  const rec=[`Acompanhar mensalmente a relação entre entradas e saídas para antecipar períodos de aperto de caixa.`];
-  if(saldoPeriodo<0) rec.unshift(`Revisar as maiores saídas listadas acima e avaliar cortes ou renegociações.`);
-  p.push(`Recomendações: ${rec.join(' ')}`);
-
-  return p.join('\n\n');
-}
-
-function openReport(text){
-  aiState={open:true, text};
-  renderAIModal();
-}
-function closeAIReport(){
-  aiState.open=false;
-  const existing=document.getElementById('ai-modal-overlay');
-  if(existing) existing.remove();
-}
-function renderAIModal(){
-  let overlay=document.getElementById('ai-modal-overlay');
-  if(!overlay){
-    overlay=el('div',{id:'ai-modal-overlay', class:'modal-overlay'});
-    overlay.addEventListener('click', e=>{ if(e.target===overlay) closeAIReport(); });
-    document.body.appendChild(overlay);
-  }
-  overlay.innerHTML='';
-  const box=el('div',{class:'modal-box'});
-  box.appendChild(el('div',{class:'modal-head'},[
-    el('div',{},[el('div',{class:'eyebrow'},'RELATÓRIO AUTOMÁTICO'), el('h2',{style:'margin:2px 0 0;font-family:\'Fraunces\',serif;font-size:19px;'},'Análise financeira')]),
-    el('button',{class:'btn ghost', onclick:closeAIReport},'Fechar'),
-  ]));
-  box.appendChild(el('div',{class:'modal-text'}, aiState.text));
-  overlay.appendChild(box);
-}
-
-// ---------- Render: aba Contas a Pagar / Receber ----------
-function renderContasTab(key){
-  const cfg=TABS[key];
-  const st=appState.data[key];
-  const app=document.getElementById('app');
-
-  if(!st.records){ app.appendChild(renderContasEmpty(key)); return; }
-
-  const f=st.f;
-  const base=st.records
-    .filter(r=>f.situacao.length===0||f.situacao.includes(r.situacao))
-    .filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade))
-    .filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria))
-    .filter(r=>f.centro.length===0||f.centro.includes(r.centro))
-    .filter(r=>!f.dataDe||r.dataISO>=f.dataDe)
-    .filter(r=>!f.dataAte||r.dataISO<=f.dataAte);
-  const filtered=f.mes.length===0?base:base.filter(r=>f.mes.includes(r.mesKey));
-
-  const totalOriginal=filtered.reduce((s,r)=>s+r.valorOriginal,0);
-  const totalFeito=filtered.reduce((s,r)=>s+r.valorFeito,0);
-  const totalAberto=filtered.filter(r=>r.situacao==='Em aberto').reduce((s,r)=>s+r.valorAberto,0);
-  const totalAtrasado=filtered.filter(r=>r.situacao==='Atrasado').reduce((s,r)=>s+r.valorAberto,0);
-  const entCount=new Set(filtered.map(r=>r.entidade)).size;
-
-  const updatedLabel=st.updatedAt?new Date(st.updatedAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
-
-  const situacoes=Array.from(new Set(st.records.map(r=>r.situacao))).sort();
-  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
-  const filtroResumo=describeFiltrosContas(f, cfg, meses);
-
-  app.appendChild(el('div',{class:'headerRow'},[
-    el('div',{},[
-      el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`),
-    ]),
-    el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openReport(buildContasReportText(key, filtered, filtroResumo))},'📄 Gerar relatório (filtros atuais)'),
-      el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-'+key).click()},'⟳ Atualizar dados'),
-      el('button',{class:'btn ghost', onclick:()=>onResetContas(key)},'🗑 Limpar'),
-    ]),
-  ]));
-  if(st.error) app.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
-
-  const entidades=Array.from(new Set(st.records.map(r=>r.entidade))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  const categorias=Array.from(new Set(st.records.flatMap(r=>r.categoriasAlocadas.map(a=>a.nome)))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  const hasCentro=st.records.some(r=>r.centro!==null);
-  const centros=hasCentro?Array.from(new Set(st.records.map(r=>r.centro))).sort((a,b)=>a.localeCompare(b,'pt-BR')):[];
-
-  const filterRow=el('div',{class:'filters'},[
-    multiSelectFilter(key+'-situacao','Situação', f.situacao, v=>{f.situacao=v; render();}, situacoes),
-    multiSelectFilter(key+'-mes','Mês', f.mes, v=>{f.mes=v; render();}, meses),
-    filterDate('De', f.dataDe, v=>{f.dataDe=v; render();}),
-    filterDate('Até', f.dataAte, v=>{f.dataAte=v; render();}),
-    multiSelectFilter(key+'-entidade', cfg.entityLabel, f.entidade, v=>{f.entidade=v; render();}, entidades),
-    multiSelectFilter(key+'-categoria','Categoria', f.categoria, v=>{f.categoria=v; render();}, categorias),
-  ]);
-  if(hasCentro) filterRow.appendChild(multiSelectFilter(key+'-centro','Centro de custo', f.centro, v=>{f.centro=v; render();}, centros));
-  app.appendChild(filterRow);
-
-  app.appendChild(el('div',{class:'kpis'},[
-    kpiTag('Total no período', brl(totalOriginal), 'ink', `${filtered.length} lançamentos`),
-    kpiTag(cfg.doneLabel, brl(totalFeito), 'paper'),
-    kpiTag(cfg.openLabel, brl(totalAberto), 'paper'),
-    kpiTag(cfg.lateLabel, brl(totalAtrasado), totalAtrasado>0?'rust':'paper'),
-    kpiTag(cfg.entityCountLabel, String(entCount), 'gold'),
-  ]));
-
-  // gráfico mensal (respeita situação/entidade/categoria/centro/data, ignora mês)
-  const monthlyMap=new Map();
-  base.forEach(r=>monthlyMap.set(r.mesKey,(monthlyMap.get(r.mesKey)||0)+r.valorOriginal));
-  const monthlyData=Array.from(monthlyMap.entries()).sort(([a],[b])=>a<b?-1:1).map(([key,valor])=>{const [y,m]=key.split('-'); return {key, mes:`${MONTH_ABBR[parseInt(m,10)-1]}/${y.slice(2)}`, valor};});
-
-  app.appendChild(sectionHead('ANO', cfg.chartTitle));
-  app.appendChild(el('div',{class:'card', style:'margin-bottom:32px;'},[renderMonthlyChart(monthlyData, f.mes, cfg.chartColor)]));
-
-  const topN=(dim,base2)=>{
-    const use = f[dim].length===0 ? base2 : filtered;
-    const map=new Map();
-    use.forEach(r=>map.set(r[dim], (map.get(r[dim])||0)+r.valorOriginal));
-    const sorted=Array.from(map.entries()).sort((a,b)=>b[1]-a[1]);
-    return sorted.map(([nome,valor])=>({nome: nome.length>24?nome.slice(0,22)+'…':nome, nomeCompleto:nome, valor}));
-  };
-  const entBase=base.filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria)).filter(r=>f.centro.length===0||f.centro.includes(r.centro)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
-  const catBase=base.filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade)).filter(r=>f.centro.length===0||f.centro.includes(r.centro)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
-  const centroBase=base.filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade)).filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
-
-  const topEntidades=topN('entidade',entBase);
-  // categoria e centro de custo: lista COMPLETA, sem "Outros"
-  const topCategorias=topAllCategorias(catBase);
-
-  const cols=[
-    renderRankingCard('RANKING', cfg.rankEntityTitle, topEntidades, cfg.chartColor, key+'-ent'),
-    renderRankingCard('RANKING', cfg.rankCategoryTitle, topCategorias, '#5C7A63', key+'-cat'),
+function render() {
+  const app =
+    document.getElementById("app");
+  app.innerHTML = "";
+  const sourceTabs = [
+    ["geral", "Visão Geral"],
+    ["pagar", "Contas a Pagar"],
+    ["receber", "Contas a Receber"],
+    ["extrato", "Extrato Bancário"]
   ];
-  if(hasCentro){
-    const topCentros=topAll(centroBase,'centro');
-    cols.push(renderRankingCard('RANKING', cfg.rankCentroTitle, topCentros, '#BB8A34', key+'-centro'));
+  const viewTabs = [
+    ["dashboard", "Dashboard"],
+    ["detalhamento", "Detalhamento"],
+    ["graficos", "Gráficos"]
+  ];
+  const actionButtons = [];
+  if (state.source !== "geral") {
+    actionButtons.push(
+      node(
+        "button",
+        {
+          class: "btn",
+          onclick: () =>
+            document
+              .getElementById("upload-main")
+              ?.click()
+        },
+        "⟳ Atualizar dados"
+      )
+    );
   }
-  app.appendChild(el('div',{class: hasCentro?'grid3':'grid2'}, cols));
-
-  // Detalhamento completo: departamento -> categoria (ex: Ocupação e Instalações -> Aluguel + Condomínio)
-  app.appendChild(sectionHead('DETALHAMENTO', cfg.detailCategoryTitle));
-  app.appendChild(el('div',{class:'card', style:'margin-bottom:32px;'},[renderCategoriaTable(catBase)]));
-
-  app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
-  app.appendChild(el('input',{type:'file', id:'fileInput-'+key, accept:'.xlsx,.xls,.csv', onchange:e=>onFileContas(key,e.target.files[0])}));
-}
-  function renderContasEmpty(key){
-  const cfg=TABS[key];
-  const st=appState.data[key];
-  const wrap=el('div',{class:'empty'});
-  wrap.appendChild(el('p',{style:'font-size:14px;color:#5C5748;margin:8px 0 26px;'}, cfg.emptyHint+' A cada atualização, envie o mesmo relatório de novo — os dados anteriores são substituídos.'));
-  const drop=el('div',{class:'drop'},[
-    el('div',{style:'font-size:26px;margin-bottom:10px;opacity:.6;'},'⬆'),
-    el('div',{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;"},'Arraste o arquivo aqui, ou clique para escolher'),
-    el('div',{style:'font-size:12px;opacity:.5;margin-top:4px;'},'.xlsx, .xls ou .csv'),
-  ]);
-  const fileInput=el('input',{type:'file', accept:'.xlsx,.xls,.csv', onchange:e=>onFileContas(key,e.target.files[0])});
-  drop.addEventListener('click',()=>fileInput.click());
-  drop.addEventListener('dragover',e=>{e.preventDefault(); drop.classList.add('over');});
-  drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
-  drop.addEventListener('drop',e=>{e.preventDefault(); drop.classList.remove('over'); onFileContas(key,e.dataTransfer.files[0]);});
-  wrap.appendChild(drop);
-  wrap.appendChild(fileInput);
-  if(st.error) wrap.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
-  return wrap;
-}
-
-async function onFileContas(key,file){
-  if(!file) return;
-  const st=appState.data[key];
-  st.error='';
-  try{
-    const recs=await parseContasGeneric(file, TABS[key]);
-    st.records=recs;
-    st.updatedAt=new Date().toISOString();
-    st.f=freshContasFilters();
-    saveTab(key);
-  }catch(e){ st.error=e.message||'Não foi possível ler este arquivo.'; }
-  render();
-}
-function onResetContas(key){
-  if(!confirm('Apagar os dados carregados desta aba?')) return;
-  localStorage.removeItem(TABS[key].storageKey);
-  appState.data[key]={records:null, updatedAt:null, error:'', f:freshContasFilters()};
-  render();
-}
-
-// ---------- Render: aba Extrato Bancário ----------
-function renderExtratoTab(){
-  const st=appState.data.extrato;
-  const app=document.getElementById('app');
-  if(!st.records){ app.appendChild(renderExtratoEmpty()); return; }
-
-  const f=st.f;
-  const base=st.records
-    .filter(r=>f.tipo.length===0||f.tipo.includes(r.tipo==='entrada'?'Entradas':'Saídas'))
-    .filter(r=>!f.dataDe||r.dataISO>=f.dataDe)
-    .filter(r=>!f.dataAte||r.dataISO<=f.dataAte);
-  const filtered=f.mes.length===0?base:base.filter(r=>f.mes.includes(r.mesKey));
-
-  const entradas=filtered.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+r.valorAbs,0);
-  const saidas=filtered.filter(r=>r.tipo==='saida').reduce((s,r)=>s+r.valorAbs,0);
-  const updatedLabel=st.updatedAt?new Date(st.updatedAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
-
-  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
-  const filtroResumo=describeFiltrosExtrato(f, meses);
-
-  app.appendChild(el('div',{class:'headerRow'},[
-    el('div',{},[el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`)]),
-    el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openReport(buildExtratoReportText(filtered, filtroResumo, st.saldoFinal))},'📄 Gerar relatório (filtros atuais)'),
-      el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-extrato').click()},'⟳ Atualizar dados'),
-      el('button',{class:'btn ghost', onclick:onResetExtrato},'🗑 Limpar'),
-    ]),
-  ]));
-  if(st.error) app.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
-  app.appendChild(el('div',{class:'filters'},[
-    multiSelectFilter('extrato-mes','Mês', f.mes, v=>{f.mes=v; render();}, meses),
-    filterDate('De', f.dataDe, v=>{f.dataDe=v; render();}),
-    filterDate('Até', f.dataAte, v=>{f.dataAte=v; render();}),
-    multiSelectFilter('extrato-tipo','Tipo', f.tipo, v=>{f.tipo=v; render();}, ['Entradas','Saídas']),
-  ]));
-
-  app.appendChild(el('div',{class:'kpis'},[
-    kpiTag('Entradas', brl(entradas), 'paper'),
-    kpiTag('Saídas', brl(saidas), 'paper'),
-    kpiTag('Saldo do período', brl(entradas-saidas), (entradas-saidas)<0?'rust':'ink'),
-    kpiTag('Saldo final (extrato)', st.saldoFinal!=null?brl(st.saldoFinal):'—', 'gold'),
-    kpiTag('Lançamentos', String(filtered.length), 'paper'),
-  ]));
-
-  const monthlyMap=new Map();
-  base.forEach(r=>{
-    const cur=monthlyMap.get(r.mesKey)||{entrada:0,saida:0};
-    if(r.tipo==='entrada') cur.entrada+=r.valorAbs; else cur.saida+=r.valorAbs;
-    monthlyMap.set(r.mesKey,cur);
-  });
-  const monthlyData=Array.from(monthlyMap.entries()).sort(([a],[b])=>a<b?-1:1).map(([key,v])=>{const [y,m]=key.split('-'); return {key, mes:`${MONTH_ABBR[parseInt(m,10)-1]}/${y.slice(2)}`, ...v};});
-
-  app.appendChild(sectionHead('ANO', 'Entradas x saídas por mês'));
-  app.appendChild(el('div',{class:'card', style:'margin-bottom:32px;'},[
-    el('div',{class:'legend'},[
-      el('span',{},[el('i',{style:'background:#5C7A63;'}), 'Entradas']),
-      el('span',{},[el('i',{style:'background:#A8462E;'}), 'Saídas']),
-    ]),
-    renderGroupedMonthlyChart(monthlyData),
-  ]));
-
-  const topByDescAll=(tipo)=>{
-    const map=new Map();
-    filtered.filter(r=>r.tipo===tipo).forEach(r=>map.set(r.descricao, (map.get(r.descricao)||0)+r.valorAbs));
-    return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome:nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
-  };
-  app.appendChild(el('div',{class:'grid2'},[
-    renderRankingCard('RANKING','Maiores saídas', topByDescAll('saida'), '#A8462E', 'extrato-saida'),
-    renderRankingCard('RANKING','Maiores entradas', topByDescAll('entrada'), '#5C7A63', 'extrato-entrada'),
-  ]));
-
-  app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
-  app.appendChild(el('input',{type:'file', id:'fileInput-extrato', accept:'.xlsx,.xls,.csv', onchange:e=>onFileExtrato(e.target.files[0])}));
-}
-
-function renderExtratoEmpty(){
-  const st=appState.data.extrato;
-  const wrap=el('div',{class:'empty'});
-  wrap.appendChild(el('p',{style:'font-size:14px;color:#5C5748;margin:8px 0 26px;'},
-    'Envie o extrato bancário exportado em .xlsx ou .csv (com colunas de Data, Descrição/Histórico e Valor). OFX ainda não é suportado — exporte em planilha.'));
-  const drop=el('div',{class:'drop'},[
-    el('div',{style:'font-size:26px;margin-bottom:10px;opacity:.6;'},'⬆'),
-    el('div',{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;"},'Arraste o arquivo aqui, ou clique para escolher'),
-    el('div',{style:'font-size:12px;opacity:.5;margin-top:4px;'},'.xlsx, .xls ou .csv'),
-  ]);
-  const fileInput=el('input',{type:'file', accept:'.xlsx,.xls,.csv', onchange:e=>onFileExtrato(e.target.files[0])});
-  drop.addEventListener('click',()=>fileInput.click());
-  drop.addEventListener('dragover',e=>{e.preventDefault(); drop.classList.add('over');});
-  drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
-  drop.addEventListener('drop',e=>{e.preventDefault(); drop.classList.remove('over'); onFileExtrato(e.dataTransfer.files[0]);});
-  wrap.appendChild(drop);
-  wrap.appendChild(fileInput);
-  if(st.error) wrap.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
-  return wrap;
-}
-
-async function onFileExtrato(file){
-  if(!file) return;
-  const st=appState.data.extrato;
-  st.error='';
-  try{
-    const {records, saldoFinal}=await parseExtrato(file);
-    st.records=records;
-    st.saldoFinal=saldoFinal;
-    st.updatedAt=new Date().toISOString();
-    st.f=freshExtratoFilters();
-    saveTab('extrato');
-  }catch(e){ st.error=e.message||'Não foi possível ler este arquivo.'; }
-  render();
-}
-function onResetExtrato(){
-  if(!confirm('Apagar os dados carregados desta aba?')) return;
-  localStorage.removeItem('dash-extrato-v2');
-  appState.data.extrato={records:null, saldoFinal:null, updatedAt:null, error:'', f:freshExtratoFilters()};
-  render();
-}
-
-// ---------- Render raiz ----------
-function render(){
-  const app=document.getElementById('app');
-  app.innerHTML='';
-
-  app.appendChild(el('div',{},[
-    el('div',{class:'eyebrow'},'DASHBOARD FINANCEIRO'),
-    el('h1',{},'Dane-se · Painel financeiro'),
-  ]));
-
-  const tabDefs=[{key:'pagar',label:'Contas a Pagar'},{key:'receber',label:'Contas a Receber'},{key:'extrato',label:'Extrato Bancário'}];
-  app.appendChild(el('div',{class:'tabbar'}, tabDefs.map(t=>el('button',{
-    class:'tabbtn'+(appState.activeTab===t.key?' active':''),
-    onclick:()=>{appState.activeTab=t.key; render();},
-  }, t.label))));
-
-  if(appState.activeTab==='extrato') renderExtratoTab();
-  else renderContasTab(appState.activeTab);
-}
-
-document.addEventListener('click', (e)=>{
-  if(e.target.closest('.msfilter')) return;
-  if(uiOpenFilter!==null){
-    uiOpenFilter=null;
-    document.querySelectorAll('details.msfilter[open]').forEach(d=>d.removeAttribute('open'));
+  actionButtons.push(
+    node(
+      "button",
+      {
+        class: "btn danger",
+        onclick: resetCurrentSource
+      },
+      "🗑 Limpar dados"
+    )
+  );
+  app.append(
+    node(
+      "div",
+      { class: "header" },
+      [
+        node(
+          "div",
+          {},
+          [
+            node(
+              "div",
+              { class: "eyebrow" },
+              "DASHBOARD FINANCEIRO"
+            ),
+            node(
+              "h1",
+              { class: "title" },
+              "Dane-se · Painel financeiro"
+            ),
+            node(
+              "div",
+              { class: "sub" },
+              "Dados processados localmente no navegador"
+            )
+          ]
+        ),
+        node(
+          "div",
+          { class: "actions" },
+          actionButtons
+        )
+      ]
+    ),
+    node(
+      "div",
+      { class: "tabs" },
+      sourceTabs.map(([key, label]) =>
+        node(
+          "button",
+          {
+            class:
+              `tab${state.source === key
+                ? " active"
+                : ""}`,
+            onclick: () => {
+              state.source = key;
+              state.filters = freshFilters();
+              render();
+            }
+          },
+          label
+        )
+      )
+    ),
+    node(
+      "div",
+      {
+        class: "tabs viewtabs"
+      },
+      viewTabs.map(([key, label]) =>
+        node(
+          "button",
+          {
+            class:
+              `tab${state.view === key
+                ? " active"
+                : ""}`,
+            onclick: () => {
+              state.view = key;
+              render();
+            }
+          },
+          label
+        )
+      )
+    )
+  );
+  if (state.error) {
+    app.append(
+      node(
+        "div",
+        { class: "error" },
+        `⚠ ${state.error}`
+      )
+    );
   }
-});
-
-loadAll();
+  if (
+    state.source !== "geral" &&
+    !state.data[state.source]
+  ) {
+    app.append(
+      renderEmptyArea(state.source)
+    );
+    return;
+  }
+  if (
+    state.source === "geral" &&
+    !Object.values(state.data).some(Boolean)
+  ) {
+    app.append(
+      node(
+        "div",
+        { class: "empty" },
+        "Carregue os dados nas abas Contas a Pagar, Contas a Receber ou Extrato Bancário."
+      )
+    );
+    return;
+  }
+  app.append(
+    renderFilters()
+  );
+  if (state.view === "dashboard") {
+    renderDashboard(app);
+  } else if (
+    state.view === "detalhamento"
+  ) {
+    renderDetails(app);
+  } else {
+    renderCharts(app);
+  }
+  if (state.source !== "geral") {
+    app.append(
+      node(
+        "input",
+        {
+          id: "upload-main",
+          type: "file",
+          accept: ".xlsx,.xls,.csv",
+          onchange: event =>
+            uploadFile(
+              state.source,
+              event.target.files[0]
+            )
+        }
+      )
+    );
+  }
+  app.append(
+    node(
+      "div",
+      { class: "footer" },
+      "Dados processados e armazenados somente neste navegador · sem IA e sem envio para servidores"
+    )
+  );
+}
+loadSavedData();
 render();
 </script>
 </body>
