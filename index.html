@@ -27,6 +27,7 @@
   .filter{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 10px;}
   .filter label{font-size:11px;font-family:'IBM Plex Mono',monospace;opacity:.55;text-transform:uppercase;}
   .filter select{border:none;background:transparent;font-size:13px;color:var(--ink);outline:none;cursor:pointer;font-family:'Inter',sans-serif;max-width:220px;}
+  .filter input[type=date]{border:none;background:transparent;font-size:12.5px;color:var(--ink);outline:none;cursor:pointer;font-family:'Inter',sans-serif;}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:32px;}
   .tag{position:relative;border-radius:4px 12px 4px 12px;padding:18px 20px 16px;border:1px solid var(--ink);box-shadow:2px 3px 0 rgba(22,35,63,.08);}
   .tag .dot{position:absolute;top:10px;left:10px;width:6px;height:6px;border-radius:50%;background:rgba(250,247,241,.4);}
@@ -67,6 +68,32 @@
   .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:14px;}
   .modal-loading{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);padding:36px 0;text-align:center;}
   .modal-text{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--ink);white-space:pre-wrap;}
+  .catTable{width:100%;}
+  .catTable .grupoRow{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-bottom:5px;border-bottom:1px solid var(--line);}
+  .catTable .grupoRow:first-child{margin-top:0;}
+  .catTable .grupoNome{font-family:'Fraunces',serif;font-weight:600;font-size:13.5px;}
+  .catTable .grupoVal{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;}
+  .catTable .subRow{display:flex;justify-content:space-between;padding:5px 0 5px 14px;font-size:12px;color:var(--muted);}
+  .catTable .subVal{font-family:'IBM Plex Mono',monospace;}
+  .msfilter{position:relative;background:#fff;border:1px solid var(--line);border-radius:6px;}
+  .msfilter summary{list-style:none;cursor:pointer;padding:6px 10px;display:flex;align-items:center;gap:7px;user-select:none;}
+  .msfilter summary::-webkit-details-marker{display:none;}
+  .msfilter summary .msfilter-label{font-size:11px;font-family:'IBM Plex Mono',monospace;opacity:.55;text-transform:uppercase;white-space:nowrap;}
+  .msfilter summary .msfilter-val{font-size:13px;color:var(--ink);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .msfilter summary:after{content:'▾';font-size:9px;opacity:.5;margin-left:1px;}
+  .msfilter[open] summary:after{content:'▴';}
+  .msfilter-panel{position:absolute;top:calc(100% + 5px);left:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 28px rgba(22,35,63,.15);min-width:220px;max-width:290px;padding:8px;max-height:280px;overflow-y:auto;}
+  .msfilter-actions{display:flex;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);position:sticky;top:-8px;background:#fff;padding-top:2px;}
+  .msfilter-actions button{flex:1;font-size:10.5px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);background:var(--paper-dim);border-radius:4px;padding:5px 4px;cursor:pointer;color:var(--ink);}
+  .msfilter-opt{display:flex;align-items:center;gap:7px;padding:5px 4px;font-size:12.5px;cursor:pointer;border-radius:4px;}
+  .msfilter-opt:hover{background:var(--paper-dim);}
+  .msfilter-opt input{cursor:pointer;flex-shrink:0;}
+  .msfilter-opt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rankSearch{width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:12.5px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:var(--ink);}
+  .rankSearch:focus{border-color:var(--gold);}
+  .rankScroll{max-height:300px;overflow-y:auto;padding-right:4px;}
+  .rankScroll::-webkit-scrollbar{width:6px;}
+  .rankScroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
 </style>
 </head>
 <body>
@@ -111,10 +138,66 @@ function findAnyCol(headers, names){
   return headers.findIndex(h=>wanted.includes(norm(h)));
 }
 
+// ---------- Categorias (plano de contas do Conta Azul) ----------
+// IMPORTANTE: cada código do plano de contas (ex: "2.12.001 Alimentação",
+// "2.12.005 Uber, taxi, combustível", "2.12.006 Antecipação dos Lucros") é
+// tratado como categoria própria. Categorias NÃO são mais fundidas por
+// prefixo do código — no plano de contas real elas frequentemente agrupam
+// itens sem relação nenhuma entre si (ex: "2.03" mistura Salário, Vale
+// Alimentação, INSS, Comissão...), então fundir por prefixo misturava
+// categorias diferentes num único rótulo.
+function parseCategoriaInfo(raw){
+  const s=(raw||'').toString().trim();
+  if(!s) return {codigo:'', nome:''};
+  const m=s.match(/^(\d+(?:\.\d+)+)\s*[-–.]?\s*(.*)$/);
+  if(m && m[2]){
+    return {codigo:m[1], nome:m[2].trim()||s};
+  }
+  return {codigo:'', nome:s.replace(/^[\d.]+\s*/,'').trim()||s};
+}
+// Lê o rateio completo de um lançamento: para cada par Categoria N / Valor
+// na Categoria N preenchido, retorna {nome, codigo, valor} com o valor
+// ATRIBUÍDO àquela categoria (não o valor total da parcela). Se o arquivo
+// não trouxer os valores de rateio (ou vierem todos zerados), cai no
+// comportamento antigo: valor total da parcela na primeira categoria.
+function parseAlocacoesCategoria(row, catCols, valorOriginal){
+  const alocacoes=[];
+  catCols.forEach(({cIdx,vIdx})=>{
+    const raw=cIdx>-1?(row[cIdx]||'').toString():'';
+    if(!raw.trim()) return;
+    const info=parseCategoriaInfo(raw);
+    const valor= vIdx>-1 ? Math.abs(Number(row[vIdx])||0) : 0;
+    alocacoes.push({nome:info.nome, codigo:info.codigo, valor});
+  });
+  if(alocacoes.length===0) return [{nome:'Sem categoria', codigo:'', valor:valorOriginal}];
+  const somaAlocada=alocacoes.reduce((s,a)=>s+a.valor,0);
+  if(somaAlocada===0){
+    // arquivo sem colunas "Valor na Categoria N" (ou todas zeradas): usa o valor total na 1ª categoria
+    return [{nome:alocacoes[0].nome, codigo:alocacoes[0].codigo, valor:valorOriginal}];
+  }
+  return alocacoes;
+}
+function parseDateBR(str){
+  const s=(str||'').toString().trim();
+  if(!s||!s.includes('/')) return null;
+  const parts=s.split('/');
+  if(parts.length<3) return null;
+  const [dd,mm,yyyy]=parts;
+  if(!dd||!mm||!yyyy) return null;
+  const d=new Date(parseInt(yyyy,10), parseInt(mm,10)-1, parseInt(dd,10));
+  if(isNaN(d.getTime())) return null;
+  return d;
+}
+function dateToISO(d){
+  if(!d) return '';
+  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // ---------- Config das abas Contas a Pagar / Contas a Receber ----------
 const TABS = {
   pagar: {
-    key:'pagar', label:'Contas a Pagar', storageKey:'dash-pagar-v2',
+    key:'pagar', label:'Contas a Pagar', storageKey:'dash-pagar-v3',
     sheetRegex:/contas a pagar/i,
     entityHeaders:['Nome do fornecedor'],
     doneHeaders:['Valor total pago da parcela (R$)'],
@@ -124,11 +207,12 @@ const TABS = {
     doneLabel:'Pago', openLabel:'Em aberto', lateLabel:'Atrasado',
     chartTitle:'Gastos por mês', rankEntityTitle:'Gastos por fornecedor',
     rankCategoryTitle:'Gastos por categoria', rankCentroTitle:'Gastos por centro de custo',
+    detailCategoryTitle:'Detalhamento por categoria (grupo › categoria)',
     emptyHint:'Envie o arquivo exportado do Conta Azul ("Visão Contas a Pagar") para montar o painel.',
     chartColor:'#16233F',
   },
   receber: {
-    key:'receber', label:'Contas a Receber', storageKey:'dash-receber-v2',
+    key:'receber', label:'Contas a Receber', storageKey:'dash-receber-v3',
     sheetRegex:/contas a receber/i,
     entityHeaders:['Nome do cliente','Nome do contato','Nome do fornecedor'],
     doneHeaders:['Valor total recebido da parcela (R$)','Valor total pago da parcela (R$)'],
@@ -138,6 +222,7 @@ const TABS = {
     doneLabel:'Recebido', openLabel:'A receber', lateLabel:'Atrasado',
     chartTitle:'Recebimentos por mês', rankEntityTitle:'Recebimentos por cliente',
     rankCategoryTitle:'Recebimentos por categoria', rankCentroTitle:'Recebimentos por centro de custo',
+    detailCategoryTitle:'Detalhamento por categoria (grupo › categoria)',
     emptyHint:'Envie o arquivo exportado do Conta Azul ("Visão Contas a Receber") para montar o painel.',
     chartColor:'#5C7A63',
   },
@@ -159,28 +244,38 @@ async function parseContasGeneric(file, cfg){
     valorOriginal: findAnyCol(headers, ['Valor original da parcela (R$)']),
     valorFeito: findAnyCol(headers, cfg.doneHeaders),
     valorAberto: findAnyCol(headers, ['Valor total da parcela em aberto (R$)']),
-    categoria: findAnyCol(headers, ['Categoria 1']),
     centro: findAnyCol(headers, ['Centro de Custo 1']),
   };
+  // colunas de categoria com rateio: Categoria 1..12 + Valor na Categoria 1..12
+  const catCols=[];
+  for(let i=1;i<=12;i++){
+    const cIdx=findAnyCol(headers, ['Categoria '+i]);
+    if(cIdx===-1) continue;
+    const vIdx=findAnyCol(headers, ['Valor na Categoria '+i]);
+    catCols.push({cIdx, vIdx});
+  }
   if(col.entidade===-1||col.vencimento===-1||col.valorOriginal===-1) throw new Error(cfg.parseErrorMsg);
   const records=[];
   for(let i=headerIdx+1;i<rows.length;i++){
     const r=rows[i];
     if(!r||r.length===0) continue;
     const venc=(r[col.vencimento]||'').toString().trim();
-    if(!venc||!venc.includes('/')) continue;
-    const parts=venc.split('/'); const mm=parts[1], yyyy=parts[2];
-    if(!yyyy||!mm) continue;
+    const dataObj=parseDateBR(venc);
+    if(!dataObj) continue;
     const entidade=(r[col.entidade]||'').toString().trim()||cfg.emptyEntityLabel;
     const situacao=(r[col.situacao]||'Não informado').toString().trim()||'Não informado';
-    const catRaw=col.categoria>-1?(r[col.categoria]||'').toString():'';
-    const categoria=catRaw.replace(/^[\d.]+\s*/,'').trim()||'Sem categoria';
     const centro=col.centro>-1?((r[col.centro]||'').toString().trim()||'Sem centro de custo'):null;
     const valorOriginal=Number(r[col.valorOriginal])||0;
     const valorFeito=col.valorFeito>-1?(Number(r[col.valorFeito])||0):0;
     const valorAberto=col.valorAberto>-1?(Number(r[col.valorAberto])||0):0;
-    records.push({entidade,situacao,categoria,centro,valorOriginal,valorFeito,valorAberto,
-      mesNum:parseInt(mm,10), ano:parseInt(yyyy,10), mesKey:`${yyyy}-${mm}`});
+    const mm=String(dataObj.getMonth()+1).padStart(2,'0'), yyyy=String(dataObj.getFullYear());
+    const categoriasAlocadas=parseAlocacoesCategoria(r, catCols, valorOriginal);
+    records.push({entidade,situacao,
+      categoria:categoriasAlocadas[0].nome, categoriaCodigo:categoriasAlocadas[0].codigo,
+      categoriaGlobal:categoriasAlocadas[0].nome, categoriasAlocadas,
+      centro,valorOriginal,valorFeito,valorAberto,
+      mesNum:dataObj.getMonth()+1, ano:dataObj.getFullYear(), mesKey:`${yyyy}-${mm}`,
+      dataISO:dateToISO(dataObj)});
   }
   if(records.length===0) throw new Error('Não encontrei linhas de lançamento válidas neste arquivo.');
   return records;
@@ -256,9 +351,11 @@ async function parseExtrato(file){
       const sv=parseNumberBR(r[col.saldo]);
       if(r[col.saldo]!=='' ) lastSaldo=sv;
     }
+    const isoDate=dateToISO(new Date(d.yyyy, d.mm-1, d.dd));
     records.push({
       descricao, tipo, valorAbs: Math.abs(valor),
       mesNum:d.mm, ano:d.yyyy, mesKey:`${d.yyyy}-${String(d.mm).padStart(2,'0')}`,
+      dataISO:isoDate,
     });
   }
   if(records.length===0) throw new Error('Não encontrei lançamentos válidos neste extrato.');
@@ -266,12 +363,15 @@ async function parseExtrato(file){
 }
 
 // ---------- Estado ----------
+function freshContasFilters(){ return {situacao:[], mes:[], entidade:[], categoria:[], centro:[], dataDe:'', dataAte:''}; }
+function freshExtratoFilters(){ return {mes:[], tipo:[], dataDe:'', dataAte:''}; }
+
 let appState={
   activeTab:'pagar',
   data:{
-    pagar:{records:null, updatedAt:null, error:'', f:{situacao:'Todas', mes:'Todos', entidade:'Todos', categoria:'Todas', centro:'Todos'}},
-    receber:{records:null, updatedAt:null, error:'', f:{situacao:'Todas', mes:'Todos', entidade:'Todos', categoria:'Todas', centro:'Todos'}},
-    extrato:{records:null, saldoFinal:null, updatedAt:null, error:'', f:{mes:'Todos', tipo:'Todas'}},
+    pagar:{records:null, updatedAt:null, error:'', f:freshContasFilters()},
+    receber:{records:null, updatedAt:null, error:'', f:freshContasFilters()},
+    extrato:{records:null, saldoFinal:null, updatedAt:null, error:'', f:freshExtratoFilters()},
   }
 };
 
@@ -283,13 +383,13 @@ function loadAll(){
     }catch(e){}
   });
   try{
-    const raw=localStorage.getItem('dash-extrato-v1');
+    const raw=localStorage.getItem('dash-extrato-v2');
     if(raw){ const p=JSON.parse(raw); appState.data.extrato.records=p.records; appState.data.extrato.updatedAt=p.updatedAt; appState.data.extrato.saldoFinal=p.saldoFinal; }
   }catch(e){}
 }
 function saveTab(k){
   const d=appState.data[k];
-  const key = k==='extrato' ? 'dash-extrato-v1' : TABS[k].storageKey;
+  const key = k==='extrato' ? 'dash-extrato-v2' : TABS[k].storageKey;
   try{ localStorage.setItem(key, JSON.stringify({records:d.records, updatedAt:d.updatedAt, saldoFinal:d.saldoFinal})); }
   catch(e){ console.error('Falha ao salvar', e); }
 }
@@ -306,30 +406,86 @@ function kpiTag(label,value,tone,sub){
 function sectionHead(eyebrow,title){
   return el('div',{class:'sectionHead'},[el('span',{class:'eyebrow'},eyebrow), el('h2',{},title), el('div',{class:'rule'})]);
 }
-function filterSelect(label, value, onChange, options){
-  const select=el('select',{onchange:e=>onChange(e.target.value)},
-    options.map(opt=>{
-      const k=typeof opt==='string'?opt:opt.key;
-      const l=typeof opt==='string'?opt:opt.label;
-      return el('option',{value:k, selected: k===value?'selected':null}, l);
-    }));
-  return el('div',{class:'filter'},[el('label',{},label), select]);
+function filterDate(label, value, onChange){
+  return el('div',{class:'filter'},[el('label',{},label), el('input',{type:'date', value:value||'', onchange:e=>onChange(e.target.value)})]);
+}
+// Filtro de múltipla seleção: array vazio = "Todas" (sem restrição). options: [{key,label}] ou strings.
+let uiOpenFilter=null;
+function toOpts(arr){ return arr.map(v=> typeof v==='string' ? {key:v,label:v} : v); }
+function multiSelectFilter(id, label, selectedArr, onChange, optionsRaw){
+  const options=toOpts(optionsRaw);
+  const countLabel = selectedArr.length===0 ? 'Todas'
+    : selectedArr.length===1 ? ((options.find(o=>o.key===selectedArr[0])||{}).label||selectedArr[0])
+    : `${selectedArr.length} selecionadas`;
+  const details=el('details',{class:'msfilter'});
+  if(uiOpenFilter===id) details.setAttribute('open','open');
+  details.addEventListener('toggle', ()=>{
+    if(details.open) uiOpenFilter=id; else if(uiOpenFilter===id) uiOpenFilter=null;
+  });
+  details.appendChild(el('summary',{},[el('span',{class:'msfilter-label'},label+':'), el('span',{class:'msfilter-val', title:countLabel},countLabel)]));
+  const panel=el('div',{class:'msfilter-panel'});
+  panel.appendChild(el('div',{class:'msfilter-actions'},[
+    el('button',{type:'button', onclick:e=>{e.preventDefault(); e.stopPropagation(); onChange([]);}},'Todas'),
+    el('button',{type:'button', onclick:e=>{e.preventDefault(); e.stopPropagation(); onChange(options.map(o=>o.key));}},'Marcar tudo'),
+  ]));
+  options.forEach(opt=>{
+    const cb=el('input',{type:'checkbox'});
+    cb.checked=selectedArr.includes(opt.key);
+    cb.addEventListener('change', ()=>{
+      const next = cb.checked ? [...selectedArr, opt.key] : selectedArr.filter(v=>v!==opt.key);
+      onChange(next);
+    });
+    panel.appendChild(el('label',{class:'msfilter-opt'},[cb, el('span',{title:opt.label}, opt.label)]));
+  });
+  details.appendChild(panel);
+  return details;
 }
 function renderBars(data, color){
   const max=Math.max(...data.map(d=>d.valor),1);
   const wrap=el('div',{});
-  if(data.length===0){ wrap.appendChild(el('div',{style:'font-size:12px;opacity:.5;padding:8px 0;'},'Sem dados para os filtros atuais.')); return wrap; }
+  if(data.length===0){ wrap.appendChild(el('div',{style:'font-size:12px;opacity:.5;padding:8px 0;'},'Nada encontrado.')); return wrap; }
   data.forEach(d=>{
     const pct=Math.max((d.valor/max)*100, 2);
     wrap.appendChild(el('div',{class:'barRow'},[
-      el('div',{class:'barLabel', title:d.nome}, d.nome),
+      el('div',{class:'barLabel', title:d.nomeCompleto||d.nome}, d.nome),
       el('div',{class:'barTrack'},[ el('div',{class:'barFill', style:`width:${pct}%;background:${color};`}) ]),
       el('div',{class:'barVal'}, brl(d.valor)),
     ]));
   });
   return wrap;
 }
-function renderMonthlyChart(data, highlightKey, color){
+// Ranking completo, sem agrupar o restante em "Outros"
+function topAll(list, dim){
+  const map=new Map();
+  list.forEach(r=>map.set(r[dim], (map.get(r[dim])||0)+r.valorOriginal));
+  return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome: nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
+}
+// Ranking por categoria: usa o valor REALMENTE alocado a cada categoria
+// (rateio), não o valor total do lançamento repetido em cada categoria.
+function topAllCategorias(list){
+  const map=somaAlocacoesPorCategoria(list);
+  return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome: nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
+}
+// Card de ranking com campo de busca (filtra do 1º ao último item, sem agrupar "Outros" e sem estourar o layout)
+let rankingDataStore={};
+function renderRankingCard(eyebrow, title, data, color, idSuffix){
+  rankingDataStore[idSuffix]=data;
+  const boxId='rankbox-'+idSuffix;
+  return el('div',{},[
+    sectionHead(eyebrow, title),
+    el('div',{class:'card'},[
+      el('input',{type:'text', class:'rankSearch', placeholder:'Buscar…', oninput:e=>{
+        const q=e.target.value.trim().toLowerCase();
+        const full=rankingDataStore[idSuffix]||[];
+        const list=q? full.filter(d=>(d.nomeCompleto||d.nome).toLowerCase().includes(q)) : full;
+        const box=document.getElementById(boxId);
+        if(box){ box.innerHTML=''; box.appendChild(renderBars(list, color)); }
+      }}),
+      el('div',{id:boxId, class:'rankScroll'}, renderBars(data,color)),
+    ]),
+  ]);
+}
+function renderMonthlyChart(data, highlightKeys, color){
   const w=1000, h=230, padL=64, padB=26, padT=10;
   const max=Math.max(...data.map(d=>d.valor), 1);
   const gap=(w-padL-20)/Math.max(data.length,1);
@@ -351,7 +507,7 @@ function renderMonthlyChart(data, highlightKey, color){
     const x=padL+i*gap+(gap-barW)/2, y=h-padB-bh;
     const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',barW); rect.setAttribute('height',bh); rect.setAttribute('rx',3);
-    rect.setAttribute('fill', d.key===highlightKey?'#BB8A34':color);
+    rect.setAttribute('fill', (highlightKeys&&highlightKeys.includes(d.key))?'#BB8A34':color);
     const title=document.createElementNS('http://www.w3.org/2000/svg','title'); title.textContent=`${d.mes}: ${brl(d.valor)}`; rect.appendChild(title);
     svg.appendChild(rect);
     const t=document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -399,14 +555,112 @@ function renderGroupedMonthlyChart(data){
   return svg;
 }
 
+// Tabela completa por categoria, somando o valor REALMENTE alocado a cada
+// categoria (respeita rateio de lançamentos com mais de uma categoria).
+function recordTemCategoria(r, nomesSelecionados){
+  return r.categoriasAlocadas.some(a=>nomesSelecionados.includes(a.nome));
+}
+function somaAlocacoesPorCategoria(list){
+  const map=new Map();
+  list.forEach(r=>{
+    r.categoriasAlocadas.forEach(a=>{
+      map.set(a.nome, (map.get(a.nome)||0)+a.valor);
+    });
+  });
+  return map;
+}
+// Agrupamento visual por "departamento" (os 2 primeiros segmentos do código,
+// ex: "2.01", "2.12"). Diferente da versão anterior, o rótulo do grupo NÃO é
+// mais o nome de uma categoria específica dentro dele (isso é que misturava
+// categorias sem relação, ex: chamar o grupo de "Alimentação" quando também
+// tinha "Antecipação dos Lucros" e "Uber, taxi, combustível" dentro).
+// Os rótulos abaixo foram inferidos a partir das categorias que aparecem em
+// cada grupo no seu arquivo — ajuste os nomes se quiser outro texto.
+const DEPARTAMENTO_LABELS={
+  '2.01':'Ocupação e Instalações',
+  '2.02':'Produção e Insumos',
+  '2.03':'Folha de Pagamento e Encargos',
+  '2.04':'Comercial e Vendas',
+  '2.05':'Marketing e Publicidade',
+  '2.06':'Impostos sobre Vendas',
+  '2.07':'Parcelamentos Tributários',
+  '2.08':'Tarifas e Encargos Bancários',
+  '2.09':'Serviços Profissionais',
+  '2.10':'Softwares e TI',
+  '2.11':'Despesas Administrativas',
+  '2.12':'Despesas Variáveis / Sócios',
+};
+function departamentoDe(codigo){
+  if(!codigo) return null;
+  const parts=codigo.split('.');
+  return parts.length>=2 ? parts.slice(0,2).join('.') : null;
+}
+function departamentoLabel(depKey){
+  return DEPARTAMENTO_LABELS[depKey] || ('Grupo '+depKey);
+}
+// Tabela: departamento (grupo) -> categorias (subcategorias), com o valor
+// já correto de cada categoria (rateio real, não o valor total repetido).
+function renderCategoriaTable(list){
+  const grupos=new Map(); // depKey (ou nome, se sem código) -> {label, total, subs:Map(nome->valor)}
+  list.forEach(r=>{
+    r.categoriasAlocadas.forEach(a=>{
+      const dep=departamentoDe(a.codigo);
+      const key= dep || a.nome;
+      const label= dep ? departamentoLabel(dep) : a.nome;
+      let g=grupos.get(key);
+      if(!g){ g={label, total:0, subs:new Map()}; grupos.set(key,g); }
+      g.total+=a.valor;
+      g.subs.set(a.nome, (g.subs.get(a.nome)||0)+a.valor);
+    });
+  });
+  const listaGrupos=Array.from(grupos.values()).sort((a,b)=>b.total-a.total);
+  const wrap=el('div',{class:'catTable'});
+  if(listaGrupos.length===0){ wrap.appendChild(el('div',{style:'font-size:12px;opacity:.5;padding:8px 0;'},'Sem dados para os filtros atuais.')); return wrap; }
+  listaGrupos.forEach(g=>{
+    wrap.appendChild(el('div',{class:'grupoRow'},[
+      el('div',{class:'grupoNome'}, g.label),
+      el('div',{class:'grupoVal'}, brl(g.total)),
+    ]));
+    const subs=Array.from(g.subs.entries()).sort((a,b)=>b[1]-a[1]);
+    const ehSoUmaESimoNome = subs.length===1 && subs[0][0]===g.label;
+    if(!ehSoUmaESimoNome){
+      subs.forEach(([nomeSub,valor])=>{
+        wrap.appendChild(el('div',{class:'subRow'},[
+          el('div',{}, nomeSub),
+          el('div',{class:'subVal'}, brl(valor)),
+        ]));
+      });
+    }
+  });
+  return wrap;
+}
+
 // ---------- Relatório automático (sem IA, sem custo) ----------
 let aiState={open:false, text:''};
 
 function pct(parte, total){ return total>0 ? (parte/total)*100 : 0; }
 
-function buildContasReportText(key){
+// Monta uma linha legível com os filtros ativos (Contas a Pagar/Receber)
+function describeFiltrosContas(f, cfg, meses){
+  const partes=[];
+  if(f.situacao.length) partes.push(`Situação: ${f.situacao.join(', ')}`);
+  if(f.mes.length){
+    const labels=f.mes.map(k=>(meses.find(m=>m.key===k)||{}).label||k);
+    partes.push(`Mês: ${labels.join(', ')}`);
+  }
+  if(f.dataDe) partes.push(`De: ${f.dataDe.split('-').reverse().join('/')}`);
+  if(f.dataAte) partes.push(`Até: ${f.dataAte.split('-').reverse().join('/')}`);
+  if(f.entidade.length) partes.push(`${cfg.entityLabel}: ${f.entidade.join(', ')}`);
+  if(f.categoria.length) partes.push(`Categoria: ${f.categoria.join(', ')}`);
+  if(f.centro.length) partes.push(`Centro de custo: ${f.centro.join(', ')}`);
+  return partes.length ? partes.join(' · ') : 'Nenhum filtro aplicado (todos os lançamentos)';
+}
+
+function buildContasReportText(key, recs, filtroResumo){
   const cfg=TABS[key];
-  const recs=appState.data[key].records;
+  if(!recs || recs.length===0){
+    return `Filtros aplicados: ${filtroResumo}\n\nNenhum lançamento encontrado com os filtros atuais. Ajuste os filtros para gerar o relatório.`;
+  }
   const totalOriginal=recs.reduce((s,r)=>s+r.valorOriginal,0);
   const totalFeito=recs.reduce((s,r)=>s+r.valorFeito,0);
   const totalAberto=recs.filter(r=>r.situacao==='Em aberto').reduce((s,r)=>s+r.valorAberto,0);
@@ -419,7 +673,7 @@ function buildContasReportText(key){
     return [...m.entries()].sort((a,b)=>b[1]-a[1]);
   };
   const topEnt=somaPorMapa('entidade').slice(0,3);
-  const topCat=somaPorMapa('categoria').slice(0,3);
+  const topCat=Array.from(somaAlocacoesPorCategoria(recs).entries()).sort((a,b)=>b[1]-a[1]).slice(0,3);
   const topEntShare=pct(topEnt.reduce((s,[,v])=>s+v,0), totalOriginal);
 
   const porMes=new Map();
@@ -434,6 +688,7 @@ function buildContasReportText(key){
   }
 
   const p=[];
+  p.push(`Filtros aplicados: ${filtroResumo}`);
   p.push(`No período analisado, o total de ${cfg.label.toLowerCase()} somou ${brl(totalOriginal)}, distribuído em ${recs.length} lançamentos e ${entCount} ${cfg.entityCountLabel.toLowerCase()}. Desse total, ${brl(totalFeito)} já foi ${cfg.doneLabel.toLowerCase()} e ${brl(totalAberto)} segue ${cfg.openLabel.toLowerCase()}.`);
 
   if(totalAtrasado>0){
@@ -462,9 +717,23 @@ function buildContasReportText(key){
   return p.join('\n\n');
 }
 
-function buildExtratoReportText(){
-  const st=appState.data.extrato;
-  const recs=st.records;
+// Monta uma linha legível com os filtros ativos (Extrato Bancário)
+function describeFiltrosExtrato(f, meses){
+  const partes=[];
+  if(f.mes.length){
+    const labels=f.mes.map(k=>(meses.find(m=>m.key===k)||{}).label||k);
+    partes.push(`Mês: ${labels.join(', ')}`);
+  }
+  if(f.dataDe) partes.push(`De: ${f.dataDe.split('-').reverse().join('/')}`);
+  if(f.dataAte) partes.push(`Até: ${f.dataAte.split('-').reverse().join('/')}`);
+  if(f.tipo.length) partes.push(`Tipo: ${f.tipo.join(', ')}`);
+  return partes.length ? partes.join(' · ') : 'Nenhum filtro aplicado (todos os lançamentos)';
+}
+
+function buildExtratoReportText(recs, filtroResumo, saldoFinal){
+  if(!recs || recs.length===0){
+    return `Filtros aplicados: ${filtroResumo}\n\nNenhum lançamento encontrado com os filtros atuais. Ajuste os filtros para gerar o relatório.`;
+  }
   const entradas=recs.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+r.valorAbs,0);
   const saidas=recs.filter(r=>r.tipo==='saida').reduce((s,r)=>s+r.valorAbs,0);
   const saldoPeriodo=entradas-saidas;
@@ -486,7 +755,8 @@ function buildExtratoReportText(){
   const mesesOrdenados=[...porMes.entries()].sort(([a],[b])=>a<b?-1:1);
 
   const p=[];
-  p.push(`No período analisado, o extrato registrou ${brl(entradas)} em entradas e ${brl(saidas)} em saídas, resultando em um saldo de ${brl(saldoPeriodo)}.${st.saldoFinal!=null?` O saldo final informado no extrato é de ${brl(st.saldoFinal)}.`:''}`);
+  p.push(`Filtros aplicados: ${filtroResumo}`);
+  p.push(`No período filtrado, o extrato registrou ${brl(entradas)} em entradas e ${brl(saidas)} em saídas, resultando em um saldo de ${brl(saldoPeriodo)}.${saldoFinal!=null?` O saldo final informado no extrato (sem considerar os filtros) é de ${brl(saldoFinal)}.`:''}`);
 
   if(saldoPeriodo<0){
     p.push(`O saldo do período é negativo, ou seja, as saídas superaram as entradas — vale investigar as causas e ajustar o fluxo de caixa.`);
@@ -546,11 +816,13 @@ function renderContasTab(key){
 
   const f=st.f;
   const base=st.records
-    .filter(r=>f.situacao==='Todas'||r.situacao===f.situacao)
-    .filter(r=>f.entidade==='Todos'||r.entidade===f.entidade)
-    .filter(r=>f.categoria==='Todas'||r.categoria===f.categoria)
-    .filter(r=>f.centro==='Todos'||r.centro===f.centro);
-  const filtered=f.mes==='Todos'?base:base.filter(r=>r.mesKey===f.mes);
+    .filter(r=>f.situacao.length===0||f.situacao.includes(r.situacao))
+    .filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade))
+    .filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria))
+    .filter(r=>f.centro.length===0||f.centro.includes(r.centro))
+    .filter(r=>!f.dataDe||r.dataISO>=f.dataDe)
+    .filter(r=>!f.dataAte||r.dataISO<=f.dataAte);
+  const filtered=f.mes.length===0?base:base.filter(r=>f.mes.includes(r.mesKey));
 
   const totalOriginal=filtered.reduce((s,r)=>s+r.valorOriginal,0);
   const totalFeito=filtered.reduce((s,r)=>s+r.valorFeito,0);
@@ -560,32 +832,36 @@ function renderContasTab(key){
 
   const updatedLabel=st.updatedAt?new Date(st.updatedAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
 
+  const situacoes=Array.from(new Set(st.records.map(r=>r.situacao))).sort();
+  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
+  const filtroResumo=describeFiltrosContas(f, cfg, meses);
+
   app.appendChild(el('div',{class:'headerRow'},[
     el('div',{},[
       el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`),
     ]),
     el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openReport(buildContasReportText(key))},'📄 Gerar relatório'),
+      el('button',{class:'btn ai', onclick:()=>openReport(buildContasReportText(key, filtered, filtroResumo))},'📄 Gerar relatório (filtros atuais)'),
       el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-'+key).click()},'⟳ Atualizar dados'),
       el('button',{class:'btn ghost', onclick:()=>onResetContas(key)},'🗑 Limpar'),
     ]),
   ]));
   if(st.error) app.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
 
-  const situacoes=Array.from(new Set(st.records.map(r=>r.situacao))).sort();
-  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
   const entidades=Array.from(new Set(st.records.map(r=>r.entidade))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  const categorias=Array.from(new Set(st.records.map(r=>r.categoria))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const categorias=Array.from(new Set(st.records.flatMap(r=>r.categoriasAlocadas.map(a=>a.nome)))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const hasCentro=st.records.some(r=>r.centro!==null);
   const centros=hasCentro?Array.from(new Set(st.records.map(r=>r.centro))).sort((a,b)=>a.localeCompare(b,'pt-BR')):[];
 
   const filterRow=el('div',{class:'filters'},[
-    filterSelect('Situação', f.situacao, v=>{f.situacao=v; render();}, ['Todas',...situacoes]),
-    filterSelect('Mês', f.mes, v=>{f.mes=v; render();}, [{key:'Todos',label:'Todos os meses'},...meses]),
-    filterSelect(cfg.entityLabel, f.entidade, v=>{f.entidade=v; render();}, ['Todos',...entidades]),
-    filterSelect('Categoria', f.categoria, v=>{f.categoria=v; render();}, ['Todas',...categorias]),
+    multiSelectFilter(key+'-situacao','Situação', f.situacao, v=>{f.situacao=v; render();}, situacoes),
+    multiSelectFilter(key+'-mes','Mês', f.mes, v=>{f.mes=v; render();}, meses),
+    filterDate('De', f.dataDe, v=>{f.dataDe=v; render();}),
+    filterDate('Até', f.dataAte, v=>{f.dataAte=v; render();}),
+    multiSelectFilter(key+'-entidade', cfg.entityLabel, f.entidade, v=>{f.entidade=v; render();}, entidades),
+    multiSelectFilter(key+'-categoria','Categoria', f.categoria, v=>{f.categoria=v; render();}, categorias),
   ]);
-  if(hasCentro) filterRow.appendChild(filterSelect('Centro de custo', f.centro, v=>{f.centro=v; render();}, ['Todos',...centros]));
+  if(hasCentro) filterRow.appendChild(multiSelectFilter(key+'-centro','Centro de custo', f.centro, v=>{f.centro=v; render();}, centros));
   app.appendChild(filterRow);
 
   app.appendChild(el('div',{class:'kpis'},[
@@ -596,7 +872,7 @@ function renderContasTab(key){
     kpiTag(cfg.entityCountLabel, String(entCount), 'gold'),
   ]));
 
-  // gráfico mensal (respeita situação/entidade/categoria/centro, ignora mês)
+  // gráfico mensal (respeita situação/entidade/categoria/centro/data, ignora mês)
   const monthlyMap=new Map();
   base.forEach(r=>monthlyMap.set(r.mesKey,(monthlyMap.get(r.mesKey)||0)+r.valorOriginal));
   const monthlyData=Array.from(monthlyMap.entries()).sort(([a],[b])=>a<b?-1:1).map(([key,valor])=>{const [y,m]=key.split('-'); return {key, mes:`${MONTH_ABBR[parseInt(m,10)-1]}/${y.slice(2)}`, valor};});
@@ -604,32 +880,34 @@ function renderContasTab(key){
   app.appendChild(sectionHead('ANO', cfg.chartTitle));
   app.appendChild(el('div',{class:'card', style:'margin-bottom:32px;'},[renderMonthlyChart(monthlyData, f.mes, cfg.chartColor)]));
 
-  const topN=(recs,dim,base2)=>{
-    const use = f[dim]===(dim==='entidade'?'Todos':'Todas') ? base2 : filtered;
+  const topN=(dim,base2)=>{
+    const use = f[dim].length===0 ? base2 : filtered;
     const map=new Map();
     use.forEach(r=>map.set(r[dim], (map.get(r[dim])||0)+r.valorOriginal));
     const sorted=Array.from(map.entries()).sort((a,b)=>b[1]-a[1]);
-    const top=sorted.slice(0,7).map(([nome,valor])=>({nome: nome.length>24?nome.slice(0,22)+'…':nome, valor}));
-    const restante=sorted.slice(7).reduce((s,[,v])=>s+v,0);
-    if(restante>0) top.push({nome:`Outros (${sorted.length-7})`, valor:restante});
-    return top;
+    return sorted.map(([nome,valor])=>({nome: nome.length>24?nome.slice(0,22)+'…':nome, nomeCompleto:nome, valor}));
   };
-  const entBase=base.filter(r=>f.categoria==='Todas'||r.categoria===f.categoria).filter(r=>f.centro==='Todos'||r.centro===f.centro).filter(r=>f.mes==='Todos'||r.mesKey===f.mes);
-  const catBase=base.filter(r=>f.entidade==='Todos'||r.entidade===f.entidade).filter(r=>f.centro==='Todos'||r.centro===f.centro).filter(r=>f.mes==='Todos'||r.mesKey===f.mes);
-  const centroBase=base.filter(r=>f.entidade==='Todos'||r.entidade===f.entidade).filter(r=>f.categoria==='Todas'||r.categoria===f.categoria).filter(r=>f.mes==='Todos'||r.mesKey===f.mes);
+  const entBase=base.filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria)).filter(r=>f.centro.length===0||f.centro.includes(r.centro)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
+  const catBase=base.filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade)).filter(r=>f.centro.length===0||f.centro.includes(r.centro)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
+  const centroBase=base.filter(r=>f.entidade.length===0||f.entidade.includes(r.entidade)).filter(r=>f.categoria.length===0||recordTemCategoria(r,f.categoria)).filter(r=>f.mes.length===0||f.mes.includes(r.mesKey));
 
-  const topEntidades=topN(null,'entidade',entBase);
-  const topCategorias=topN(null,'categoria',catBase);
+  const topEntidades=topN('entidade',entBase);
+  // categoria e centro de custo: lista COMPLETA, sem "Outros"
+  const topCategorias=topAllCategorias(catBase);
 
   const cols=[
-    el('div',{},[sectionHead('RANKING', cfg.rankEntityTitle), el('div',{class:'card'},[renderBars(topEntidades, cfg.chartColor)])]),
-    el('div',{},[sectionHead('RANKING', cfg.rankCategoryTitle), el('div',{class:'card'},[renderBars(topCategorias, '#5C7A63')])]),
+    renderRankingCard('RANKING', cfg.rankEntityTitle, topEntidades, cfg.chartColor, key+'-ent'),
+    renderRankingCard('RANKING', cfg.rankCategoryTitle, topCategorias, '#5C7A63', key+'-cat'),
   ];
   if(hasCentro){
-    const topCentros=topN(null,'centro',centroBase);
-    cols.push(el('div',{},[sectionHead('RANKING', cfg.rankCentroTitle), el('div',{class:'card'},[renderBars(topCentros, '#BB8A34')])]));
+    const topCentros=topAll(centroBase,'centro');
+    cols.push(renderRankingCard('RANKING', cfg.rankCentroTitle, topCentros, '#BB8A34', key+'-centro'));
   }
   app.appendChild(el('div',{class: hasCentro?'grid3':'grid2'}, cols));
+
+  // Detalhamento completo: departamento -> categoria (ex: Ocupação e Instalações -> Aluguel + Condomínio)
+  app.appendChild(sectionHead('DETALHAMENTO', cfg.detailCategoryTitle));
+  app.appendChild(el('div',{class:'card', style:'margin-bottom:32px;'},[renderCategoriaTable(catBase)]));
 
   app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
   app.appendChild(el('input',{type:'file', id:'fileInput-'+key, accept:'.xlsx,.xls,.csv', onchange:e=>onFileContas(key,e.target.files[0])}));
@@ -663,7 +941,7 @@ async function onFileContas(key,file){
     const recs=await parseContasGeneric(file, TABS[key]);
     st.records=recs;
     st.updatedAt=new Date().toISOString();
-    st.f={situacao:'Todas', mes:'Todos', entidade:'Todos', categoria:'Todas', centro:'Todos'};
+    st.f=freshContasFilters();
     saveTab(key);
   }catch(e){ st.error=e.message||'Não foi possível ler este arquivo.'; }
   render();
@@ -671,7 +949,7 @@ async function onFileContas(key,file){
 function onResetContas(key){
   if(!confirm('Apagar os dados carregados desta aba?')) return;
   localStorage.removeItem(TABS[key].storageKey);
-  appState.data[key]={records:null, updatedAt:null, error:'', f:{situacao:'Todas', mes:'Todos', entidade:'Todos', categoria:'Todas', centro:'Todos'}};
+  appState.data[key]={records:null, updatedAt:null, error:'', f:freshContasFilters()};
   render();
 }
 
@@ -682,27 +960,33 @@ function renderExtratoTab(){
   if(!st.records){ app.appendChild(renderExtratoEmpty()); return; }
 
   const f=st.f;
-  const base=st.records.filter(r=>f.tipo==='Todas'||(f.tipo==='Entradas'?r.tipo==='entrada':r.tipo==='saida'));
-  const filtered=f.mes==='Todos'?base:base.filter(r=>r.mesKey===f.mes);
+  const base=st.records
+    .filter(r=>f.tipo.length===0||f.tipo.includes(r.tipo==='entrada'?'Entradas':'Saídas'))
+    .filter(r=>!f.dataDe||r.dataISO>=f.dataDe)
+    .filter(r=>!f.dataAte||r.dataISO<=f.dataAte);
+  const filtered=f.mes.length===0?base:base.filter(r=>f.mes.includes(r.mesKey));
 
   const entradas=filtered.filter(r=>r.tipo==='entrada').reduce((s,r)=>s+r.valorAbs,0);
   const saidas=filtered.filter(r=>r.tipo==='saida').reduce((s,r)=>s+r.valorAbs,0);
   const updatedLabel=st.updatedAt?new Date(st.updatedAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
 
+  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
+  const filtroResumo=describeFiltrosExtrato(f, meses);
+
   app.appendChild(el('div',{class:'headerRow'},[
     el('div',{},[el('div',{class:'sub'},`Atualizado em ${updatedLabel} · ${st.records.length} lançamentos carregados`)]),
     el('div',{style:'display:flex;gap:8px;'},[
-      el('button',{class:'btn ai', onclick:()=>openReport(buildExtratoReportText())},'📄 Gerar relatório'),
+      el('button',{class:'btn ai', onclick:()=>openReport(buildExtratoReportText(filtered, filtroResumo, st.saldoFinal))},'📄 Gerar relatório (filtros atuais)'),
       el('button',{class:'btn', onclick:()=>document.getElementById('fileInput-extrato').click()},'⟳ Atualizar dados'),
       el('button',{class:'btn ghost', onclick:onResetExtrato},'🗑 Limpar'),
     ]),
   ]));
   if(st.error) app.appendChild(el('div',{class:'err'},`⚠ ${st.error}`));
-
-  const meses=Array.from(new Set(st.records.map(r=>r.mesKey))).sort().map(k=>{const [y,m]=k.split('-'); return {key:k,label:`${MONTH_FULL[parseInt(m,10)-1]}/${y}`};});
   app.appendChild(el('div',{class:'filters'},[
-    filterSelect('Mês', f.mes, v=>{f.mes=v; render();}, [{key:'Todos',label:'Todos os meses'},...meses]),
-    filterSelect('Tipo', f.tipo, v=>{f.tipo=v; render();}, ['Todas','Entradas','Saídas']),
+    multiSelectFilter('extrato-mes','Mês', f.mes, v=>{f.mes=v; render();}, meses),
+    filterDate('De', f.dataDe, v=>{f.dataDe=v; render();}),
+    filterDate('Até', f.dataAte, v=>{f.dataAte=v; render();}),
+    multiSelectFilter('extrato-tipo','Tipo', f.tipo, v=>{f.tipo=v; render();}, ['Entradas','Saídas']),
   ]));
 
   app.appendChild(el('div',{class:'kpis'},[
@@ -730,18 +1014,14 @@ function renderExtratoTab(){
     renderGroupedMonthlyChart(monthlyData),
   ]));
 
-  const topByDesc=(tipo)=>{
+  const topByDescAll=(tipo)=>{
     const map=new Map();
     filtered.filter(r=>r.tipo===tipo).forEach(r=>map.set(r.descricao, (map.get(r.descricao)||0)+r.valorAbs));
-    const sorted=Array.from(map.entries()).sort((a,b)=>b[1]-a[1]);
-    const top=sorted.slice(0,8).map(([nome,valor])=>({nome:nome.length>24?nome.slice(0,22)+'…':nome, valor}));
-    const restante=sorted.slice(8).reduce((s,[,v])=>s+v,0);
-    if(restante>0) top.push({nome:`Outros (${sorted.length-8})`, valor:restante});
-    return top;
+    return Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).map(([nome,valor])=>({nome:nome.length>30?nome.slice(0,28)+'…':nome, nomeCompleto:nome, valor}));
   };
   app.appendChild(el('div',{class:'grid2'},[
-    el('div',{},[sectionHead('RANKING','Maiores saídas'), el('div',{class:'card'},[renderBars(topByDesc('saida'),'#A8462E')])]),
-    el('div',{},[sectionHead('RANKING','Maiores entradas'), el('div',{class:'card'},[renderBars(topByDesc('entrada'),'#5C7A63')])]),
+    renderRankingCard('RANKING','Maiores saídas', topByDescAll('saida'), '#A8462E', 'extrato-saida'),
+    renderRankingCard('RANKING','Maiores entradas', topByDescAll('entrada'), '#5C7A63', 'extrato-entrada'),
   ]));
 
   app.appendChild(el('div',{class:'footer'},'Dados carregados e relatório gerado localmente, direto no navegador · nada é enviado para nenhum servidor'));
@@ -778,15 +1058,15 @@ async function onFileExtrato(file){
     st.records=records;
     st.saldoFinal=saldoFinal;
     st.updatedAt=new Date().toISOString();
-    st.f={mes:'Todos', tipo:'Todas'};
+    st.f=freshExtratoFilters();
     saveTab('extrato');
   }catch(e){ st.error=e.message||'Não foi possível ler este arquivo.'; }
   render();
 }
 function onResetExtrato(){
   if(!confirm('Apagar os dados carregados desta aba?')) return;
-  localStorage.removeItem('dash-extrato-v1');
-  appState.data.extrato={records:null, saldoFinal:null, updatedAt:null, error:'', f:{mes:'Todos', tipo:'Todas'}};
+  localStorage.removeItem('dash-extrato-v2');
+  appState.data.extrato={records:null, saldoFinal:null, updatedAt:null, error:'', f:freshExtratoFilters()};
   render();
 }
 
@@ -809,6 +1089,14 @@ function render(){
   if(appState.activeTab==='extrato') renderExtratoTab();
   else renderContasTab(appState.activeTab);
 }
+
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('.msfilter')) return;
+  if(uiOpenFilter!==null){
+    uiOpenFilter=null;
+    document.querySelectorAll('details.msfilter[open]').forEach(d=>d.removeAttribute('open'));
+  }
+});
 
 loadAll();
 render();
