@@ -1161,6 +1161,15 @@ function freshFilters(){
   };
 }
 
+function freshCategoryFilters(){
+  return{
+    month1:"",
+    month2:"",
+    groups:[],
+    categories:[]
+  };
+}
+
 let state={
   source:"pagar",
   view:"dashboard",
@@ -1174,7 +1183,8 @@ let state={
   updated:{},
   balance:null,
   error:"",
-  filters:freshFilters()
+  filters:freshFilters(),
+  categoryFilters:freshCategoryFilters()
 };
 
 function loadData(){
@@ -1536,13 +1546,13 @@ function dateField(label,key){
     ]
   );
 }
-function multiChoiceField(label,items,filterKey,placeholder){
+function multiChoiceField(label,items,filterKey,placeholder,target=state.filters){
   const details=el(
     "details",
     {class:"multi field"}
   );
 
-  const count=state.filters[filterKey].length;
+  const count=target[filterKey].length;
 
   details.append(
     el("label",{},label),
@@ -1595,19 +1605,19 @@ function multiChoiceField(label,items,filterKey,placeholder){
       );
 
       checkbox.checked=
-        state.filters[filterKey].includes(item);
+        target[filterKey].includes(item);
 
       checkbox.onchange=()=>{
         if(checkbox.checked){
-          state.filters[filterKey]=[
+          target[filterKey]=[
             ...new Set([
-              ...state.filters[filterKey],
+              ...target[filterKey],
               item
             ])
           ];
         }else{
-          state.filters[filterKey]=
-            state.filters[filterKey].filter(
+          target[filterKey]=
+            target[filterKey].filter(
               value=>value!==item
             );
         }
@@ -1656,7 +1666,7 @@ function multiChoiceField(label,items,filterKey,placeholder){
               event.preventDefault();
               event.stopPropagation();
 
-              state.filters[filterKey]=[];
+              target[filterKey]=[];
               render();
             }
           },
@@ -1672,7 +1682,7 @@ function multiChoiceField(label,items,filterKey,placeholder){
               event.preventDefault();
               event.stopPropagation();
 
-              state.filters[filterKey]=[...items];
+              target[filterKey]=[...items];
 
               render();
             }
@@ -2612,6 +2622,15 @@ function comparisonInformation(){
       secondTotal
     );
 
+  const increased=changes.filter(item=>item.difference>0);
+  const reduced=changes.filter(item=>item.difference<0);
+  const unchanged=changes.filter(item=>item.difference===0);
+  const firstAverage=firstRecords.length?firstTotal/firstRecords.length:0;
+  const secondAverage=secondRecords.length?secondTotal/secondRecords.length:0;
+  const secondRanking=[...secondSubcategories.entries()].sort((a,b)=>b[1]-a[1]);
+  const topThreeTotal=secondRanking.slice(0,3).reduce((sum,[,value])=>sum+value,0);
+  const concentration=secondTotal?topThreeTotal/secondTotal*100:0;
+
   const labels=periodLabels();
   const paragraphs=[];
 
@@ -2638,6 +2657,25 @@ function comparisonInformation(){
             :"aumento"} em relação ao primeiro período.`
           :"."
       )
+    );
+  }
+
+  paragraphs.push(
+    `O primeiro período reúne ${firstRecords.length} ${firstRecords.length===1?"lançamento":"lançamentos"}, com valor médio de ${brl(firstAverage)} por lançamento. `+
+    `No segundo período foram ${secondRecords.length} ${secondRecords.length===1?"lançamento":"lançamentos"}, com média de ${brl(secondAverage)}.`
+  );
+
+  paragraphs.push(
+    `Das ${changes.length} ${changes.length===1?"subcategoria analisada":"subcategorias analisadas"}, `+
+    `${increased.length} ${increased.length===1?"apresentou aumento":"apresentaram aumento"}, `+
+    `${reduced.length} ${reduced.length===1?"teve redução":"tiveram redução"} e `+
+    `${unchanged.length} ${unchanged.length===1?"permaneceu estável":"permaneceram estáveis"}.`
+  );
+
+  if(secondRanking.length){
+    paragraphs.push(
+      `No segundo período, as três maiores subcategorias foram ${secondRanking.slice(0,3).map(([name,value])=>`${name} (${brl(value)})`).join(", ")}. `+
+      `Juntas, elas representam ${concentration.toFixed(1).replace(".",",")}% das despesas do período, indicando ${concentration>=60?"concentração elevada dos gastos":"distribuição mais equilibrada dos gastos"}.`
     );
   }
 
@@ -2765,6 +2803,12 @@ function renderAnalysis(){
     records.forEach(record=>months.set(record.month,(months.get(record.month)||0)+record.original));
     const ordered=[...months.entries()].sort(([a],[b])=>a.localeCompare(b));
     const categories=[...categoryMap(records).entries()].sort((a,b)=>b[1]-a[1]);
+    const totals=accountTotals(records);
+    const monthlyAverage=ordered.length?total/ordered.length:0;
+    const highest=[...ordered].sort((a,b)=>b[1]-a[1])[0];
+    const lowest=[...ordered].sort((a,b)=>a[1]-b[1])[0];
+    const topThree=categories.slice(0,3).reduce((sum,[,value])=>sum+value,0);
+    const concentration=total?topThree/total*100:0;
     const first=ordered[0];
     const last=ordered.at(-1);
     const change=first&&last?variation(first[1],last[1]):0;
@@ -2773,10 +2817,14 @@ function renderAnalysis(){
       ?"Análise do período filtrado"
       :`Análise anual${years?` · ${years}`:""}`;
     const paragraphs=[
-      `Foram analisados ${records.length} ${records.length===1?"lançamento":"lançamentos"}, totalizando ${brl(total)} em despesas.`,
+      `Foram analisados ${records.length} ${records.length===1?"lançamento":"lançamentos"}, totalizando ${brl(total)} em despesas. A média mensal foi de ${brl(monthlyAverage)} considerando ${ordered.length} ${ordered.length===1?"mês com movimentação":"meses com movimentação"}.`,
+      `Do total analisado, ${brl(totals.done)} já foi pago, ${brl(totals.open)} permanece em aberto e ${brl(totals.late)} está atrasado. ${totals.late>0?"Os valores atrasados merecem acompanhamento prioritário para evitar juros, multas e pressão no fluxo de caixa.":"Não foram identificados valores atrasados nos filtros atuais."}`,
       categories[0]
-        ?`${categories[0][0]} foi a subcategoria de maior impacto, com ${brl(categories[0][1])}.`
+        ?`As subcategorias de maior impacto foram ${categories.slice(0,3).map(([name,value])=>`${name} (${brl(value)})`).join(", ")}. Juntas, representam ${concentration.toFixed(1).replace(".",",")}% das despesas, o que ${concentration>=60?"demonstra concentração relevante e recomenda uma revisão detalhada desses gastos":"indica uma distribuição relativamente equilibrada entre as despesas"}.`
         :"Não há subcategorias com movimentação para os filtros atuais.",
+      highest&&lowest
+        ?`${MONTHS[Number(highest[0].slice(5))-1]}/${highest[0].slice(0,4)} apresentou o maior volume de despesas, com ${brl(highest[1])}. O menor volume ocorreu em ${MONTHS[Number(lowest[0].slice(5))-1]}/${lowest[0].slice(0,4)}, com ${brl(lowest[1])}. A diferença entre esses meses foi de ${brl(highest[1]-lowest[1])}.`
+        :"Não há meses suficientes para identificar o maior e o menor volume de despesas.",
       first&&last&&first[0]!==last[0]
         ?`Entre ${MONTHS[Number(first[0].slice(5))-1]}/${first[0].slice(0,4)} e ${MONTHS[Number(last[0].slice(5))-1]}/${last[0].slice(0,4)}, as despesas ${last[1]>=first[1]?"aumentaram":"diminuíram"} ${brl(Math.abs(last[1]-first[1]))}${Number.isFinite(change)?` (${Math.abs(change).toFixed(1).replace(".",",")}%)`:""}.`
         :"O período disponível não permite comparar meses diferentes."
@@ -3017,6 +3065,25 @@ function renderExpenseComparison(app){
   );
 }
 
+function renderCategoryFilters(){
+  const filters=state.categoryFilters;
+  const records=state.source==="receber"?(state.data.receber||[]):(state.data.pagar||[]);
+  const categories=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocation.name)))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const groups=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocationGroup(allocation))))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const row=el("div",{class:"filters"},[
+    selectField("Mês 1",filters.month1,availableMonths(),value=>{filters.month1=value;render();}),
+    selectField("Mês 2",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
+    multiChoiceField("Categorias",groups,"groups","Buscar categoria…",filters),
+    multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…",filters),
+    el("button",{class:"btn secondary",onclick:()=>{state.categoryFilters=freshCategoryFilters();render();}},"Limpar filtros da aba")
+  ]);
+
+  return el("div",{class:"filterbox"},[
+    el("div",{class:"sub",style:"margin-bottom:12px"},"Estes filtros pertencem somente à aba Categorias e não são alterados pelos filtros do Dashboard ou da Comparação."),
+    row
+  ]);
+}
+
 function renderCategories(app){
   if(state.source==="extrato"){
     app.append(sectionHeader("CATEGORIAS","Detalhamento por categoria"),el("div",{class:"card"},"O extrato bancário não possui categorias ou subcategorias no arquivo importado."));
@@ -3028,21 +3095,45 @@ function renderCategories(app){
       ?"receber"
       :"pagar";
 
+  const filters=state.categoryFilters;
+  const source=state.data[key]||[];
+  const allocationsFor=record=>(record.allocations||[]).filter(allocation=>
+    (!filters.groups.length||filters.groups.includes(allocationGroup(allocation)))&&
+    (!filters.categories.length||filters.categories.includes(allocation.name))
+  );
+  const recordsForMonth=month=>source.filter(record=>!month||record.month===month);
+  const mapFor=records=>{
+    const map=new Map();
+    records.forEach(record=>allocationsFor(record).forEach(allocation=>map.set(allocation.name,(map.get(allocation.name)||0)+allocation.value)));
+    return map;
+  };
+  const groupsFor=records=>{
+    const map=new Map();
+    records.forEach(record=>allocationsFor(record).forEach(allocation=>{
+      const label=allocationGroup(allocation);
+      if(!map.has(label))map.set(label,{label,total:0,subcategories:new Map()});
+      const group=map.get(label);
+      group.total+=allocation.value;
+      group.subcategories.set(allocation.name,(group.subcategories.get(allocation.name)||0)+allocation.value);
+    }));
+    return[...map.values()].sort((a,b)=>b.total-a.total);
+  };
+
   /*
     selectedRecords garante que a aba Categorias
     siga todos os filtros ativos.
   */
-  const comparing=state.filters.compare||(state.filters.month1&&state.filters.month2);
+  const comparing=filters.month1&&filters.month2;
 
   if(comparing){
-    const firstRecords=periodFilter(state.data[key],1);
-    const secondRecords=periodFilter(state.data[key],2);
-    const firstMap=categoryMap(firstRecords);
-    const secondMap=categoryMap(secondRecords);
+    const firstRecords=recordsForMonth(filters.month1);
+    const secondRecords=recordsForMonth(filters.month2);
+    const firstMap=mapFor(firstRecords);
+    const secondMap=mapFor(secondRecords);
     const groupBySubcategory=new Map();
 
     [...firstRecords,...secondRecords].forEach(record=>{
-      filteredAllocations(record).forEach(allocation=>groupBySubcategory.set(allocation.name,allocationGroup(allocation)));
+      allocationsFor(record).forEach(allocation=>groupBySubcategory.set(allocation.name,allocationGroup(allocation)));
     });
 
     const rows=[...new Set([...firstMap.keys(),...secondMap.keys()])]
@@ -3052,7 +3143,8 @@ function renderCategories(app){
         return{group:groupBySubcategory.get(name)||"Sem categoria",name,first,second,difference:second-first,percentage:variation(first,second)};
       })
       .sort((a,b)=>a.group.localeCompare(b.group,"pt-BR")||Math.abs(b.difference)-Math.abs(a.difference));
-    const labels=comparisonLabels();
+    const monthName=key=>`${MONTHS[Number(key.slice(5))-1]}/${key.slice(0,4)}`;
+    const labels=[monthName(filters.month1),monthName(filters.month2)];
 
     app.append(
       sectionHeader("DETALHAMENTO","Categorias e subcategorias comparadas"),
@@ -3067,10 +3159,10 @@ function renderCategories(app){
     return;
   }
 
-  const records=displayRecords(state.data[key]);
+  const records=recordsForMonth(filters.month1);
 
   const groups=
-    categoryGroups(records);
+    groupsFor(records);
 
   app.append(
     sectionHeader(
@@ -4144,6 +4236,9 @@ function render(){
                 state.filters=
                   freshFilters();
 
+                state.categoryFilters=
+                  freshCategoryFilters();
+
                 render();
               }
             },
@@ -4196,7 +4291,9 @@ function render(){
   }
 
   app.append(
-    renderFilters()
+    state.view==="categorias"
+      ?renderCategoryFilters()
+      :renderFilters()
   );
 
   if(state.view==="dashboard"){
