@@ -1181,7 +1181,7 @@ function loadData(){
     try{
       const saved=JSON.parse(
         localStorage.getItem(
-          `dane-se-dashboard-${key}-v9`
+          `dane-se-dashboard-${key}-v10`
         )
       );
 
@@ -1201,7 +1201,7 @@ function loadData(){
 
 function saveData(key){
   localStorage.setItem(
-    `dane-se-dashboard-${key}-v9`,
+    `dane-se-dashboard-${key}-v10`,
     JSON.stringify({
       records:state.data[key],
       updated:state.updated[key],
@@ -1507,11 +1507,7 @@ function dateField(label,key){
     state.filters.categories.length;
 
   details.append(
-    el(
-      "label",
-      {},
-      "Subcategorias"
-    ),
+    el("label",{},"Subcategorias"),
 
     el(
       "summary",
@@ -1527,22 +1523,19 @@ function dateField(label,key){
     {class:"multiPanel"}
   );
 
-  const optionsContainer=el(
-    "div",
-    {}
-  );
+  const optionsContainer=el("div",{});
 
-  function renderCategoryOptions(search=""){
+  function drawOptions(search=""){
     optionsContainer.innerHTML="";
 
-    const filteredCategories=
-      categories.filter(category=>
+    const filtered=categories.filter(
+      category=>
         category
           .toLowerCase()
           .includes(search.toLowerCase())
-      );
+    );
 
-    if(!filteredCategories.length){
+    if(!filtered.length){
       optionsContainer.append(
         el(
           "div",
@@ -1557,12 +1550,10 @@ function dateField(label,key){
       return;
     }
 
-    filteredCategories.forEach(category=>{
+    filtered.forEach(category=>{
       const checkbox=el(
         "input",
-        {
-          type:"checkbox"
-        }
+        {type:"checkbox"}
       );
 
       checkbox.checked=
@@ -1610,7 +1601,7 @@ function dateField(label,key){
         placeholder:"Buscar subcategoria…",
 
         oninput:event=>
-          renderCategoryOptions(
+          drawOptions(
             event.target.value
           )
       }
@@ -1660,9 +1651,9 @@ function dateField(label,key){
     optionsContainer
   );
 
-  renderCategoryOptions();
-
+  drawOptions();
   details.append(panel);
+
   return details;
 }
 
@@ -1931,11 +1922,26 @@ function accountTotals(records){
   };
 }
 
+function filteredAllocations(record){
+  if(!record.allocations)return[];
+
+  if(!state.filters.categories.length){
+    return record.allocations;
+  }
+
+  return record.allocations.filter(
+    allocation=>
+      state.filters.categories.includes(
+        allocation.name
+      )
+  );
+}
+
 function categoryMap(records){
   const map=new Map();
 
   records.forEach(record=>{
-    record.allocations?.forEach(
+    filteredAllocations(record).forEach(
       allocation=>{
         map.set(
           allocation.name,
@@ -1956,7 +1962,7 @@ function categoryGroups(records){
   const groups=new Map();
 
   records.forEach(record=>{
-    record.allocations?.forEach(
+    filteredAllocations(record).forEach(
       allocation=>{
         const parts=
           (allocation.code||"")
@@ -1982,8 +1988,7 @@ function categoryGroups(records){
           );
         }
 
-        const group=
-          groups.get(key);
+        const group=groups.get(key);
 
         group.total+=
           allocation.value;
@@ -2010,14 +2015,25 @@ function categoryGroups(records){
 }
 
 function rankingData(records,property){
+  /*
+    Recebe a base completa e aplica todos
+    os filtros ativos antes de agrupar.
+  */
+  const filteredRecords=
+    selectedRecords(records);
+
   const map=new Map();
 
-  records.forEach(record=>{
+  filteredRecords.forEach(record=>{
+    const name=
+      record[property]||
+      "Não informado";
+
     map.set(
-      record[property],
+      name,
 
       (
-        map.get(record[property])||
+        map.get(name)||
         0
       )+record.original
     );
@@ -2037,7 +2053,10 @@ function renderRanking(
   color
 ){
   const data=
-    rankingData(records,property);
+    rankingData(
+      records,
+      property
+    );
 
   const maximum=Math.max(
     1,
@@ -2092,9 +2111,16 @@ function renderRanking(
 }
 
 function monthlyAccountData(records){
+  /*
+    Aplica todos os filtros ativos antes
+    de montar o gráfico mensal.
+  */
+  const filteredRecords=
+    selectedRecords(records);
+
   const map=new Map();
 
-  baseFilter(records).forEach(record=>{
+  filteredRecords.forEach(record=>{
     map.set(
       record.month,
 
@@ -2108,7 +2134,9 @@ function monthlyAccountData(records){
   return[
     ...map.entries()
   ]
-    .sort()
+    .sort(([first],[second])=>
+      first.localeCompare(second)
+    )
     .map(([key,value])=>({
       key,
 
@@ -2122,11 +2150,14 @@ function monthlyAccountData(records){
 }
 
 function monthlyStatementData(){
+  const filteredRecords=
+    selectedRecords(
+      state.data.extrato
+    );
+
   const map=new Map();
 
-  baseFilter(
-    state.data.extrato
-  ).forEach(record=>{
+  filteredRecords.forEach(record=>{
     const current=
       map.get(record.month)||
       {
@@ -2146,7 +2177,9 @@ function monthlyStatementData(){
   return[
     ...map.entries()
   ]
-    .sort()
+    .sort(([first],[second])=>
+      first.localeCompare(second)
+    )
     .map(([key,value])=>({
       key,
 
@@ -2331,10 +2364,7 @@ function statementChart(data){
             "rect"
           );
 
-        rectangle.setAttribute(
-          "x",
-          x
-        );
+        rectangle.setAttribute("x",x);
 
         rectangle.setAttribute(
           "y",
@@ -2351,11 +2381,7 @@ function statementChart(data){
           barHeight
         );
 
-        rectangle.setAttribute(
-          "rx",
-          4
-        );
-
+        rectangle.setAttribute("rx",4);
         rectangle.setAttribute(
           "fill",
           color
@@ -2417,13 +2443,6 @@ function statementChart(data){
 }
 
 function comparisonInformation(){
-  /*
-    Os dois períodos passam pela mesma função
-    de filtros. Isso faz a comparação respeitar:
-    datas, meses, situação, fornecedor,
-    centro de custo e subcategorias selecionadas.
-  */
-
   const firstRecords=
     periodFilter(
       state.data.pagar,
@@ -2450,6 +2469,10 @@ function comparisonInformation(){
       0
     );
 
+  /*
+    categoryMap soma apenas as subcategorias
+    selecionadas nos filtros.
+  */
   const firstSubcategories=
     categoryMap(firstRecords);
 
@@ -2647,13 +2670,11 @@ function comparisonInformation(){
 
   if(totalDifference>0){
     paragraphs.push(
-      "Ponto de atenção: recomenda-se revisar os aumentos identificados " +
-      "e confirmar se são recorrentes, extraordinários ou decorrentes de alteração nos vencimentos."
+      "Ponto de atenção: recomenda-se revisar os aumentos identificados e confirmar se são recorrentes, extraordinários ou decorrentes de alteração nos vencimentos."
     );
   }else if(totalDifference<0){
     paragraphs.push(
-      "É importante confirmar se a redução representa uma economia recorrente " +
-      "ou apenas uma alteração nas datas de vencimento e pagamento."
+      "É importante confirmar se a redução representa uma economia recorrente ou apenas uma alteração nas datas de vencimento e pagamento."
     );
   }else{
     paragraphs.push(
@@ -2680,14 +2701,14 @@ function comparisonInformation(){
 }
 
 function renderAnalysis(){
-  const comparisonEnabled=
+  const enabled=
     state.filters.compare||
     (
       state.filters.month1&&
       state.filters.month2
     );
 
-  if(!comparisonEnabled){
+  if(!enabled){
     return el(
       "div",
       {class:"card analysis"},
@@ -2722,11 +2743,7 @@ function renderAnalysis(){
 
         information.paragraphs.map(
           paragraph=>
-            el(
-              "p",
-              {},
-              paragraph
-            )
+            el("p",{},paragraph)
         )
       ),
 
@@ -2837,11 +2854,7 @@ function renderExpenseComparison(app){
                 "Diferença",
                 "Variação %"
               ].map(value=>
-                el(
-                  "th",
-                  {},
-                  value
-                )
+                el("th",{},value)
               )
             )
           ),
@@ -2927,6 +2940,10 @@ function renderCategories(app){
       ?"receber"
       :"pagar";
 
+  /*
+    selectedRecords garante que a aba Categorias
+    siga todos os filtros ativos.
+  */
   const records=
     selectedRecords(
       state.data[key]
@@ -3094,7 +3111,7 @@ function renderAccountsDashboard(app,key){
             ),
 
             renderRanking(
-              records,
+              state.data[key],
               "entity",
               "#2457a7"
             )
@@ -3111,7 +3128,7 @@ function renderAccountsDashboard(app,key){
             ),
 
             renderRanking(
-              records,
+              state.data[key],
               "costCenter",
               "#d89a22"
             )
@@ -3217,11 +3234,9 @@ function renderStatementDashboard(app){
 
 function reportData(){
   /*
-    O relatório utiliza selectedRecords e
-    comparisonInformation. As duas funções
-    respeitam os filtros ativos.
+    Todos os dados dos relatórios são montados
+    a partir dos filtros ativos.
   */
-
   const records=
     selectedRecords(
       state.data.pagar
@@ -3230,18 +3245,23 @@ function reportData(){
   return{
     records,
     totals:accountTotals(records),
+
     suppliers:rankingData(
-      records,
+      state.data.pagar,
       "entity"
     ),
+
     costCenters:rankingData(
-      records,
+      state.data.pagar,
       "costCenter"
     ),
+
     groups:categoryGroups(records),
+
     months:monthlyAccountData(
       state.data.pagar
     ),
+
     analysis:comparisonInformation()
   };
 }
@@ -3263,42 +3283,55 @@ function downloadExcel(){
   const summarySheet=
     XLSX.utils.aoa_to_sheet([
       ["RELATÓRIO FINANCEIRO DANE-SE"],
+
       [
         "Gerado em",
-        new Date().toLocaleString("pt-BR")
+        new Date().toLocaleString(
+          "pt-BR"
+        )
       ],
+
       [
         "Períodos comparados",
         periodLabels().join(" × ")
       ],
+
       [
         "Subcategorias filtradas",
+
         state.filters.categories.length
           ?state.filters.categories.join(", ")
           :"Todas"
       ],
+
       [],
       ["Indicador","Valor"],
+
       [
         "Total no período",
         report.totals.total
       ],
+
       [
         "Pago",
         report.totals.done
       ],
+
       [
         "Em aberto",
         report.totals.open
       ],
+
       [
         "Atrasado",
         report.totals.late
       ],
+
       [
         "Fornecedores",
         report.totals.entityCount
       ],
+
       [
         "Lançamentos",
         report.records.length
@@ -3318,10 +3351,12 @@ function downloadExcel(){
 
   const analysisRows=[
     ["ANÁLISE DO PERÍODO"],
+
     [
       "Períodos comparados",
       periodLabels().join(" × ")
     ],
+
     []
   ];
 
@@ -3336,6 +3371,7 @@ function downloadExcel(){
 
   analysisRows.push(
     [],
+
     [
       "Subcategoria",
       "Período 1",
@@ -3841,7 +3877,7 @@ function clearCurrentData(){
   }
 
   localStorage.removeItem(
-    `dane-se-dashboard-${state.source}-v9`
+    `dane-se-dashboard-${state.source}-v10`
   );
 
   state.data[state.source]=null;
@@ -3983,6 +4019,7 @@ function render(){
 
               onclick:()=>{
                 state.source=key;
+
                 state.filters=
                   freshFilters();
 
@@ -4079,11 +4116,6 @@ function render(){
         )
       );
     }else{
-      const records=
-        selectedRecords(
-          state.data[state.source]
-        );
-
       app.append(
         sectionHeader(
           "ANO",
@@ -4125,7 +4157,7 @@ function render(){
                 ),
 
                 renderRanking(
-                  records,
+                  state.data[state.source],
                   "entity",
                   "#2457a7"
                 )
@@ -4142,7 +4174,7 @@ function render(){
                 ),
 
                 renderRanking(
-                  records,
+                  state.data[state.source],
                   "costCenter",
                   "#d89a22"
                 )
