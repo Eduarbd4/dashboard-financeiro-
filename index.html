@@ -21,9 +21,7 @@
   --rust:#c5442e;
   --line:#d9c7a6;
   --muted:#514b40;
-  --white:#fff;
   --blue:#2457a7;
-  --cyan:#168a9c;
 }
 
 *{box-sizing:border-box}
@@ -81,12 +79,6 @@ body{
   border-radius:7px;
   cursor:pointer;
   font-weight:600;
-  transition:.15s;
-}
-
-.btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 5px 12px rgba(16,35,74,.18);
 }
 
 .btn.secondary{
@@ -186,7 +178,6 @@ body{
   flex-wrap:wrap;
   width:100%;
   padding-top:12px;
-  margin-top:4px;
   border-top:1px solid var(--line);
 }
 
@@ -212,8 +203,8 @@ body{
   top:58px;
   left:0;
   z-index:30;
-  width:290px;
-  max-height:270px;
+  width:300px;
+  max-height:300px;
   overflow:auto;
   background:#fff;
   border:1px solid var(--line);
@@ -222,17 +213,19 @@ body{
   padding:8px;
 }
 
+.multiSearch{
+  width:100%;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:5px;
+  margin-bottom:7px;
+  font:12px Inter;
+}
+
 .multiActions{
   display:flex;
   gap:6px;
-  padding-bottom:7px;
-  margin-bottom:5px;
-  border-bottom:1px solid var(--line);
-  position:sticky;
-  top:-8px;
-  background:#fff;
-  z-index:2;
-  padding-top:4px;
+  margin-bottom:6px;
 }
 
 .multiActions button{
@@ -251,8 +244,8 @@ body{
   gap:7px;
   padding:6px;
   font-size:12px;
-  cursor:pointer;
   border-radius:4px;
+  cursor:pointer;
 }
 
 .multiOpt:hover{
@@ -281,13 +274,8 @@ body{
   border-color:var(--ink);
 }
 
-.kpi.paid{
-  border-top:5px solid var(--sage);
-}
-
-.kpi.open{
-  border-top:5px solid var(--gold);
-}
+.kpi.paid{border-top:5px solid var(--sage)}
+.kpi.open{border-top:5px solid var(--gold)}
 
 .kpi.late{
   background:var(--rust);
@@ -375,26 +363,6 @@ body{
 .chart svg{
   display:block;
   min-width:680px;
-}
-
-.legend{
-  display:flex;
-  gap:16px;
-  font:11px "IBM Plex Mono";
-  color:var(--muted);
-  margin-bottom:10px;
-}
-
-.legendItem{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.legendColor{
-  width:10px;
-  height:10px;
-  border-radius:2px;
 }
 
 .rankScroll{
@@ -501,19 +469,35 @@ body{
   font-weight:600;
 }
 
-.neutral{
-  color:var(--muted);
-}
+.neutral{color:var(--muted)}
 
 .analysis{
-  line-height:1.7;
-  font-size:13px;
+  line-height:1.8;
+  font-family:Inter,sans-serif;
+  font-size:14px;
+  color:#263957;
   border-left:5px solid var(--gold);
+  background:linear-gradient(135deg,#fff 0%,#fff8ea 100%);
+  padding:22px;
+}
+
+.analysisTitle{
+  display:block;
+  font:700 20px Fraunces;
+  color:var(--ink);
+  margin-bottom:11px;
 }
 
 .analysisLead{
-  font:600 17px Fraunces;
-  margin-bottom:14px;
+  font-family:Inter,sans-serif;
+  font-weight:500;
+  font-size:14px;
+  line-height:1.8;
+  margin-bottom:16px;
+}
+
+.analysisLead p{
+  margin:0 0 11px;
 }
 
 .analysisList{
@@ -523,15 +507,22 @@ body{
 }
 
 .insight{
-  background:#fff2d8;
+  background:#fff;
   border:1px solid #edcf91;
-  border-radius:7px;
+  border-radius:8px;
   padding:12px;
+  box-shadow:0 3px 10px rgba(16,35,74,.06);
 }
 
-.catgroup{
-  margin-bottom:22px;
+.insight strong{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:5px;
 }
+
+.catgroup{margin-bottom:22px}
 
 .cathead{
   display:flex;
@@ -540,7 +531,6 @@ body{
   padding:9px 0;
   border-bottom:2px solid var(--line);
   font:600 16px Fraunces;
-  color:var(--ink);
 }
 
 .catsub{
@@ -552,9 +542,7 @@ body{
   font-size:12px;
 }
 
-.catsub:hover{
-  background:#fff6e6;
-}
+.catsub:hover{background:#fff6e6}
 
 .cathead span:last-child,
 .catsub span:last-child{
@@ -594,49 +582,21 @@ body{
   margin-top:28px;
 }
 
-input[type=file]{
-  display:none;
-}
+input[type=file]{display:none}
 
 @media(max-width:950px){
-  .kpis{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .grid2,
-  .analysisList{
-    grid-template-columns:1fr;
-  }
+  .kpis{grid-template-columns:1fr 1fr}
+  .grid2,.analysisList{grid-template-columns:1fr}
 }
 
 @media(max-width:600px){
-  .wrap{
-    padding:20px 14px 40px;
-  }
-
-  .kpis{
-    grid-template-columns:1fr;
-  }
-
-  .actions{
-    width:100%;
-  }
-
-  .actions .btn{
-    flex:1;
-  }
-
-  .field{
-    flex:1 1 140px;
-  }
-
-  .multi{
-    flex:1 1 190px;
-  }
-
-  .rankname{
-    width:125px;
-  }
+  .wrap{padding:20px 14px 40px}
+  .kpis{grid-template-columns:1fr}
+  .actions{width:100%}
+  .actions .btn{flex:1}
+  .field{flex:1 1 140px}
+  .multi{flex:1 1 190px}
+  .rankname{width:125px}
 }
 </style>
 </head>
@@ -706,32 +666,32 @@ const brl=value=>
     maximumFractionDigits:0
   }).format(Number(value)||0);
 
-function createElement(tag,attributes={},children=[]){
-  const element=document.createElement(tag);
+function el(tag,attributes={},children=[]){
+  const item=document.createElement(tag);
 
   Object.entries(attributes).forEach(([key,value])=>{
     if(key.startsWith("on")){
-      element.addEventListener(key.slice(2),value);
+      item.addEventListener(key.slice(2),value);
     }else if(key==="class"){
-      element.className=value;
+      item.className=value;
     }else if(key==="html"){
-      element.innerHTML=value;
+      item.innerHTML=value;
     }else{
-      element.setAttribute(key,value);
+      item.setAttribute(key,value);
     }
   });
 
   (Array.isArray(children)?children:[children]).forEach(child=>{
     if(child===null||child===undefined||child===false)return;
 
-    element.appendChild(
+    item.appendChild(
       typeof child==="string"
         ?document.createTextNode(child)
         :child
     );
   });
 
-  return element;
+  return item;
 }
 
 const normalize=value=>
@@ -813,6 +773,16 @@ function dateToISO(date){
   ].join("-");
 }
 
+function formatDateBR(value){
+  if(!value)return "não informado";
+
+  const parts=value.split("-");
+
+  return parts.length===3
+    ?`${parts[2]}/${parts[1]}/${parts[0]}`
+    :value;
+}
+
 function parseCategory(raw){
   const text=(raw||"").toString().trim();
 
@@ -880,15 +850,22 @@ async function parseAccounts(file,key){
     entity:findColumn(headers,config.entityHeaders),
     date:findColumn(headers,["Data de vencimento"]),
     status:findColumn(headers,["Situação"]),
+
     original:findColumn(
       headers,
       ["Valor original da parcela (R$)"]
     ),
-    done:findColumn(headers,config.doneHeaders),
+
+    done:findColumn(
+      headers,
+      config.doneHeaders
+    ),
+
     open:findColumn(
       headers,
       ["Valor total da parcela em aberto (R$)"]
     ),
+
     costCenter:findColumn(
       headers,
       ["Centro de Custo 1"]
@@ -916,6 +893,7 @@ async function parseAccounts(file,key){
     if(categoryIndex>=0){
       categoryColumns.push({
         categoryIndex,
+
         valueIndex:findColumn(
           headers,
           [`Valor na Categoria ${index}`]
@@ -947,6 +925,7 @@ async function parseAccounts(file,key){
       allocations.push({
         code:category.code,
         name:category.name,
+
         value:Math.abs(
           parseNumber(row[column.valueIndex])
         )
@@ -1106,8 +1085,13 @@ async function parseStatement(file){
 
     if(!date)return;
 
-    const rawValue=parseNumber(row[columns.value]);
-    const rawType=normalize(row[columns.type]);
+    const rawValue=parseNumber(
+      row[columns.value]
+    );
+
+    const rawType=normalize(
+      row[columns.type]
+    );
 
     let type;
 
@@ -1116,14 +1100,18 @@ async function parseStatement(file){
     }else if(rawType.startsWith("c")){
       type="entry";
     }else{
-      type=rawValue<0?"exit":"entry";
+      type=rawValue<0
+        ?"exit"
+        :"entry";
     }
 
     if(
       columns.balance>=0&&
       row[columns.balance]!==""
     ){
-      balance=parseNumber(row[columns.balance]);
+      balance=parseNumber(
+        row[columns.balance]
+      );
     }
 
     const formattedDate=dateToISO(date);
@@ -1133,6 +1121,7 @@ async function parseStatement(file){
       month:formattedDate.slice(0,7),
       value:Math.abs(rawValue),
       type,
+
       description:String(
         row[columns.description]||
         "Sem descrição"
@@ -1146,7 +1135,10 @@ async function parseStatement(file){
     );
   }
 
-  return{records,balance};
+  return{
+    records,
+    balance
+  };
 }
 
 function freshFilters(){
@@ -1189,7 +1181,7 @@ function loadData(){
     try{
       const saved=JSON.parse(
         localStorage.getItem(
-          `dane-se-dashboard-${key}-v8`
+          `dane-se-dashboard-${key}-v9`
         )
       );
 
@@ -1209,7 +1201,7 @@ function loadData(){
 
 function saveData(key){
   localStorage.setItem(
-    `dane-se-dashboard-${key}-v8`,
+    `dane-se-dashboard-${key}-v9`,
     JSON.stringify({
       records:state.data[key],
       updated:state.updated[key],
@@ -1218,7 +1210,7 @@ function saveData(key){
   );
 }
 
-function currentSourceRecords(){
+function sourceRecords(){
   return state.data[state.source]||[];
 }
 
@@ -1228,11 +1220,14 @@ function availableMonths(){
     .flat();
 
   return[
-    ...new Set(all.map(record=>record.month))
+    ...new Set(
+      all.map(record=>record.month)
+    )
   ]
     .sort()
     .map(key=>({
       key,
+
       label:
         `${MONTHS[Number(key.slice(5))-1]}/`+
         key.slice(0,4)
@@ -1258,7 +1253,9 @@ function baseFilter(records){
     .filter(record=>
       !filters.categories.length||
       record.allocations?.some(allocation=>
-        filters.categories.includes(allocation.name)
+        filters.categories.includes(
+          allocation.name
+        )
       )
     )
     .filter(record=>
@@ -1306,10 +1303,11 @@ function periodFilter(records,period=0){
     );
 }
 
-function selectedPeriodRecords(records){
+function selectedRecords(records){
   return periodFilter(
     records,
-    state.filters.compare||state.filters.month2
+    state.filters.compare||
+    state.filters.month2
       ?2
       :1
   );
@@ -1326,49 +1324,58 @@ function variation(firstValue,secondValue){
   )*100;
 }
 
-function percentageText(firstValue,secondValue){
-  const value=variation(firstValue,secondValue);
-
-  if(!Number.isFinite(value))return "—";
-
-  return`${value>0?"+":""}${value.toFixed(1).replace(".",",")}%`;
-}
-
 function periodLabels(){
   const filters=state.filters;
   const months=availableMonths();
 
-  const monthName=key=>
+  const monthLabel=key=>
     months.find(month=>month.key===key)?.label||
-    "Período";
+    "Período não selecionado";
+
+  const range=(from,to)=>
+    `${from?formatDateBR(from):"início"} a `+
+    `${to?formatDateBR(to):"fim"}`;
 
   if(filters.compare){
     return[
-      `${filters.period1From||"início"} a ${filters.period1To||"fim"}`,
-      `${filters.period2From||"início"} a ${filters.period2To||"fim"}`
+      range(
+        filters.period1From,
+        filters.period1To
+      ),
+
+      range(
+        filters.period2From,
+        filters.period2To
+      )
     ];
   }
 
   return[
-    monthName(filters.month1),
-    monthName(filters.month2)
+    filters.dateFrom||filters.dateTo
+      ?range(
+        filters.dateFrom,
+        filters.dateTo
+      )
+      :monthLabel(filters.month1),
+
+    monthLabel(filters.month2)
   ];
 }
 
 function sectionHeader(eyebrow,title){
-  return createElement(
+  return el(
     "div",
     {class:"section"},
     [
-      createElement(
+      el(
         "span",
         {class:"eyebrow"},
         eyebrow
       ),
 
-      createElement("h2",{},title),
+      el("h2",{},title),
 
-      createElement(
+      el(
         "div",
         {class:"rule"}
       )
@@ -1382,24 +1389,24 @@ function kpiCard(
   tone="",
   detail=""
 ){
-  return createElement(
+  return el(
     "div",
     {class:`kpi ${tone}`},
     [
-      createElement(
+      el(
         "div",
         {class:"label"},
         label
       ),
 
-      createElement(
+      el(
         "div",
         {class:"value"},
         value
       ),
 
       detail
-        ?createElement(
+        ?el(
           "div",
           {class:"detail"},
           detail
@@ -1415,61 +1422,65 @@ function selectField(
   options,
   onChange
 ){
-  const select=createElement(
+  const select=el(
     "select",
     {
       onchange:event=>
         onChange(event.target.value)
     },
     [
-      createElement(
+      el(
         "option",
         {value:""},
         "Todos"
       ),
 
       ...options.map(option=>{
-        const item=createElement(
+        const item=el(
           "option",
           {value:option.key},
           option.label
         );
 
-        item.selected=option.key===value;
+        item.selected=
+          option.key===value;
+
         return item;
       })
     ]
   );
 
-  return createElement(
+  return el(
     "div",
     {class:"field"},
     [
-      createElement("label",{},label),
+      el("label",{},label),
       select
     ]
   );
 }
 
 function dateField(label,key){
-  return createElement(
+  return el(
     "div",
     {class:"field"},
     [
-      createElement("label",{},label),
+      el("label",{},label),
 
-      createElement("input",{
+      el("input",{
         type:"date",
         value:state.filters[key],
 
         onchange:event=>{
-          state.filters[key]=event.target.value;
+          state.filters[key]=
+            event.target.value;
 
           if(
             !state.filters.compare&&
             event.target.value
           ){
-            const month=event.target.value.slice(0,7);
+            const month=
+              event.target.value.slice(0,7);
 
             if(key==="dateFrom"){
               state.filters.month1=month;
@@ -1486,23 +1497,23 @@ function dateField(label,key){
     ]
   );
 }
-
-function multiCategoryField(categories){
-  const details=createElement(
+  function multiCategoryField(categories){
+  const details=el(
     "details",
     {class:"multi field"}
   );
 
-  const count=state.filters.categories.length;
+  const count=
+    state.filters.categories.length;
 
   details.append(
-    createElement(
+    el(
       "label",
       {},
       "Subcategorias"
     ),
 
-    createElement(
+    el(
       "summary",
       {},
       count
@@ -1511,22 +1522,113 @@ function multiCategoryField(categories){
     )
   );
 
-  const panel=createElement(
+  const panel=el(
     "div",
     {class:"multiPanel"}
   );
 
+  const optionsContainer=el(
+    "div",
+    {}
+  );
+
+  function renderCategoryOptions(search=""){
+    optionsContainer.innerHTML="";
+
+    const filteredCategories=
+      categories.filter(category=>
+        category
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      );
+
+    if(!filteredCategories.length){
+      optionsContainer.append(
+        el(
+          "div",
+          {
+            style:
+              "padding:10px;font-size:12px;color:#514b40"
+          },
+          "Nenhuma subcategoria encontrada."
+        )
+      );
+
+      return;
+    }
+
+    filteredCategories.forEach(category=>{
+      const checkbox=el(
+        "input",
+        {
+          type:"checkbox"
+        }
+      );
+
+      checkbox.checked=
+        state.filters.categories.includes(
+          category
+        );
+
+      checkbox.onchange=()=>{
+        if(checkbox.checked){
+          state.filters.categories=[
+            ...new Set([
+              ...state.filters.categories,
+              category
+            ])
+          ];
+        }else{
+          state.filters.categories=
+            state.filters.categories.filter(
+              item=>item!==category
+            );
+        }
+
+        render();
+      };
+
+      optionsContainer.append(
+        el(
+          "label",
+          {class:"multiOpt"},
+          [
+            checkbox,
+            category
+          ]
+        )
+      );
+    });
+  }
+
   panel.append(
-    createElement(
+    el(
+      "input",
+      {
+        class:"multiSearch",
+        type:"search",
+        placeholder:"Buscar subcategoria…",
+
+        oninput:event=>
+          renderCategoryOptions(
+            event.target.value
+          )
+      }
+    ),
+
+    el(
       "div",
       {class:"multiActions"},
       [
-        createElement(
+        el(
           "button",
           {
             type:"button",
+
             onclick:event=>{
               event.preventDefault();
+              event.stopPropagation();
+
               state.filters.categories=[];
               render();
             }
@@ -1534,55 +1636,31 @@ function multiCategoryField(categories){
           "Limpar"
         ),
 
-        createElement(
+        el(
           "button",
           {
             type:"button",
+
             onclick:event=>{
               event.preventDefault();
-              state.filters.categories=[...categories];
+              event.stopPropagation();
+
+              state.filters.categories=[
+                ...categories
+              ];
+
               render();
             }
           },
           "Selecionar todas"
         )
       ]
-    )
+    ),
+
+    optionsContainer
   );
 
-  categories.forEach(category=>{
-    const checkbox=createElement(
-      "input",
-      {type:"checkbox"}
-    );
-
-    checkbox.checked=
-      state.filters.categories.includes(category);
-
-    checkbox.onchange=()=>{
-      if(checkbox.checked){
-        state.filters.categories=[
-          ...state.filters.categories,
-          category
-        ];
-      }else{
-        state.filters.categories=
-          state.filters.categories.filter(
-            item=>item!==category
-          );
-      }
-
-      render();
-    };
-
-    panel.append(
-      createElement(
-        "label",
-        {class:"multiOpt"},
-        [checkbox,category]
-      )
-    );
-  });
+  renderCategoryOptions();
 
   details.append(panel);
   return details;
@@ -1590,7 +1668,7 @@ function multiCategoryField(categories){
 
 function renderFilters(){
   const filters=state.filters;
-  const records=currentSourceRecords();
+  const records=sourceRecords();
 
   const options=property=>[
     ...new Set(
@@ -1599,7 +1677,12 @@ function renderFilters(){
         .filter(Boolean)
     )
   ]
-    .sort((a,b)=>a.localeCompare(b,"pt-BR"))
+    .sort((first,second)=>
+      first.localeCompare(
+        second,
+        "pt-BR"
+      )
+    )
     .map(value=>({
       key:value,
       label:value
@@ -1613,9 +1696,14 @@ function renderFilters(){
         )||[]
       )
     )
-  ].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  ].sort((first,second)=>
+    first.localeCompare(
+      second,
+      "pt-BR"
+    )
+  );
 
-  const row=createElement(
+  const row=el(
     "div",
     {class:"filters"}
   );
@@ -1636,6 +1724,7 @@ function renderFilters(){
         "Mês 1",
         filters.month1,
         availableMonths(),
+
         value=>{
           filters.month1=value;
           render();
@@ -1646,6 +1735,7 @@ function renderFilters(){
         "Mês 2",
         filters.month2,
         availableMonths(),
+
         value=>{
           filters.month2=value;
           render();
@@ -1654,22 +1744,25 @@ function renderFilters(){
     );
   }
 
-  const compareCheckbox=createElement(
+  const compareCheckbox=el(
     "input",
     {
       type:"checkbox",
 
       onchange:event=>{
-        filters.compare=event.target.checked;
+        filters.compare=
+          event.target.checked;
+
         render();
       }
     }
   );
 
-  compareCheckbox.checked=filters.compare;
+  compareCheckbox.checked=
+    filters.compare;
 
   row.append(
-    createElement(
+    el(
       "label",
       {class:"compareToggle"},
       [
@@ -1681,7 +1774,7 @@ function renderFilters(){
 
   if(filters.compare){
     row.append(
-      createElement(
+      el(
         "div",
         {class:"compareDates"},
         [
@@ -1718,6 +1811,7 @@ function renderFilters(){
         "Situação",
         filters.status,
         options("status"),
+
         value=>{
           filters.status=value;
           render();
@@ -1728,6 +1822,7 @@ function renderFilters(){
         CONFIG[state.source].entityLabel,
         filters.entity,
         options("entity"),
+
         value=>{
           filters.entity=value;
           render();
@@ -1740,6 +1835,7 @@ function renderFilters(){
         "Centro de custo",
         filters.costCenter,
         options("costCenter"),
+
         value=>{
           filters.costCenter=value;
           render();
@@ -1754,9 +1850,17 @@ function renderFilters(){
         "Tipo",
         filters.type,
         [
-          {key:"entry",label:"Entradas"},
-          {key:"exit",label:"Saídas"}
+          {
+            key:"entry",
+            label:"Entradas"
+          },
+
+          {
+            key:"exit",
+            label:"Saídas"
+          }
         ],
+
         value=>{
           filters.type=value;
           render();
@@ -1766,7 +1870,7 @@ function renderFilters(){
   }
 
   row.append(
-    createElement(
+    el(
       "button",
       {
         class:"btn secondary",
@@ -1780,7 +1884,7 @@ function renderFilters(){
     )
   );
 
-  return createElement(
+  return el(
     "div",
     {class:"filterbox"},
     row
@@ -1790,26 +1894,34 @@ function renderFilters(){
 function accountTotals(records){
   return{
     total:records.reduce(
-      (sum,record)=>sum+record.original,
+      (sum,record)=>
+        sum+record.original,
       0
     ),
 
     done:records.reduce(
-      (sum,record)=>sum+record.done,
+      (sum,record)=>
+        sum+record.done,
       0
     ),
 
     open:records
-      .filter(record=>record.status==="Em aberto")
+      .filter(record=>
+        record.status==="Em aberto"
+      )
       .reduce(
-        (sum,record)=>sum+record.open,
+        (sum,record)=>
+          sum+record.open,
         0
       ),
 
     late:records
-      .filter(record=>record.status==="Atrasado")
+      .filter(record=>
+        record.status==="Atrasado"
+      )
       .reduce(
-        (sum,record)=>sum+record.open,
+        (sum,record)=>
+          sum+record.open,
         0
       ),
 
@@ -1823,13 +1935,18 @@ function categoryMap(records){
   const map=new Map();
 
   records.forEach(record=>{
-    record.allocations?.forEach(allocation=>{
-      map.set(
-        allocation.name,
-        (map.get(allocation.name)||0)+
-        allocation.value
-      );
-    });
+    record.allocations?.forEach(
+      allocation=>{
+        map.set(
+          allocation.name,
+
+          (
+            map.get(allocation.name)||
+            0
+          )+allocation.value
+        );
+      }
+    );
   });
 
   return map;
@@ -1839,38 +1956,49 @@ function categoryGroups(records){
   const groups=new Map();
 
   records.forEach(record=>{
-    record.allocations?.forEach(allocation=>{
-      const parts=(allocation.code||"").split(".");
+    record.allocations?.forEach(
+      allocation=>{
+        const parts=
+          (allocation.code||"")
+            .split(".");
 
-      const key=
-        parts.length>=2
-          ?parts.slice(0,2).join(".")
-          :allocation.name;
+        const key=
+          parts.length>=2
+            ?parts.slice(0,2).join(".")
+            :allocation.name;
 
-      const label=
-        GROUP_LABELS[key]||
-        allocation.name;
+        const label=
+          GROUP_LABELS[key]||
+          allocation.name;
 
-      if(!groups.has(key)){
-        groups.set(key,{
-          label,
-          total:0,
-          subcategories:new Map()
-        });
+        if(!groups.has(key)){
+          groups.set(
+            key,
+            {
+              label,
+              total:0,
+              subcategories:new Map()
+            }
+          );
+        }
+
+        const group=
+          groups.get(key);
+
+        group.total+=
+          allocation.value;
+
+        group.subcategories.set(
+          allocation.name,
+
+          (
+            group.subcategories.get(
+              allocation.name
+            )||0
+          )+allocation.value
+        );
       }
-
-      const group=groups.get(key);
-      group.total+=allocation.value;
-
-      group.subcategories.set(
-        allocation.name,
-        (
-          group.subcategories.get(
-            allocation.name
-          )||0
-        )+allocation.value
-      );
-    });
+    );
   });
 
   return[
@@ -1887,8 +2015,10 @@ function rankingData(records,property){
   records.forEach(record=>{
     map.set(
       record[property],
+
       (
-        map.get(record[property])||0
+        map.get(record[property])||
+        0
       )+record.original
     );
   });
@@ -1906,24 +2036,25 @@ function renderRanking(
   property,
   color
 ){
-  const data=rankingData(records,property);
+  const data=
+    rankingData(records,property);
 
   const maximum=Math.max(
     1,
     ...data.map(item=>item[1])
   );
 
-  return createElement(
+  return el(
     "div",
     {class:"card rankScroll"},
 
     data.length
       ?data.map(([name,value])=>
-        createElement(
+        el(
           "div",
           {class:"ranking"},
           [
-            createElement(
+            el(
               "div",
               {
                 class:"rankname",
@@ -1932,10 +2063,11 @@ function renderRanking(
               name
             ),
 
-            createElement(
+            el(
               "div",
               {class:"track"},
-              createElement(
+
+              el(
                 "div",
                 {
                   class:"fill",
@@ -1947,7 +2079,7 @@ function renderRanking(
               )
             ),
 
-            createElement(
+            el(
               "div",
               {class:"rankvalue"},
               brl(value)
@@ -1965,8 +2097,11 @@ function monthlyAccountData(records){
   baseFilter(records).forEach(record=>{
     map.set(
       record.month,
-      (map.get(record.month)||0)+
-      record.original
+
+      (
+        map.get(record.month)||
+        0
+      )+record.original
     );
   });
 
@@ -1976,9 +2111,12 @@ function monthlyAccountData(records){
     .sort()
     .map(([key,value])=>({
       key,
+
       label:
-        `${ABBR[Number(key.slice(5))-1]}/`+
-        key.slice(2,4),
+        `${ABBR[
+          Number(key.slice(5))-1
+        ]}/${key.slice(2,4)}`,
+
       value
     }));
 }
@@ -1986,14 +2124,23 @@ function monthlyAccountData(records){
 function monthlyStatementData(){
   const map=new Map();
 
-  baseFilter(state.data.extrato).forEach(record=>{
-    const current=map.get(record.month)||{
-      entry:0,
-      exit:0
-    };
+  baseFilter(
+    state.data.extrato
+  ).forEach(record=>{
+    const current=
+      map.get(record.month)||
+      {
+        entry:0,
+        exit:0
+      };
 
-    current[record.type]+=record.value;
-    map.set(record.month,current);
+    current[record.type]+=
+      record.value;
+
+    map.set(
+      record.month,
+      current
+    );
   });
 
   return[
@@ -2002,9 +2149,12 @@ function monthlyStatementData(){
     .sort()
     .map(([key,value])=>({
       key,
+
       label:
-        `${ABBR[Number(key.slice(5))-1]}/`+
-        key.slice(2,4),
+        `${ABBR[
+          Number(key.slice(5))-1
+        ]}/${key.slice(2,4)}`,
+
       ...value
     }));
 }
@@ -2024,7 +2174,8 @@ function barChart(data,color){
     (width-left-20)/
     Math.max(data.length,1);
 
-  const barWidth=Math.min(70,gap*.62);
+  const barWidth=
+    Math.min(70,gap*.62);
 
   const svg=document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -2059,10 +2210,19 @@ function barChart(data,color){
 
     rectangle.setAttribute("x",x);
     rectangle.setAttribute("y",y);
-    rectangle.setAttribute("width",barWidth);
-    rectangle.setAttribute("height",barHeight);
+    rectangle.setAttribute(
+      "width",
+      barWidth
+    );
+    rectangle.setAttribute(
+      "height",
+      barHeight
+    );
     rectangle.setAttribute("rx",4);
-    rectangle.setAttribute("fill",color);
+    rectangle.setAttribute(
+      "fill",
+      color
+    );
 
     const tooltip=
       document.createElementNS(
@@ -2106,7 +2266,7 @@ function barChart(data,color){
     svg.append(label);
   });
 
-  return createElement(
+  return el(
     "div",
     {class:"chart"},
     svg
@@ -2131,7 +2291,8 @@ function statementChart(data){
     (width-left-20)/
     Math.max(data.length,1);
 
-  const barWidth=Math.min(30,gap*.3);
+  const barWidth=
+    Math.min(30,gap*.3);
 
   const svg=document.createElementNS(
     "http://www.w3.org/2000/svg",
@@ -2147,62 +2308,76 @@ function statementChart(data){
     [
       ["entry","#287a4b"],
       ["exit","#c5442e"]
-    ].forEach(([field,color],barIndex)=>{
-      const barHeight=
-        (height-bottom-20)*
-        (item[field]/maximum);
+    ].forEach(
+      ([field,color],barIndex)=>{
+        const barHeight=
+          (height-bottom-20)*
+          (item[field]/maximum);
 
-      const center=
-        left+
-        index*gap+
-        gap/2;
+        const center=
+          left+
+          index*gap+
+          gap/2;
 
-      const x=
-        center-
-        barWidth-
-        3+
-        barIndex*(barWidth+6);
+        const x=
+          center-
+          barWidth-
+          3+
+          barIndex*(barWidth+6);
 
-      const rectangle=
-        document.createElementNS(
-          svg.namespaceURI,
-          "rect"
+        const rectangle=
+          document.createElementNS(
+            svg.namespaceURI,
+            "rect"
+          );
+
+        rectangle.setAttribute(
+          "x",
+          x
         );
 
-      rectangle.setAttribute("x",x);
-
-      rectangle.setAttribute(
-        "y",
-        height-bottom-barHeight
-      );
-
-      rectangle.setAttribute(
-        "width",
-        barWidth
-      );
-
-      rectangle.setAttribute(
-        "height",
-        barHeight
-      );
-
-      rectangle.setAttribute("rx",4);
-      rectangle.setAttribute("fill",color);
-
-      const tooltip=
-        document.createElementNS(
-          svg.namespaceURI,
-          "title"
+        rectangle.setAttribute(
+          "y",
+          height-bottom-barHeight
         );
 
-      tooltip.textContent=
-        `${item.label} · `+
-        `${field==="entry"?"Entradas":"Saídas"}: `+
-        brl(item[field]);
+        rectangle.setAttribute(
+          "width",
+          barWidth
+        );
 
-      rectangle.append(tooltip);
-      svg.append(rectangle);
-    });
+        rectangle.setAttribute(
+          "height",
+          barHeight
+        );
+
+        rectangle.setAttribute(
+          "rx",
+          4
+        );
+
+        rectangle.setAttribute(
+          "fill",
+          color
+        );
+
+        const tooltip=
+          document.createElementNS(
+            svg.namespaceURI,
+            "title"
+          );
+
+        tooltip.textContent=
+          `${item.label} · `+
+          `${field==="entry"
+            ?"Entradas"
+            :"Saídas"}: `+
+          brl(item[field]);
+
+        rectangle.append(tooltip);
+        svg.append(rectangle);
+      }
+    );
 
     const label=
       document.createElementNS(
@@ -2234,7 +2409,7 @@ function statementChart(data){
     svg.append(label);
   });
 
-  return createElement(
+  return el(
     "div",
     {class:"chart"},
     svg
@@ -2242,46 +2417,65 @@ function statementChart(data){
 }
 
 function comparisonInformation(){
-  const firstRecords=periodFilter(
-    state.data.pagar,
-    1
-  );
+  /*
+    Os dois períodos passam pela mesma função
+    de filtros. Isso faz a comparação respeitar:
+    datas, meses, situação, fornecedor,
+    centro de custo e subcategorias selecionadas.
+  */
 
-  const secondRecords=periodFilter(
-    state.data.pagar,
-    2
-  );
+  const firstRecords=
+    periodFilter(
+      state.data.pagar,
+      1
+    );
 
-  const firstTotal=firstRecords.reduce(
-    (sum,record)=>sum+record.original,
-    0
-  );
+  const secondRecords=
+    periodFilter(
+      state.data.pagar,
+      2
+    );
 
-  const secondTotal=secondRecords.reduce(
-    (sum,record)=>sum+record.original,
-    0
-  );
+  const firstTotal=
+    firstRecords.reduce(
+      (sum,record)=>
+        sum+record.original,
+      0
+    );
 
-  const firstCategories=categoryMap(firstRecords);
-  const secondCategories=categoryMap(secondRecords);
+  const secondTotal=
+    secondRecords.reduce(
+      (sum,record)=>
+        sum+record.original,
+      0
+    );
+
+  const firstSubcategories=
+    categoryMap(firstRecords);
+
+  const secondSubcategories=
+    categoryMap(secondRecords);
 
   const changes=[
     ...new Set([
-      ...firstCategories.keys(),
-      ...secondCategories.keys()
+      ...firstSubcategories.keys(),
+      ...secondSubcategories.keys()
     ])
   ]
     .map(name=>{
       const firstValue=
-        firstCategories.get(name)||0;
+        firstSubcategories.get(name)||
+        0;
 
       const secondValue=
-        secondCategories.get(name)||0;
+        secondSubcategories.get(name)||
+        0;
 
       return{
         name,
         firstValue,
         secondValue,
+
         difference:
           secondValue-firstValue,
 
@@ -2301,7 +2495,9 @@ function comparisonInformation(){
   const biggestIncrease=[
     ...changes
   ]
-    .filter(item=>item.difference>0)
+    .filter(item=>
+      item.difference>0
+    )
     .sort(
       (first,second)=>
         second.difference-
@@ -2311,7 +2507,9 @@ function comparisonInformation(){
   const biggestReduction=[
     ...changes
   ]
-    .filter(item=>item.difference<0)
+    .filter(item=>
+      item.difference<0
+    )
     .sort(
       (first,second)=>
         first.difference-
@@ -2336,74 +2534,130 @@ function comparisonInformation(){
     secondTotal-firstTotal;
 
   const totalPercentage=
-    variation(firstTotal,secondTotal);
+    variation(
+      firstTotal,
+      secondTotal
+    );
 
   const labels=periodLabels();
+  const paragraphs=[];
 
-  const parts=[
-    `Na comparação entre ${labels[0]} e ${labels[1]}, `+
-    `as despesas ${totalDifference<=0?"diminuíram":"aumentaram"} `+
-    `${brl(Math.abs(totalDifference))}`+
-    (
-      Number.isFinite(totalPercentage)
-        ?`, representando ${Math.abs(totalPercentage)
-          .toFixed(1)
-          .replace(".",",")}% de `+
-          `${totalDifference<=0?"redução":"aumento"}.`
-        :"."
-    )
-  ];
-
-  if(biggestIncrease){
-    parts.push(
-      `O maior aumento ocorreu em ${biggestIncrease.name}, `+
-      `com crescimento de ${brl(biggestIncrease.difference)}.`
+  if(totalDifference===0){
+    paragraphs.push(
+      `Na comparação entre ${labels[0]} e ${labels[1]}, `+
+      "o total das despesas permaneceu estável, sem diferença financeira entre os períodos."
     );
   }else{
-    parts.push(
-      "Nenhuma subcategoria apresentou aumento no período."
+    paragraphs.push(
+      `Na comparação entre ${labels[0]} e ${labels[1]}, `+
+      `as despesas ${totalDifference<0
+        ?"diminuíram"
+        :"aumentaram"} `+
+      `${brl(Math.abs(totalDifference))}`+
+      (
+        Number.isFinite(totalPercentage)
+          ?`, o equivalente a `+
+          `${Math.abs(totalPercentage)
+            .toFixed(1)
+            .replace(".",",")}% de `+
+          `${totalDifference<0
+            ?"redução"
+            :"aumento"} em relação ao primeiro período.`
+          :"."
+      )
+    );
+  }
+
+  if(biggestIncrease){
+    paragraphs.push(
+      `Entre as subcategorias filtradas, o maior aumento ocorreu em `+
+      `${biggestIncrease.name}, que passou de `+
+      `${brl(biggestIncrease.firstValue)} para `+
+      `${brl(biggestIncrease.secondValue)}, `+
+      `um acréscimo de ${brl(biggestIncrease.difference)}`+
+      (
+        Number.isFinite(
+          biggestIncrease.percentage
+        )
+          ?` (${Math.abs(
+            biggestIncrease.percentage
+          ).toFixed(1).replace(".",",")}%).`
+          :"."
+      )
+    );
+  }else{
+    paragraphs.push(
+      "Nenhuma subcategoria apresentou aumento no período comparado."
     );
   }
 
   if(biggestReduction){
-    parts.push(
-      `A maior redução ocorreu em ${biggestReduction.name}, `+
-      `com queda de ${brl(Math.abs(biggestReduction.difference))}.`
+    paragraphs.push(
+      `A maior redução ocorreu em `+
+      `${biggestReduction.name}, cujo valor passou de `+
+      `${brl(biggestReduction.firstValue)} para `+
+      `${brl(biggestReduction.secondValue)}, `+
+      `uma queda de ${brl(
+        Math.abs(
+          biggestReduction.difference
+        )
+      )}`+
+      (
+        Number.isFinite(
+          biggestReduction.percentage
+        )
+          ?` (${Math.abs(
+            biggestReduction.percentage
+          ).toFixed(1).replace(".",",")}% de redução).`
+          :"."
+      )
     );
   }else{
-    parts.push(
-      "Nenhuma subcategoria apresentou redução no período."
+    paragraphs.push(
+      "Nenhuma subcategoria apresentou redução no período comparado."
     );
   }
 
   if(biggestImpact){
-    parts.push(
-      `${biggestImpact.name} foi a despesa de maior impacto `+
+    paragraphs.push(
+      `${biggestImpact.name} foi a subcategoria com maior impacto `+
       "na variação total observada."
     );
   }
 
   if(newExpenses.length){
-    parts.push(
-      `${newExpenses.length} despesa(s) apareceram somente no segundo período.`
+    paragraphs.push(
+      `${newExpenses.length} `+
+      `${newExpenses.length===1
+        ?"subcategoria apareceu"
+        :"subcategorias apareceram"} `+
+      "somente no segundo período."
     );
   }
 
   if(removedExpenses.length){
-    parts.push(
-      `${removedExpenses.length} despesa(s) deixaram de aparecer no segundo período.`
+    paragraphs.push(
+      `${removedExpenses.length} `+
+      `${removedExpenses.length===1
+        ?"subcategoria deixou"
+        :"subcategorias deixaram"} `+
+      "de apresentar movimentação no segundo período."
     );
   }
 
   if(totalDifference>0){
-    parts.push(
-      "Ponto de atenção: houve aumento no custo total. " +
-      "Recomenda-se revisar as subcategorias com maior crescimento."
+    paragraphs.push(
+      "Ponto de atenção: recomenda-se revisar os aumentos identificados " +
+      "e confirmar se são recorrentes, extraordinários ou decorrentes de alteração nos vencimentos."
     );
   }else if(totalDifference<0){
-    parts.push(
-      "O período apresentou redução geral das despesas. " +
-      "Vale confirmar se a queda representa economia recorrente ou apenas mudança de vencimentos."
+    paragraphs.push(
+      "É importante confirmar se a redução representa uma economia recorrente " +
+      "ou apenas uma alteração nas datas de vencimento e pagamento."
+    );
+  }else{
+    paragraphs.push(
+      "Apesar da estabilidade do total, a composição interna das despesas pode ter mudado."
     );
   }
 
@@ -2420,7 +2674,8 @@ function comparisonInformation(){
     biggestImpact,
     newExpenses,
     removedExpenses,
-    text:parts.join(" ")
+    paragraphs,
+    text:paragraphs.join(" ")
   };
 }
 
@@ -2433,63 +2688,113 @@ function renderAnalysis(){
     );
 
   if(!comparisonEnabled){
-    return createElement(
+    return el(
       "div",
       {class:"card analysis"},
-      "Selecione dois meses ou ative “Comparar períodos” para visualizar a análise."
+      [
+        el(
+          "span",
+          {class:"analysisTitle"},
+          "Análise financeira"
+        ),
+
+        "Selecione dois meses ou ative “Comparar períodos” para visualizar a análise."
+      ]
     );
   }
 
-  const information=comparisonInformation();
+  const information=
+    comparisonInformation();
 
-  return createElement(
+  return el(
     "div",
     {class:"card analysis"},
     [
-      createElement(
-        "div",
-        {class:"analysisLead"},
-        information.text
+      el(
+        "span",
+        {class:"analysisTitle"},
+        "Resumo da comparação"
       ),
 
-      createElement(
+      el(
+        "div",
+        {class:"analysisLead"},
+
+        information.paragraphs.map(
+          paragraph=>
+            el(
+              "p",
+              {},
+              paragraph
+            )
+        )
+      ),
+
+      el(
         "div",
         {class:"analysisList"},
         [
-          createElement(
+          el(
             "div",
             {class:"insight"},
-            `Variação total: ${
+            [
+              el(
+                "strong",
+                {},
+                "Variação total"
+              ),
+
               Number.isFinite(
                 information.totalPercentage
               )
-                ?`${information.totalPercentage
-                  .toFixed(1)
-                  .replace(".",",")}%`
-                :"—"
-            }`
+                ?`${information.totalPercentage>0
+                  ?"+"
+                  :""}`+
+                  `${information.totalPercentage
+                    .toFixed(1)
+                    .replace(".",",")}%`
+                :"Sem base comparável"
+            ]
           ),
 
-          createElement(
+          el(
             "div",
             {class:"insight"},
-            `Maior aumento: ${
+            [
+              el(
+                "strong",
+                {},
+                "Maior aumento"
+              ),
+
               information.biggestIncrease
-                ?`${information.biggestIncrease.name} `+
-                `(${brl(information.biggestIncrease.difference)})`
-                :"nenhum"
-            }`
+                ?`${information.biggestIncrease.name}: `+
+                brl(
+                  information.biggestIncrease.difference
+                )
+                :"Nenhum aumento"
+            ]
           ),
 
-          createElement(
+          el(
             "div",
             {class:"insight"},
-            `Maior redução: ${
+            [
+              el(
+                "strong",
+                {},
+                "Maior redução"
+              ),
+
               information.biggestReduction
-                ?`${information.biggestReduction.name} `+
-                `(${brl(Math.abs(information.biggestReduction.difference))})`
-                :"nenhuma"
-            }`
+                ?`${information.biggestReduction.name}: `+
+                brl(
+                  Math.abs(
+                    information.biggestReduction.difference
+                  )
+                )
+                :"Nenhuma redução"
+            ]
           )
         ]
       )
@@ -2498,58 +2803,10 @@ function renderAnalysis(){
 }
 
 function renderExpenseComparison(app){
-  const information=comparisonInformation();
+  const information=
+    comparisonInformation();
+
   const labels=periodLabels();
-
-  const rows=information.changes.map(item=>
-    createElement(
-      "tr",
-      {},
-      [
-        createElement(
-          "td",
-          {},
-          item.name
-        ),
-
-        createElement(
-          "td",
-          {},
-          brl(item.firstValue)
-        ),
-
-        createElement(
-          "td",
-          {},
-          brl(item.secondValue)
-        ),
-
-        createElement(
-          "td",
-          {},
-          brl(item.difference)
-        ),
-
-        createElement(
-          "td",
-          {
-            class:
-              !Number.isFinite(item.percentage)
-                ?"neutral"
-                :item.percentage<=0
-                  ?"positive"
-                  :"negative"
-          },
-          Number.isFinite(item.percentage)
-            ?`${item.percentage>0?"+":""}`+
-              `${item.percentage
-                .toFixed(1)
-                .replace(".",",")}%`
-            :"—"
-        )
-      ]
-    )
-  );
 
   app.append(
     sectionHeader(
@@ -2557,27 +2814,30 @@ function renderExpenseComparison(app){
       "Despesas comparadas por subcategoria"
     ),
 
-    createElement(
+    el(
       "div",
       {class:"card tablewrap"},
-      createElement(
+
+      el(
         "table",
         {class:"table"},
         [
-          createElement(
+          el(
             "thead",
             {},
-            createElement(
+
+            el(
               "tr",
               {},
+
               [
-                "Despesa",
+                "Subcategoria",
                 labels[0],
                 labels[1],
                 "Diferença",
                 "Variação %"
               ].map(value=>
-                createElement(
+                el(
                   "th",
                   {},
                   value
@@ -2586,10 +2846,67 @@ function renderExpenseComparison(app){
             )
           ),
 
-          createElement(
+          el(
             "tbody",
             {},
-            rows
+
+            information.changes.map(
+              item=>
+                el(
+                  "tr",
+                  {},
+                  [
+                    el(
+                      "td",
+                      {},
+                      item.name
+                    ),
+
+                    el(
+                      "td",
+                      {},
+                      brl(item.firstValue)
+                    ),
+
+                    el(
+                      "td",
+                      {},
+                      brl(item.secondValue)
+                    ),
+
+                    el(
+                      "td",
+                      {},
+                      brl(item.difference)
+                    ),
+
+                    el(
+                      "td",
+                      {
+                        class:
+                          !Number.isFinite(
+                            item.percentage
+                          )
+                            ?"neutral"
+                            :item.percentage<=0
+                              ?"positive"
+                              :"negative"
+                      },
+
+                      Number.isFinite(
+                        item.percentage
+                      )
+                        ?`${item.percentage>0
+                          ?"+"
+                          :""}`+
+                          `${item.percentage
+                            .toFixed(1)
+                            .replace(".",",")}%`
+                        :"—"
+                    )
+                  ]
+                )
+            )
           )
         ]
       )
@@ -2605,16 +2922,18 @@ function renderExpenseComparison(app){
 }
 
 function renderCategories(app){
-  const source=
+  const key=
     state.source==="receber"
       ?"receber"
       :"pagar";
 
-  const records=selectedPeriodRecords(
-    state.data[source]
-  );
+  const records=
+    selectedRecords(
+      state.data[key]
+    );
 
-  const groups=categoryGroups(records);
+  const groups=
+    categoryGroups(records);
 
   app.append(
     sectionHeader(
@@ -2622,27 +2941,27 @@ function renderCategories(app){
       "Detalhamento por categoria (categoria › subcategoria)"
     ),
 
-    createElement(
+    el(
       "div",
       {class:"card"},
 
       groups.length
         ?groups.map(group=>
-          createElement(
+          el(
             "div",
             {class:"catgroup"},
             [
-              createElement(
+              el(
                 "div",
                 {class:"cathead"},
                 [
-                  createElement(
+                  el(
                     "span",
                     {},
                     group.label
                   ),
 
-                  createElement(
+                  el(
                     "span",
                     {},
                     brl(group.total)
@@ -2657,24 +2976,25 @@ function renderCategories(app){
                   (first,second)=>
                     second[1]-first[1]
                 )
-                .map(([name,value])=>
-                  createElement(
-                    "div",
-                    {class:"catsub"},
-                    [
-                      createElement(
-                        "span",
-                        {},
-                        name
-                      ),
+                .map(
+                  ([name,value])=>
+                    el(
+                      "div",
+                      {class:"catsub"},
+                      [
+                        el(
+                          "span",
+                          {},
+                          name
+                        ),
 
-                      createElement(
-                        "span",
-                        {},
-                        brl(value)
-                      )
-                    ]
-                  )
+                        el(
+                          "span",
+                          {},
+                          brl(value)
+                        )
+                      ]
+                    )
                 )
             ]
           )
@@ -2687,14 +3007,16 @@ function renderCategories(app){
 function renderAccountsDashboard(app,key){
   const config=CONFIG[key];
 
-  const records=selectedPeriodRecords(
-    state.data[key]
-  );
+  const records=
+    selectedRecords(
+      state.data[key]
+    );
 
-  const totals=accountTotals(records);
+  const totals=
+    accountTotals(records);
 
   app.append(
-    createElement(
+    el(
       "div",
       {class:"kpis"},
       [
@@ -2740,27 +3062,32 @@ function renderAccountsDashboard(app,key){
         :"Recebimentos por mês"
     ),
 
-    createElement(
+    el(
       "div",
       {class:"card"},
+
       barChart(
-        monthlyAccountData(state.data[key]),
+        monthlyAccountData(
+          state.data[key]
+        ),
+
         key==="pagar"
           ?"#10234a"
           :"#287a4b"
       )
     ),
 
-    createElement(
+    el(
       "div",
       {class:"grid2"},
       [
-        createElement(
+        el(
           "div",
           {},
           [
             sectionHeader(
               "RANKING",
+
               key==="pagar"
                 ?"Gastos por fornecedor"
                 :"Recebimentos por cliente"
@@ -2774,7 +3101,7 @@ function renderAccountsDashboard(app,key){
           ]
         ),
 
-        createElement(
+        el(
           "div",
           {},
           [
@@ -2800,32 +3127,40 @@ function renderAccountsDashboard(app,key){
         "ANÁLISE",
         "Análise do período"
       ),
+
       renderAnalysis()
     );
   }
 }
 
 function renderStatementDashboard(app){
-  const records=selectedPeriodRecords(
-    state.data.extrato
-  );
+  const records=
+    selectedRecords(
+      state.data.extrato
+    );
 
   const entries=records
-    .filter(record=>record.type==="entry")
+    .filter(record=>
+      record.type==="entry"
+    )
     .reduce(
-      (sum,record)=>sum+record.value,
+      (sum,record)=>
+        sum+record.value,
       0
     );
 
   const exits=records
-    .filter(record=>record.type==="exit")
+    .filter(record=>
+      record.type==="exit"
+    )
     .reduce(
-      (sum,record)=>sum+record.value,
+      (sum,record)=>
+        sum+record.value,
       0
     );
 
   app.append(
-    createElement(
+    el(
       "div",
       {class:"kpis"},
       [
@@ -2869,74 +3204,45 @@ function renderStatementDashboard(app){
       "Entradas x saídas por mês"
     ),
 
-    createElement(
+    el(
       "div",
       {class:"card"},
-      [
-        createElement(
-          "div",
-          {class:"legend"},
-          [
-            createElement(
-              "div",
-              {class:"legendItem"},
-              [
-                createElement(
-                  "span",
-                  {
-                    class:"legendColor",
-                    style:"background:#287a4b"
-                  }
-                ),
-                "Entradas"
-              ]
-            ),
 
-            createElement(
-              "div",
-              {class:"legendItem"},
-              [
-                createElement(
-                  "span",
-                  {
-                    class:"legendColor",
-                    style:"background:#c5442e"
-                  }
-                ),
-                "Saídas"
-              ]
-            )
-          ]
-        ),
-
-        statementChart(
-          monthlyStatementData()
-        )
-      ]
+      statementChart(
+        monthlyStatementData()
+      )
     )
   );
 }
 
 function reportData(){
-  const records=selectedPeriodRecords(
-    state.data.pagar
-  );
+  /*
+    O relatório utiliza selectedRecords e
+    comparisonInformation. As duas funções
+    respeitam os filtros ativos.
+  */
 
-  const totals=accountTotals(records);
-  const suppliers=rankingData(records,"entity");
-  const costCenters=rankingData(records,"costCenter");
-  const groups=categoryGroups(records);
-  const months=monthlyAccountData(state.data.pagar);
-  const analysis=comparisonInformation();
+  const records=
+    selectedRecords(
+      state.data.pagar
+    );
 
   return{
     records,
-    totals,
-    suppliers,
-    costCenters,
-    groups,
-    months,
-    analysis
+    totals:accountTotals(records),
+    suppliers:rankingData(
+      records,
+      "entity"
+    ),
+    costCenters:rankingData(
+      records,
+      "costCenter"
+    ),
+    groups:categoryGroups(records),
+    months:monthlyAccountData(
+      state.data.pagar
+    ),
+    analysis:comparisonInformation()
   };
 }
 
@@ -2945,87 +3251,179 @@ function downloadExcel(){
 
   if(!report.records.length){
     alert(
-      "Não há dados de Contas a Pagar para os filtros atuais."
+      "Não há dados de Contas a Pagar para os filtros ativos."
     );
+
     return;
   }
 
-  const workbook=XLSX.utils.book_new();
+  const workbook=
+    XLSX.utils.book_new();
+
+  const summarySheet=
+    XLSX.utils.aoa_to_sheet([
+      ["RELATÓRIO FINANCEIRO DANE-SE"],
+      [
+        "Gerado em",
+        new Date().toLocaleString("pt-BR")
+      ],
+      [
+        "Períodos comparados",
+        periodLabels().join(" × ")
+      ],
+      [
+        "Subcategorias filtradas",
+        state.filters.categories.length
+          ?state.filters.categories.join(", ")
+          :"Todas"
+      ],
+      [],
+      ["Indicador","Valor"],
+      [
+        "Total no período",
+        report.totals.total
+      ],
+      [
+        "Pago",
+        report.totals.done
+      ],
+      [
+        "Em aberto",
+        report.totals.open
+      ],
+      [
+        "Atrasado",
+        report.totals.late
+      ],
+      [
+        "Fornecedores",
+        report.totals.entityCount
+      ],
+      [
+        "Lançamentos",
+        report.records.length
+      ]
+    ]);
+
+  summarySheet["!cols"]=[
+    {wch:28},
+    {wch:90}
+  ];
 
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.aoa_to_sheet([
-      ["RELATÓRIO FINANCEIRO DANE-SE"],
-      ["Gerado em",new Date().toLocaleString("pt-BR")],
-      ["Dados","Conforme filtros ativos"],
-      [],
-      ["Indicador","Valor"],
-      ["Total no período",report.totals.total],
-      ["Pago",report.totals.done],
-      ["Em aberto",report.totals.open],
-      ["Atrasado",report.totals.late],
-      ["Fornecedores",report.totals.entityCount],
-      ["Lançamentos",report.records.length]
-    ]),
+    summarySheet,
     "Resumo"
   );
 
-  XLSX.utils.book_append_sheet(
-    workbook,
-    XLSX.utils.aoa_to_sheet([
-      ["ANÁLISE DO PERÍODO"],
-      [report.analysis.text],
-      [],
-      [
-        "Despesa",
-        "Período 1",
-        "Período 2",
-        "Diferença",
-        "Variação %"
-      ],
-      ...report.analysis.changes.map(item=>[
+  const analysisRows=[
+    ["ANÁLISE DO PERÍODO"],
+    [
+      "Períodos comparados",
+      periodLabels().join(" × ")
+    ],
+    []
+  ];
+
+  report.analysis.paragraphs.forEach(
+    (paragraph,index)=>{
+      analysisRows.push([
+        `Análise ${index+1}`,
+        paragraph
+      ]);
+    }
+  );
+
+  analysisRows.push(
+    [],
+    [
+      "Subcategoria",
+      "Período 1",
+      "Período 2",
+      "Diferença",
+      "Variação %"
+    ]
+  );
+
+  report.analysis.changes.forEach(
+    item=>{
+      analysisRows.push([
         item.name,
         item.firstValue,
         item.secondValue,
         item.difference,
-        item.percentage
-      ])
-    ]),
+
+        Number.isFinite(
+          item.percentage
+        )
+          ?item.percentage/100
+          :""
+      ]);
+    }
+  );
+
+  const analysisSheet=
+    XLSX.utils.aoa_to_sheet(
+      analysisRows
+    );
+
+  analysisSheet["!cols"]=[
+    {wch:38},
+    {wch:90},
+    {wch:18},
+    {wch:18},
+    {wch:16}
+  ];
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    analysisSheet,
     "Análise do período"
   );
 
   XLSX.utils.book_append_sheet(
     workbook,
+
     XLSX.utils.aoa_to_sheet([
       ["Mês","Gastos"],
+
       ...report.months.map(item=>[
         item.label,
         item.value
       ])
     ]),
+
     "Gastos por mês"
   );
 
   XLSX.utils.book_append_sheet(
     workbook,
+
     XLSX.utils.aoa_to_sheet([
       ["Fornecedor","Valor"],
       ...report.suppliers
     ]),
+
     "Fornecedores"
   );
 
   XLSX.utils.book_append_sheet(
     workbook,
+
     XLSX.utils.aoa_to_sheet([
       ["Centro de custo","Valor"],
       ...report.costCenters
     ]),
+
     "Centros de custo"
   );
 
   const categoryRows=[
-    ["Categoria","Subcategoria","Valor"]
+    [
+      "Categoria",
+      "Subcategoria",
+      "Valor"
+    ]
   ];
 
   report.groups.forEach(group=>{
@@ -3042,13 +3440,20 @@ function downloadExcel(){
 
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.aoa_to_sheet(categoryRows),
+
+    XLSX.utils.aoa_to_sheet(
+      categoryRows
+    ),
+
     "Categorias"
   );
 
   XLSX.writeFile(
     workbook,
-    `relatorio-financeiro-${new Date().toISOString().slice(0,10)}.xlsx`
+
+    `relatorio-financeiro-${new Date()
+      .toISOString()
+      .slice(0,10)}.xlsx`
   );
 }
 
@@ -3057,8 +3462,9 @@ function downloadPDF(){
 
   if(!report.records.length){
     alert(
-      "Não há dados de Contas a Pagar para os filtros atuais."
+      "Não há dados de Contas a Pagar para os filtros ativos."
     );
+
     return;
   }
 
@@ -3066,34 +3472,43 @@ function downloadPDF(){
     alert(
       "Não foi possível carregar o gerador de PDF."
     );
+
     return;
   }
 
   const{jsPDF}=window.jspdf;
 
-  const documentPDF=new jsPDF({
+  const pdf=new jsPDF({
     orientation:"landscape"
   });
 
-  documentPDF.setTextColor(16,35,74);
-  documentPDF.setFontSize(18);
+  pdf.setTextColor(16,35,74);
+  pdf.setFont("helvetica","bold");
+  pdf.setFontSize(18);
 
-  documentPDF.text(
+  pdf.text(
     "Dane-se - Relatório financeiro",
     14,
     16
   );
 
-  documentPDF.setFontSize(9);
+  pdf.setFont("helvetica","normal");
+  pdf.setFontSize(9);
 
-  documentPDF.text(
+  pdf.text(
     `Gerado em ${new Date().toLocaleString("pt-BR")} | Conforme filtros ativos`,
     14,
     23
   );
 
-  documentPDF.autoTable({
-    startY:29,
+  pdf.text(
+    `Períodos: ${periodLabels().join(" x ")}`,
+    14,
+    28
+  );
+
+  pdf.autoTable({
+    startY:33,
 
     head:[[
       "Total no período",
@@ -3117,67 +3532,106 @@ function downloadPDF(){
   });
 
   let y=
-    documentPDF.lastAutoTable.finalY+
-    9;
+    pdf.lastAutoTable.finalY+
+    10;
 
-  documentPDF.setFontSize(12);
+  pdf.setFont(
+    "helvetica",
+    "bold"
+  );
 
-  documentPDF.text(
+  pdf.setFontSize(14);
+  pdf.setTextColor(16,35,74);
+
+  pdf.text(
     "Análise do período",
     14,
     y
   );
 
-  documentPDF.setFontSize(9);
+  y+=8;
 
-  const analysisLines=
-    documentPDF.splitTextToSize(
-      report.analysis.text,
-      265
-    );
-
-  documentPDF.text(
-    analysisLines,
-    14,
-    y+6
+  pdf.setFont(
+    "helvetica",
+    "normal"
   );
 
-  y+=10+analysisLines.length*4;
+  pdf.setFontSize(10);
+  pdf.setTextColor(48,58,75);
 
-  documentPDF.autoTable({
-    startY:y,
+  report.analysis.paragraphs.forEach(
+    paragraph=>{
+      const lines=
+        pdf.splitTextToSize(
+          paragraph,
+          265
+        );
+
+      pdf.text(
+        lines,
+        14,
+        y
+      );
+
+      y+=lines.length*5+4;
+
+      if(y>180){
+        pdf.addPage();
+        y=18;
+      }
+    }
+  );
+
+  pdf.autoTable({
+    startY:y+3,
 
     head:[[
-      "Despesa",
+      "Subcategoria",
       "Período 1",
       "Período 2",
       "Diferença",
       "Variação"
     ]],
 
-    body:report.analysis.changes.map(item=>[
-      item.name,
-      brl(item.firstValue),
-      brl(item.secondValue),
-      brl(item.difference),
+    body:report.analysis.changes.map(
+      item=>[
+        item.name,
+        brl(item.firstValue),
+        brl(item.secondValue),
+        brl(item.difference),
 
-      Number.isFinite(item.percentage)
-        ?`${item.percentage.toFixed(1)}%`
-        :"—"
-    ]),
+        Number.isFinite(
+          item.percentage
+        )
+          ?`${item.percentage>0
+            ?"+"
+            :""}`+
+            `${item.percentage
+              .toFixed(1)
+              .replace(".",",")}%`
+          :"—"
+      ]
+    ),
 
     headStyles:{
-      fillColor:[36,87,167]
+      fillColor:[36,87,167],
+      textColor:[255,255,255]
+    },
+
+    alternateRowStyles:{
+      fillColor:[245,248,253]
     },
 
     styles:{
-      fontSize:7
+      font:"helvetica",
+      fontSize:8,
+      cellPadding:3
     }
   });
 
-  documentPDF.addPage();
+  pdf.addPage();
 
-  documentPDF.autoTable({
+  pdf.autoTable({
     startY:14,
 
     head:[[
@@ -3186,14 +3640,15 @@ function downloadPDF(){
       "Valor"
     ]],
 
-    body:report.groups.flatMap(group=>
-      [
-        ...group.subcategories.entries()
-      ].map(([name,value])=>[
-        group.label,
-        name,
-        brl(value)
-      ])
+    body:report.groups.flatMap(
+      group=>
+        [
+          ...group.subcategories.entries()
+        ].map(([name,value])=>[
+          group.label,
+          name,
+          brl(value)
+        ])
     ),
 
     headStyles:{
@@ -3205,9 +3660,9 @@ function downloadPDF(){
     }
   });
 
-  documentPDF.addPage();
+  pdf.addPage();
 
-  documentPDF.autoTable({
+  pdf.autoTable({
     startY:14,
 
     head:[[
@@ -3231,9 +3686,9 @@ function downloadPDF(){
     }
   });
 
-  documentPDF.autoTable({
+  pdf.autoTable({
     startY:
-      documentPDF.lastAutoTable.finalY+
+      pdf.lastAutoTable.finalY+
       8,
 
     head:[[
@@ -3257,8 +3712,10 @@ function downloadPDF(){
     }
   });
 
-  documentPDF.save(
-    `relatorio-financeiro-${new Date().toISOString().slice(0,10)}.pdf`
+  pdf.save(
+    `relatorio-financeiro-${new Date()
+      .toISOString()
+      .slice(0,10)}.pdf`
   );
 }
 
@@ -3269,21 +3726,27 @@ async function uploadFile(key,file){
     state.error="";
 
     if(key==="extrato"){
-      const result=await parseStatement(file);
+      const result=
+        await parseStatement(file);
 
-      state.data.extrato=result.records;
-      state.balance=result.balance;
+      state.data.extrato=
+        result.records;
+
+      state.balance=
+        result.balance;
     }else{
-      state.data[key]=await parseAccounts(
-        file,
-        key
-      );
+      state.data[key]=
+        await parseAccounts(
+          file,
+          key
+        );
     }
 
     state.updated[key]=
       new Date().toISOString();
 
-    state.filters=freshFilters();
+    state.filters=
+      freshFilters();
 
     saveData(key);
   }catch(error){
@@ -3300,11 +3763,11 @@ function renderEmpty(){
     CONFIG[state.source]?.label||
     "Extrato Bancário";
 
-  const container=createElement(
+  const container=el(
     "div",
     {class:"empty"},
     [
-      createElement(
+      el(
         "p",
         {},
         `Carregue o arquivo de ${label} para visualizar esta área.`
@@ -3312,13 +3775,13 @@ function renderEmpty(){
     ]
   );
 
-  const drop=createElement(
+  const drop=el(
     "div",
     {class:"drop"},
     "⬆ Arraste o arquivo aqui ou clique para escolher"
   );
 
-  const input=createElement(
+  const input=el(
     "input",
     {
       type:"file",
@@ -3345,7 +3808,10 @@ function renderEmpty(){
 
   drop.ondrop=event=>{
     event.preventDefault();
-    drop.classList.remove("over");
+
+    drop.classList.remove(
+      "over"
+    );
 
     uploadFile(
       state.source,
@@ -3353,24 +3819,29 @@ function renderEmpty(){
     );
   };
 
-  container.append(drop,input);
+  container.append(
+    drop,
+    input
+  );
+
   return container;
 }
 
 function clearCurrentData(){
+  const label=
+    CONFIG[state.source]?.label||
+    "Extrato Bancário";
+
   if(
     !confirm(
-      `Apagar os dados de ${
-        CONFIG[state.source]?.label||
-        "Extrato Bancário"
-      }?`
+      `Apagar os dados de ${label}?`
     )
   ){
     return;
   }
 
   localStorage.removeItem(
-    `dane-se-dashboard-${state.source}-v8`
+    `dane-se-dashboard-${state.source}-v9`
   );
 
   state.data[state.source]=null;
@@ -3410,29 +3881,30 @@ function render(){
       :"—";
 
   app.append(
-    createElement(
+    el(
       "div",
       {class:"header"},
       [
-        createElement(
+        el(
           "div",
           {},
           [
-            createElement(
+            el(
               "div",
               {class:"eyebrow"},
               "DASHBOARD FINANCEIRO"
             ),
 
-            createElement(
+            el(
               "h1",
               {class:"title"},
               "Dane-se · Painel financeiro"
             ),
 
-            createElement(
+            el(
               "div",
               {class:"sub"},
+
               state.data[state.source]
                 ?`Atualizado em ${updated} · ${state.data[state.source].length} lançamentos carregados`
                 :"Dados processados localmente no navegador"
@@ -3440,11 +3912,11 @@ function render(){
           ]
         ),
 
-        createElement(
+        el(
           "div",
           {class:"actions"},
           [
-            createElement(
+            el(
               "button",
               {
                 class:"btn secondary",
@@ -3453,7 +3925,7 @@ function render(){
               "Baixar PDF"
             ),
 
-            createElement(
+            el(
               "button",
               {
                 class:"btn secondary",
@@ -3463,14 +3935,16 @@ function render(){
             ),
 
             state.data[state.source]
-              ?createElement(
+              ?el(
                 "button",
                 {
                   class:"btn",
 
                   onclick:()=>{
                     document
-                      .getElementById("main-file")
+                      .getElementById(
+                        "main-file"
+                      )
                       ?.click();
                   }
                 },
@@ -3479,7 +3953,7 @@ function render(){
               :null,
 
             state.data[state.source]
-              ?createElement(
+              ?el(
                 "button",
                 {
                   class:"btn danger",
@@ -3493,59 +3967,61 @@ function render(){
       ]
     ),
 
-    createElement(
+    el(
       "div",
       {class:"tabs"},
 
-      sourceTabs.map(([key,label])=>
-        createElement(
-          "button",
-          {
-            class:
-              `tab${state.source===key
-                ?" active"
-                :""}`,
+      sourceTabs.map(
+        ([key,label])=>
+          el(
+            "button",
+            {
+              class:
+                `tab${state.source===key
+                  ?" active"
+                  :""}`,
 
-            onclick:()=>{
-              state.source=key;
-              state.filters=freshFilters();
-              render();
-            }
-          },
-          label
-        )
+              onclick:()=>{
+                state.source=key;
+                state.filters=
+                  freshFilters();
+
+                render();
+              }
+            },
+            label
+          )
       )
     ),
 
-    createElement(
+    el(
       "div",
-      {
-        class:"tabs viewtabs"
-      },
+      {class:"tabs viewtabs"},
 
-      viewTabs.map(([key,label])=>
-        createElement(
-          "button",
-          {
-            class:
-              `tab${state.view===key
-                ?" active"
-                :""}`,
+      viewTabs.map(
+        ([key,label])=>
+          el(
+            "button",
+            {
+              class:
+                `tab${state.view===key
+                  ?" active"
+                  :""}`,
 
-            onclick:()=>{
-              state.view=key;
-              render();
-            }
-          },
-          label
-        )
+              onclick:()=>{
+                state.view=key;
+                render();
+              }
+            },
+            label
+          )
       )
     )
   );
 
   if(state.error){
     app.append(
-      createElement(
+      el(
         "div",
         {class:"error"},
         `⚠ ${state.error}`
@@ -3554,11 +4030,16 @@ function render(){
   }
 
   if(!state.data[state.source]){
-    app.append(renderEmpty());
+    app.append(
+      renderEmpty()
+    );
+
     return;
   }
 
-  app.append(renderFilters());
+  app.append(
+    renderFilters()
+  );
 
   if(state.view==="dashboard"){
     if(
@@ -3572,9 +4053,13 @@ function render(){
     }else{
       renderStatementDashboard(app);
     }
-  }else if(state.view==="comparacao"){
+  }else if(
+    state.view==="comparacao"
+  ){
     renderExpenseComparison(app);
-  }else if(state.view==="categorias"){
+  }else if(
+    state.view==="categorias"
+  ){
     renderCategories(app);
   }else{
     if(state.source==="extrato"){
@@ -3584,50 +4069,56 @@ function render(){
           "Entradas x saídas por mês"
         ),
 
-        createElement(
+        el(
           "div",
           {class:"card"},
+
           statementChart(
             monthlyStatementData()
           )
         )
       );
     }else{
-      const records=selectedPeriodRecords(
-        state.data[state.source]
-      );
+      const records=
+        selectedRecords(
+          state.data[state.source]
+        );
 
       app.append(
         sectionHeader(
           "ANO",
+
           state.source==="pagar"
             ?"Gastos por mês"
             :"Recebimentos por mês"
         ),
 
-        createElement(
+        el(
           "div",
           {class:"card"},
+
           barChart(
             monthlyAccountData(
               state.data[state.source]
             ),
+
             state.source==="pagar"
               ?"#10234a"
               :"#287a4b"
           )
         ),
 
-        createElement(
+        el(
           "div",
           {class:"grid2"},
           [
-            createElement(
+            el(
               "div",
               {},
               [
                 sectionHeader(
                   "RANKING",
+
                   state.source==="pagar"
                     ?"Gastos por fornecedor"
                     :"Recebimentos por cliente"
@@ -3641,7 +4132,7 @@ function render(){
               ]
             ),
 
-            createElement(
+            el(
               "div",
               {},
               [
@@ -3664,7 +4155,7 @@ function render(){
   }
 
   app.append(
-    createElement(
+    el(
       "input",
       {
         id:"main-file",
@@ -3679,7 +4170,7 @@ function render(){
       }
     ),
 
-    createElement(
+    el(
       "div",
       {class:"footer"},
       "Dados processados somente neste navegador · relatórios automáticos sem IA"
