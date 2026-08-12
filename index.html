@@ -1154,6 +1154,7 @@ function freshFilters(){
     period2To:"",
     status:"",
     entity:"",
+    groups:[],
     categories:[],
     costCenter:"",
     type:""
@@ -1250,14 +1251,14 @@ function baseFilter(records){
       !filters.costCenter||
       record.costCenter===filters.costCenter
     )
-    .filter(record=>
-      !filters.categories.length||
-      record.allocations?.some(allocation=>
-        filters.categories.includes(
-          allocation.name
-        )
-      )
-    )
+    .filter(record=>{
+      if(!filters.groups.length&&!filters.categories.length)return true;
+
+      return record.allocations?.some(allocation=>
+        (!filters.groups.length||filters.groups.includes(allocationGroup(allocation)))&&
+        (!filters.categories.length||filters.categories.includes(allocation.name))
+      );
+    })
     .filter(record=>
       !filters.type||
       record.type===filters.type
@@ -1289,6 +1290,8 @@ function periodFilter(records,period=0){
         :period===2
           ?filters.month2
           :"";
+
+    if(from||to)month="";
   }
 
   return baseFilter(records)
@@ -1311,6 +1314,21 @@ function selectedRecords(records){
       ?2
       :1
   );
+}
+
+function displayRecords(records){
+  const filters=state.filters;
+
+  if(filters.compare||filters.month2){
+    return[
+      ...new Set([
+        ...periodFilter(records,1),
+        ...periodFilter(records,2)
+      ])
+    ];
+  }
+
+  return periodFilter(records,1);
 }
 
 function variation(firstValue,secondValue){
@@ -1362,16 +1380,35 @@ function periodLabels(){
   ];
 }
 
+function monthLabelFromRange(from,to,fallback){
+  if(from&&to&&from.slice(0,7)===to.slice(0,7)){
+    const key=from.slice(0,7);
+    return `${MONTHS[Number(key.slice(5))-1]}/${key.slice(0,4)}`;
+  }
+
+  return fallback;
+}
+
+function comparisonLabels(){
+  const filters=state.filters;
+  const labels=periodLabels();
+
+  if(filters.compare){
+    return[
+      monthLabelFromRange(filters.period1From,filters.period1To,"Período 1"),
+      monthLabelFromRange(filters.period2From,filters.period2To,"Período 2")
+    ];
+  }
+
+  return labels;
+}
+
 function sectionHeader(eyebrow,title){
   return el(
     "div",
     {class:"section"},
     [
-      el(
-        "span",
-        {class:"eyebrow"},
-        eyebrow
-      ),
+      eyebrow?el("span",{class:"eyebrow"},eyebrow):null,
 
       el("h2",{},title),
 
@@ -1487,7 +1524,9 @@ function dateField(label,key){
             }
 
             if(key==="dateTo"){
-              state.filters.month2=month;
+              if(!state.filters.dateFrom){
+                state.filters.month1=month;
+              }
             }
           }
 
@@ -1497,24 +1536,23 @@ function dateField(label,key){
     ]
   );
 }
-  function multiCategoryField(categories){
+function multiChoiceField(label,items,filterKey,placeholder){
   const details=el(
     "details",
     {class:"multi field"}
   );
 
-  const count=
-    state.filters.categories.length;
+  const count=state.filters[filterKey].length;
 
   details.append(
-    el("label",{},"Subcategorias"),
+    el("label",{},label),
 
     el(
       "summary",
       {},
       count
         ?`${count} selecionadas`
-        :"Todas as subcategorias"
+        :`Todas as ${label.toLowerCase()}`
     )
   );
 
@@ -1528,9 +1566,9 @@ function dateField(label,key){
   function drawOptions(search=""){
     optionsContainer.innerHTML="";
 
-    const filtered=categories.filter(
-      category=>
-        category
+    const filtered=items.filter(
+      item=>
+        item
           .toLowerCase()
           .includes(search.toLowerCase())
     );
@@ -1543,36 +1581,34 @@ function dateField(label,key){
             style:
               "padding:10px;font-size:12px;color:#514b40"
           },
-          "Nenhuma subcategoria encontrada."
+          `Nenhuma ${label.toLowerCase()} encontrada.`
         )
       );
 
       return;
     }
 
-    filtered.forEach(category=>{
+    filtered.forEach(item=>{
       const checkbox=el(
         "input",
         {type:"checkbox"}
       );
 
       checkbox.checked=
-        state.filters.categories.includes(
-          category
-        );
+        state.filters[filterKey].includes(item);
 
       checkbox.onchange=()=>{
         if(checkbox.checked){
-          state.filters.categories=[
+          state.filters[filterKey]=[
             ...new Set([
-              ...state.filters.categories,
-              category
+              ...state.filters[filterKey],
+              item
             ])
           ];
         }else{
-          state.filters.categories=
-            state.filters.categories.filter(
-              item=>item!==category
+          state.filters[filterKey]=
+            state.filters[filterKey].filter(
+              value=>value!==item
             );
         }
 
@@ -1585,7 +1621,7 @@ function dateField(label,key){
           {class:"multiOpt"},
           [
             checkbox,
-            category
+            item
           ]
         )
       );
@@ -1598,7 +1634,7 @@ function dateField(label,key){
       {
         class:"multiSearch",
         type:"search",
-        placeholder:"Buscar subcategoria…",
+        placeholder,
 
         oninput:event=>
           drawOptions(
@@ -1620,7 +1656,7 @@ function dateField(label,key){
               event.preventDefault();
               event.stopPropagation();
 
-              state.filters.categories=[];
+              state.filters[filterKey]=[];
               render();
             }
           },
@@ -1636,9 +1672,7 @@ function dateField(label,key){
               event.preventDefault();
               event.stopPropagation();
 
-              state.filters.categories=[
-                ...categories
-              ];
+              state.filters[filterKey]=[...items];
 
               render();
             }
@@ -1693,6 +1727,14 @@ function renderFilters(){
       "pt-BR"
     )
   );
+
+  const groups=[
+    ...new Set(
+      records.flatMap(record=>
+        record.allocations?.map(allocation=>allocationGroup(allocation))||[]
+      )
+    )
+  ].sort((first,second)=>first.localeCompare(second,"pt-BR"));
 
   const row=el(
     "div",
@@ -1820,7 +1862,9 @@ function renderFilters(){
         }
       ),
 
-      multiCategoryField(categories),
+      multiChoiceField("Categorias",groups,"groups","Buscar categoria…"),
+
+      multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…"),
 
       selectField(
         "Centro de custo",
@@ -1925,16 +1969,21 @@ function accountTotals(records){
 function filteredAllocations(record){
   if(!record.allocations)return[];
 
-  if(!state.filters.categories.length){
+  if(!state.filters.groups.length&&!state.filters.categories.length){
     return record.allocations;
   }
 
   return record.allocations.filter(
     allocation=>
-      state.filters.categories.includes(
-        allocation.name
-      )
+      (!state.filters.groups.length||state.filters.groups.includes(allocationGroup(allocation)))&&
+      (!state.filters.categories.length||state.filters.categories.includes(allocation.name))
   );
+}
+
+function allocationGroup(allocation){
+  const parts=(allocation.code||"").split(".");
+  const key=parts.length>=2?parts.slice(0,2).join("."):allocation.name;
+  return GROUP_LABELS[key]||allocation.name;
 }
 
 function categoryMap(records){
@@ -2020,7 +2069,7 @@ function rankingData(records,property){
     os filtros ativos antes de agrupar.
   */
   const filteredRecords=
-    selectedRecords(records);
+    displayRecords(records);
 
   const map=new Map();
 
@@ -2116,7 +2165,7 @@ function monthlyAccountData(records){
     de montar o gráfico mensal.
   */
   const filteredRecords=
-    selectedRecords(records);
+    displayRecords(records);
 
   const map=new Map();
 
@@ -2151,7 +2200,7 @@ function monthlyAccountData(records){
 
 function monthlyStatementData(){
   const filteredRecords=
-    selectedRecords(
+    displayRecords(
       state.data.extrato
     );
 
@@ -2443,15 +2492,16 @@ function statementChart(data){
 }
 
 function comparisonInformation(){
+  const sourceKey=state.source==="receber"?"receber":"pagar";
   const firstRecords=
     periodFilter(
-      state.data.pagar,
+      state.data[sourceKey],
       1
     );
 
   const secondRecords=
     periodFilter(
-      state.data.pagar,
+      state.data[sourceKey],
       2
     );
 
@@ -2709,19 +2759,33 @@ function renderAnalysis(){
     );
 
   if(!enabled){
-    return el(
-      "div",
-      {class:"card analysis"},
-      [
-        el(
-          "span",
-          {class:"analysisTitle"},
-          "Análise financeira"
-        ),
+    const records=displayRecords(state.data.pagar);
+    const total=records.reduce((sum,record)=>sum+record.original,0);
+    const months=new Map();
+    records.forEach(record=>months.set(record.month,(months.get(record.month)||0)+record.original));
+    const ordered=[...months.entries()].sort(([a],[b])=>a.localeCompare(b));
+    const categories=[...categoryMap(records).entries()].sort((a,b)=>b[1]-a[1]);
+    const first=ordered[0];
+    const last=ordered.at(-1);
+    const change=first&&last?variation(first[1],last[1]):0;
+    const years=[...new Set(records.map(record=>record.month?.slice(0,4)).filter(Boolean))].join(", ");
+    const title=state.filters.dateFrom||state.filters.dateTo||state.filters.month1
+      ?"Análise do período filtrado"
+      :`Análise anual${years?` · ${years}`:""}`;
+    const paragraphs=[
+      `Foram analisados ${records.length} ${records.length===1?"lançamento":"lançamentos"}, totalizando ${brl(total)} em despesas.`,
+      categories[0]
+        ?`${categories[0][0]} foi a subcategoria de maior impacto, com ${brl(categories[0][1])}.`
+        :"Não há subcategorias com movimentação para os filtros atuais.",
+      first&&last&&first[0]!==last[0]
+        ?`Entre ${MONTHS[Number(first[0].slice(5))-1]}/${first[0].slice(0,4)} e ${MONTHS[Number(last[0].slice(5))-1]}/${last[0].slice(0,4)}, as despesas ${last[1]>=first[1]?"aumentaram":"diminuíram"} ${brl(Math.abs(last[1]-first[1]))}${Number.isFinite(change)?` (${Math.abs(change).toFixed(1).replace(".",",")}%)`:""}.`
+        :"O período disponível não permite comparar meses diferentes."
+    ];
 
-        "Selecione dois meses ou ative “Comparar períodos” para visualizar a análise."
-      ]
-    );
+    return el("div",{class:"card analysis"},[
+      el("span",{class:"analysisTitle"},title),
+      el("div",{class:"analysisLead"},paragraphs.map(paragraph=>el("p",{},paragraph)))
+    ]);
   }
 
   const information=
@@ -2820,10 +2884,29 @@ function renderAnalysis(){
 }
 
 function renderExpenseComparison(app){
+  if(state.source==="extrato"){
+    const first=periodFilter(state.data.extrato,1);
+    const second=periodFilter(state.data.extrato,2);
+    const total=(records,type)=>records.filter(record=>record.type===type).reduce((sum,record)=>sum+record.value,0);
+    const labels=comparisonLabels();
+    const rows=[
+      ["Entradas",total(first,"entry"),total(second,"entry")],
+      ["Saídas",total(first,"exit"),total(second,"exit")],
+      ["Saldo",total(first,"entry")-total(first,"exit"),total(second,"entry")-total(second,"exit")]
+    ];
+    app.append(sectionHeader("COMPARAÇÃO","Movimentações do extrato"),el("div",{class:"card tablewrap"},el("table",{class:"table"},[
+      el("thead",{},el("tr",{},["Indicador",labels[0],labels[1],"Diferença","Variação %"].map(value=>el("th",{},value)))),
+      el("tbody",{},rows.map(([name,a,b])=>{const percentage=variation(a,b);return el("tr",{},[
+        el("td",{},name),el("td",{},brl(a)),el("td",{},brl(b)),el("td",{},brl(b-a)),el("td",{},Number.isFinite(percentage)?`${percentage>0?"+":""}${percentage.toFixed(1).replace(".",",")}%`:"—")
+      ]);}))
+    ])));
+    return;
+  }
+
   const information=
     comparisonInformation();
 
-  const labels=periodLabels();
+  const labels=comparisonLabels();
 
   app.append(
     sectionHeader(
@@ -2935,6 +3018,11 @@ function renderExpenseComparison(app){
 }
 
 function renderCategories(app){
+  if(state.source==="extrato"){
+    app.append(sectionHeader("CATEGORIAS","Detalhamento por categoria"),el("div",{class:"card"},"O extrato bancário não possui categorias ou subcategorias no arquivo importado."));
+    return;
+  }
+
   const key=
     state.source==="receber"
       ?"receber"
@@ -2944,10 +3032,42 @@ function renderCategories(app){
     selectedRecords garante que a aba Categorias
     siga todos os filtros ativos.
   */
-  const records=
-    selectedRecords(
-      state.data[key]
+  const comparing=state.filters.compare||(state.filters.month1&&state.filters.month2);
+
+  if(comparing){
+    const firstRecords=periodFilter(state.data[key],1);
+    const secondRecords=periodFilter(state.data[key],2);
+    const firstMap=categoryMap(firstRecords);
+    const secondMap=categoryMap(secondRecords);
+    const groupBySubcategory=new Map();
+
+    [...firstRecords,...secondRecords].forEach(record=>{
+      filteredAllocations(record).forEach(allocation=>groupBySubcategory.set(allocation.name,allocationGroup(allocation)));
+    });
+
+    const rows=[...new Set([...firstMap.keys(),...secondMap.keys()])]
+      .map(name=>{
+        const first=firstMap.get(name)||0;
+        const second=secondMap.get(name)||0;
+        return{group:groupBySubcategory.get(name)||"Sem categoria",name,first,second,difference:second-first,percentage:variation(first,second)};
+      })
+      .sort((a,b)=>a.group.localeCompare(b.group,"pt-BR")||Math.abs(b.difference)-Math.abs(a.difference));
+    const labels=comparisonLabels();
+
+    app.append(
+      sectionHeader("DETALHAMENTO","Categorias e subcategorias comparadas"),
+      el("div",{class:"card tablewrap"},el("table",{class:"table"},[
+        el("thead",{},el("tr",{},["Categoria","Subcategoria",labels[0],labels[1],"Diferença","Variação %"].map(value=>el("th",{},value)))),
+        el("tbody",{},rows.map(item=>el("tr",{},[
+          el("td",{},item.group),el("td",{},item.name),el("td",{},brl(item.first)),el("td",{},brl(item.second)),el("td",{},brl(item.difference)),
+          el("td",{class:!Number.isFinite(item.percentage)?"neutral":item.percentage<=0?"positive":"negative"},Number.isFinite(item.percentage)?`${item.percentage>0?"+":""}${item.percentage.toFixed(1).replace(".",",")}%`:"—")
+        ])))
+      ]))
     );
+    return;
+  }
+
+  const records=displayRecords(state.data[key]);
 
   const groups=
     categoryGroups(records);
@@ -3025,7 +3145,7 @@ function renderAccountsDashboard(app,key){
   const config=CONFIG[key];
 
   const records=
-    selectedRecords(
+    displayRecords(
       state.data[key]
     );
 
@@ -3073,7 +3193,7 @@ function renderAccountsDashboard(app,key){
     ),
 
     sectionHeader(
-      "ANO",
+      "",
       key==="pagar"
         ?"Gastos por mês"
         :"Recebimentos por mês"
@@ -3152,7 +3272,7 @@ function renderAccountsDashboard(app,key){
 
 function renderStatementDashboard(app){
   const records=
-    selectedRecords(
+    displayRecords(
       state.data.extrato
     );
 
@@ -3217,7 +3337,7 @@ function renderStatementDashboard(app){
     ),
 
     sectionHeader(
-      "ANO",
+      "",
       "Entradas x saídas por mês"
     ),
 
@@ -3237,29 +3357,29 @@ function reportData(){
     Todos os dados dos relatórios são montados
     a partir dos filtros ativos.
   */
-  const records=
-    selectedRecords(
-      state.data.pagar
-    );
+  const key=state.source==="receber"?"receber":"pagar";
+  const records=displayRecords(state.data[key]);
 
   return{
     records,
+    key,
+    config:CONFIG[key],
     totals:accountTotals(records),
 
     suppliers:rankingData(
-      state.data.pagar,
+      state.data[key],
       "entity"
     ),
 
     costCenters:rankingData(
-      state.data.pagar,
+      state.data[key],
       "costCenter"
     ),
 
     groups:categoryGroups(records),
 
     months:monthlyAccountData(
-      state.data.pagar
+      state.data[key]
     ),
 
     analysis:comparisonInformation()
@@ -3271,7 +3391,7 @@ function downloadExcel(){
 
   if(!report.records.length){
     alert(
-      "Não há dados de Contas a Pagar para os filtros ativos."
+      "Não há dados para os filtros ativos."
     );
 
     return;
@@ -3313,12 +3433,12 @@ function downloadExcel(){
       ],
 
       [
-        "Pago",
+        report.config.doneLabel,
         report.totals.done
       ],
 
       [
-        "Em aberto",
+        report.config.openLabel,
         report.totals.open
       ],
 
@@ -3328,7 +3448,7 @@ function downloadExcel(){
       ],
 
       [
-        "Fornecedores",
+        `${report.config.entityLabel}s`,
         report.totals.entityCount
       ],
 
@@ -3498,7 +3618,7 @@ function downloadPDF(){
 
   if(!report.records.length){
     alert(
-      "Não há dados de Contas a Pagar para os filtros ativos."
+      "Não há dados para os filtros ativos."
     );
 
     return;
@@ -3905,9 +4025,10 @@ function render(){
   const viewTabs=[
     ["dashboard","Dashboard"],
     ["comparacao","Comparação"],
-    ["graficos","Gráficos"],
     ["categorias","Categorias"]
   ];
+
+  if(state.view==="graficos")state.view="dashboard";
 
   const updated=
     state.updated[state.source]
@@ -4098,92 +4219,6 @@ function render(){
     state.view==="categorias"
   ){
     renderCategories(app);
-  }else{
-    if(state.source==="extrato"){
-      app.append(
-        sectionHeader(
-          "ANO",
-          "Entradas x saídas por mês"
-        ),
-
-        el(
-          "div",
-          {class:"card"},
-
-          statementChart(
-            monthlyStatementData()
-          )
-        )
-      );
-    }else{
-      app.append(
-        sectionHeader(
-          "ANO",
-
-          state.source==="pagar"
-            ?"Gastos por mês"
-            :"Recebimentos por mês"
-        ),
-
-        el(
-          "div",
-          {class:"card"},
-
-          barChart(
-            monthlyAccountData(
-              state.data[state.source]
-            ),
-
-            state.source==="pagar"
-              ?"#10234a"
-              :"#287a4b"
-          )
-        ),
-
-        el(
-          "div",
-          {class:"grid2"},
-          [
-            el(
-              "div",
-              {},
-              [
-                sectionHeader(
-                  "RANKING",
-
-                  state.source==="pagar"
-                    ?"Gastos por fornecedor"
-                    :"Recebimentos por cliente"
-                ),
-
-                renderRanking(
-                  state.data[state.source],
-                  "entity",
-                  "#2457a7"
-                )
-              ]
-            ),
-
-            el(
-              "div",
-              {},
-              [
-                sectionHeader(
-                  "RANKING",
-                  "Valores por centro de custo"
-                ),
-
-                renderRanking(
-                  state.data[state.source],
-                  "costCenter",
-                  "#d89a22"
-                )
-              ]
-            )
-          ]
-        )
-      );
-    }
   }
 
   app.append(
