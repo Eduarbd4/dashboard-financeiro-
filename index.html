@@ -12,15 +12,18 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-:root {
-  --ink:#16233f;
-  --paper:#faf7f1;
-  --dim:#f1ece2;
-  --gold:#bb8a34;
-  --sage:#5c7a63;
-  --rust:#a8462e;
-  --line:#ded6c4;
-  --muted:#5c5748;
+:root{
+  --ink:#10234a;
+  --paper:#fffaf2;
+  --dim:#f4ead9;
+  --gold:#d89a22;
+  --sage:#287a4b;
+  --rust:#c5442e;
+  --line:#d9c7a6;
+  --muted:#514b40;
+  --white:#fff;
+  --blue:#2457a7;
+  --cyan:#168a9c;
 }
 
 *{box-sizing:border-box}
@@ -45,13 +48,14 @@ body{
 }
 
 .title{
-  font:600 27px Fraunces;
+  font:600 28px Fraunces;
   margin:3px 0;
 }
 
 .sub{
   font:12px "IBM Plex Mono";
-  opacity:.62;
+  color:var(--muted);
+  margin-top:4px;
 }
 
 .header{
@@ -72,21 +76,27 @@ body{
 .btn{
   border:1px solid var(--ink);
   background:var(--ink);
-  color:var(--paper);
+  color:#fff;
   padding:9px 14px;
   border-radius:7px;
   cursor:pointer;
   font-weight:600;
+  transition:.15s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 5px 12px rgba(16,35,74,.18);
 }
 
 .btn.secondary{
   background:#fff;
-  color:var(--ink);
-  border-color:var(--line);
+  color:var(--blue);
+  border-color:var(--blue);
 }
 
 .btn.danger{
-  background:transparent;
+  background:#fff;
   color:var(--rust);
   border-color:var(--rust);
 }
@@ -105,7 +115,7 @@ body{
   background:none;
   padding:11px 15px;
   margin-bottom:-1px;
-  border-bottom:2px solid transparent;
+  border-bottom:3px solid transparent;
   color:var(--muted);
   cursor:pointer;
   font:12px "IBM Plex Mono";
@@ -128,12 +138,13 @@ body{
   border-radius:12px;
   padding:15px;
   margin-bottom:22px;
+  box-shadow:0 5px 16px rgba(16,35,74,.06);
 }
 
 .filters{
   display:flex;
   gap:10px;
-  align-items:end;
+  align-items:flex-end;
   flex-wrap:wrap;
 }
 
@@ -175,7 +186,77 @@ body{
   flex-wrap:wrap;
   width:100%;
   padding-top:12px;
+  margin-top:4px;
   border-top:1px solid var(--line);
+}
+
+.multi{
+  position:relative;
+}
+
+.multi summary{
+  height:36px;
+  display:flex;
+  align-items:center;
+  padding:0 10px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+  cursor:pointer;
+  font-size:12px;
+  min-width:190px;
+}
+
+.multiPanel{
+  position:absolute;
+  top:58px;
+  left:0;
+  z-index:30;
+  width:290px;
+  max-height:270px;
+  overflow:auto;
+  background:#fff;
+  border:1px solid var(--line);
+  box-shadow:0 12px 30px rgba(16,35,74,.22);
+  border-radius:8px;
+  padding:8px;
+}
+
+.multiActions{
+  display:flex;
+  gap:6px;
+  padding-bottom:7px;
+  margin-bottom:5px;
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:-8px;
+  background:#fff;
+  z-index:2;
+  padding-top:4px;
+}
+
+.multiActions button{
+  flex:1;
+  border:1px solid var(--line);
+  background:var(--dim);
+  border-radius:4px;
+  padding:5px;
+  cursor:pointer;
+  font-size:10px;
+}
+
+.multiOpt{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:6px;
+  font-size:12px;
+  cursor:pointer;
+  border-radius:4px;
+}
+
+.multiOpt:hover{
+  background:var(--dim);
 }
 
 .kpis{
@@ -188,15 +269,24 @@ body{
 .kpi{
   background:#fff;
   border:1px solid var(--line);
-  border-radius:5px 13px 5px 13px;
+  border-radius:5px 14px 5px 14px;
   padding:18px;
   min-width:0;
+  box-shadow:0 6px 18px rgba(16,35,74,.10);
 }
 
 .kpi.primary{
   background:var(--ink);
-  color:var(--paper);
+  color:#fff;
   border-color:var(--ink);
+}
+
+.kpi.paid{
+  border-top:5px solid var(--sage);
+}
+
+.kpi.open{
+  border-top:5px solid var(--gold);
 }
 
 .kpi.late{
@@ -205,21 +295,33 @@ body{
   border-color:var(--rust);
 }
 
-.kpi.gold{
+.kpi.entity{
   background:var(--gold);
-  color:#251b08;
+  color:#2a1d08;
   border-color:var(--gold);
+}
+
+.kpi.entry{
+  background:var(--sage);
+  color:#fff;
+  border-color:var(--sage);
+}
+
+.kpi.exit{
+  background:var(--rust);
+  color:#fff;
+  border-color:var(--rust);
 }
 
 .kpi .label{
   font-size:10px;
   letter-spacing:.08em;
   text-transform:uppercase;
-  opacity:.75;
+  opacity:.78;
 }
 
 .kpi .value{
-  font:600 24px Fraunces;
+  font:600 23px Fraunces;
   margin:8px 0 5px;
   white-space:nowrap;
   overflow:hidden;
@@ -228,7 +330,7 @@ body{
 
 .kpi .detail{
   font:11px "IBM Plex Mono";
-  opacity:.7;
+  opacity:.75;
 }
 
 .section{
@@ -256,6 +358,13 @@ body{
   padding:17px;
   margin-bottom:22px;
   overflow:hidden;
+  box-shadow:0 4px 14px rgba(16,35,74,.06);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
 }
 
 .chart{
@@ -265,17 +374,94 @@ body{
 
 .chart svg{
   display:block;
-  min-width:700px;
+  min-width:680px;
+}
+
+.legend{
+  display:flex;
+  gap:16px;
+  font:11px "IBM Plex Mono";
+  color:var(--muted);
+  margin-bottom:10px;
+}
+
+.legendItem{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.legendColor{
+  width:10px;
+  height:10px;
+  border-radius:2px;
+}
+
+.rankScroll{
+  max-height:310px;
+  overflow-y:auto;
+  padding-right:8px;
+}
+
+.rankScroll::-webkit-scrollbar,
+.tablewrap::-webkit-scrollbar,
+.multiPanel::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+.rankScroll::-webkit-scrollbar-thumb,
+.tablewrap::-webkit-scrollbar-thumb,
+.multiPanel::-webkit-scrollbar-thumb{
+  background:var(--gold);
+  border-radius:8px;
+}
+
+.ranking{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:10px 0;
+}
+
+.rankname{
+  width:175px;
+  flex-shrink:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+}
+
+.track{
+  height:22px;
+  background:var(--dim);
+  border-radius:4px;
+  flex:1;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  border-radius:4px;
+}
+
+.rankvalue{
+  width:108px;
+  flex-shrink:0;
+  text-align:right;
+  font:11px "IBM Plex Mono";
 }
 
 .tablewrap{
-  overflow-x:auto;
+  overflow:auto;
+  max-height:430px;
 }
 
 .table{
   width:100%;
   border-collapse:collapse;
-  min-width:680px;
+  min-width:720px;
 }
 
 .table th,
@@ -294,31 +480,51 @@ body{
 .table th{
   font:10px "IBM Plex Mono";
   text-transform:uppercase;
+  color:#fff;
+  background:var(--ink);
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+
+.table tbody tr:hover{
+  background:#fff6e6;
+}
+
+.positive{
+  color:var(--sage);
+  font-weight:600;
+}
+
+.negative{
+  color:var(--rust);
+  font-weight:600;
+}
+
+.neutral{
   color:var(--muted);
 }
 
-.positive{color:var(--sage)}
-.negative{color:var(--rust)}
-.neutral{color:var(--muted)}
-
 .analysis{
-  line-height:1.65;
+  line-height:1.7;
   font-size:13px;
+  border-left:5px solid var(--gold);
 }
 
 .analysisLead{
   font:600 17px Fraunces;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 
-.insights{
+.analysisList{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
 }
 
 .insight{
-  background:var(--dim);
+  background:#fff2d8;
+  border:1px solid #edcf91;
   border-radius:7px;
   padding:12px;
 }
@@ -332,58 +538,28 @@ body{
   justify-content:space-between;
   gap:15px;
   padding:9px 0;
-  border-bottom:1px solid var(--line);
+  border-bottom:2px solid var(--line);
   font:600 16px Fraunces;
+  color:var(--ink);
 }
 
 .catsub{
   display:flex;
   justify-content:space-between;
   gap:15px;
-  padding:7px 0 7px 24px;
+  padding:8px 0 8px 24px;
   color:var(--muted);
   font-size:12px;
+}
+
+.catsub:hover{
+  background:#fff6e6;
 }
 
 .cathead span:last-child,
 .catsub span:last-child{
   font-family:"IBM Plex Mono";
   white-space:nowrap;
-}
-
-.ranking{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  margin:10px 0;
-}
-
-.rankname{
-  width:180px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:12px;
-}
-
-.track{
-  height:22px;
-  background:var(--dim);
-  border-radius:4px;
-  flex:1;
-  overflow:hidden;
-}
-
-.fill{
-  height:100%;
-  background:var(--ink);
-  border-radius:4px;
-}
-
-.rankvalue{
-  width:110px;
-  text-align:right;
-  font:11px "IBM Plex Mono";
 }
 
 .empty{
@@ -393,14 +569,15 @@ body{
 }
 
 .drop{
-  border:2px dashed var(--line);
+  border:2px dashed var(--gold);
   border-radius:12px;
   padding:38px 20px;
   cursor:pointer;
+  background:#fff;
 }
 
 .drop.over{
-  border-color:var(--gold);
+  border-color:var(--blue);
   background:var(--dim);
 }
 
@@ -413,23 +590,53 @@ body{
 .footer{
   text-align:center;
   font:10px "IBM Plex Mono";
-  opacity:.5;
+  color:var(--muted);
   margin-top:28px;
 }
 
-input[type=file]{display:none}
+input[type=file]{
+  display:none;
+}
 
-@media(max-width:900px){
-  .kpis{grid-template-columns:1fr 1fr}
-  .insights{grid-template-columns:1fr}
+@media(max-width:950px){
+  .kpis{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .grid2,
+  .analysisList{
+    grid-template-columns:1fr;
+  }
 }
 
 @media(max-width:600px){
-  .wrap{padding:20px 14px 40px}
-  .kpis{grid-template-columns:1fr}
-  .actions{width:100%}
-  .actions .btn{flex:1}
-  .field{flex:1 1 140px}
+  .wrap{
+    padding:20px 14px 40px;
+  }
+
+  .kpis{
+    grid-template-columns:1fr;
+  }
+
+  .actions{
+    width:100%;
+  }
+
+  .actions .btn{
+    flex:1;
+  }
+
+  .field{
+    flex:1 1 140px;
+  }
+
+  .multi{
+    flex:1 1 190px;
+  }
+
+  .rankname{
+    width:125px;
+  }
 }
 </style>
 </head>
@@ -443,7 +650,7 @@ const MONTHS=[
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
 ];
 
-const MONTH_ABBR=[
+const ABBR=[
   "jan","fev","mar","abr","mai","jun",
   "jul","ago","set","out","nov","dez"
 ];
@@ -463,38 +670,68 @@ const GROUP_LABELS={
   "2.12":"Despesas Variáveis / Sócios"
 };
 
-const brl=value=>new Intl.NumberFormat("pt-BR",{
-  style:"currency",
-  currency:"BRL",
-  maximumFractionDigits:0
-}).format(Number(value)||0);
+const CONFIG={
+  pagar:{
+    label:"Contas a Pagar",
+    sheetRegex:/contas a pagar/i,
+    entityHeaders:["Nome do fornecedor"],
+    entityLabel:"Fornecedor",
+    doneHeaders:["Valor total pago da parcela (R$)"],
+    doneLabel:"Pago",
+    openLabel:"Em aberto"
+  },
 
-function element(tag,attributes={},children=[]){
-  const item=document.createElement(tag);
+  receber:{
+    label:"Contas a Receber",
+    sheetRegex:/contas a receber/i,
+    entityHeaders:[
+      "Nome do cliente",
+      "Nome do contato",
+      "Nome do fornecedor"
+    ],
+    entityLabel:"Cliente",
+    doneHeaders:[
+      "Valor total recebido da parcela (R$)",
+      "Valor total pago da parcela (R$)"
+    ],
+    doneLabel:"Recebido",
+    openLabel:"A receber"
+  }
+};
+
+const brl=value=>
+  new Intl.NumberFormat("pt-BR",{
+    style:"currency",
+    currency:"BRL",
+    maximumFractionDigits:0
+  }).format(Number(value)||0);
+
+function createElement(tag,attributes={},children=[]){
+  const element=document.createElement(tag);
 
   Object.entries(attributes).forEach(([key,value])=>{
     if(key.startsWith("on")){
-      item.addEventListener(key.slice(2),value);
+      element.addEventListener(key.slice(2),value);
     }else if(key==="class"){
-      item.className=value;
+      element.className=value;
     }else if(key==="html"){
-      item.innerHTML=value;
+      element.innerHTML=value;
     }else{
-      item.setAttribute(key,value);
+      element.setAttribute(key,value);
     }
   });
 
   (Array.isArray(children)?children:[children]).forEach(child=>{
     if(child===null||child===undefined||child===false)return;
 
-    item.appendChild(
+    element.appendChild(
       typeof child==="string"
         ?document.createTextNode(child)
         :child
     );
   });
 
-  return item;
+  return element;
 }
 
 const normalize=value=>
@@ -502,7 +739,10 @@ const normalize=value=>
 
 function findColumn(headers,names){
   const wanted=names.map(normalize);
-  return headers.findIndex(header=>wanted.includes(normalize(header)));
+
+  return headers.findIndex(header=>
+    wanted.includes(normalize(header))
+  );
 }
 
 function parseNumber(value){
@@ -510,7 +750,10 @@ function parseNumber(value){
 
   let text=(value||"").toString().trim();
 
-  if(text.includes(",")&&text.lastIndexOf(",")>text.lastIndexOf(".")){
+  if(
+    text.includes(",")&&
+    text.lastIndexOf(",")>text.lastIndexOf(".")
+  ){
     text=text.replace(/\./g,"").replace(",",".");
   }
 
@@ -522,102 +765,161 @@ function parseDate(value){
   if(value instanceof Date)return value;
 
   if(typeof value==="number"&&value>20000){
-    const converted=new Date(Math.round((value-25569)*86400000));
+    const date=new Date(Math.round((value-25569)*86400000));
 
     return new Date(
-      converted.getUTCFullYear(),
-      converted.getUTCMonth(),
-      converted.getUTCDate()
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate()
     );
   }
 
   const text=(value||"").toString().trim();
 
-  let match=text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  let match=text.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/
+  );
 
   if(match){
     const year=match[3].length===2
       ?Number(`20${match[3]}`)
       :Number(match[3]);
 
-    return new Date(year,Number(match[2])-1,Number(match[1]));
+    return new Date(
+      year,
+      Number(match[2])-1,
+      Number(match[1])
+    );
   }
 
   match=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
   return match
-    ?new Date(Number(match[1]),Number(match[2])-1,Number(match[3]))
+    ?new Date(
+      Number(match[1]),
+      Number(match[2])-1,
+      Number(match[3])
+    )
     :null;
 }
 
-function dateISO(date){
+function dateToISO(date){
   if(!date)return "";
 
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+  return[
+    date.getFullYear(),
+    String(date.getMonth()+1).padStart(2,"0"),
+    String(date.getDate()).padStart(2,"0")
+  ].join("-");
 }
 
 function parseCategory(raw){
   const text=(raw||"").toString().trim();
-  const match=text.match(/^(\d+(?:\.\d+)+)\s*[-–.]?\s*(.*)$/);
 
-  return match&&match[2]
-    ?{code:match[1],name:match[2].trim()}
-    :{
-      code:"",
-      name:text.replace(/^[\d.]+\s*/,"").trim()||"Sem categoria"
+  const match=text.match(
+    /^(\d+(?:\.\d+)+)\s*[-–.]?\s*(.*)$/
+  );
+
+  if(match&&match[2]){
+    return{
+      code:match[1],
+      name:match[2].trim()
     };
+  }
+
+  return{
+    code:"",
+    name:
+      text.replace(/^[\d.]+\s*/,"").trim()||
+      "Sem categoria"
+  };
 }
 
-async function parsePayables(file){
-  const workbook=XLSX.read(await file.arrayBuffer(),{type:"array"});
+async function parseAccounts(file,key){
+  const config=CONFIG[key];
+
+  const workbook=XLSX.read(
+    await file.arrayBuffer(),
+    {type:"array"}
+  );
 
   const sheetName=
-    workbook.SheetNames.find(name=>/contas a pagar/i.test(name))||
-    workbook.SheetNames[0];
+    workbook.SheetNames.find(name=>
+      config.sheetRegex.test(name)
+    )||workbook.SheetNames[0];
 
   const worksheet=workbook.Sheets[sheetName];
 
-  const rows=XLSX.utils.sheet_to_json(worksheet,{
-    header:1,
-    raw:true,
-    defval:""
-  });
+  const rows=XLSX.utils.sheet_to_json(
+    worksheet,
+    {
+      header:1,
+      raw:true,
+      defval:""
+    }
+  );
 
   const headerIndex=rows.findIndex(row=>
-    row.some(cell=>normalize(cell)==="nome do fornecedor")
+    config.entityHeaders.some(name=>
+      row.some(cell=>
+        normalize(cell)===normalize(name)
+      )
+    )
   );
 
   if(headerIndex<0){
     throw new Error(
-      'Não reconheci o arquivo. Envie o relatório "Visão Contas a Pagar" do Conta Azul.'
+      `Não reconheci o relatório de ${config.label}. `+
+      "Exporte novamente pelo Conta Azul sem alterar os cabeçalhos."
     );
   }
 
   const headers=rows[headerIndex];
 
   const columns={
-    supplier:findColumn(headers,["Nome do fornecedor"]),
-    dueDate:findColumn(headers,["Data de vencimento"]),
+    entity:findColumn(headers,config.entityHeaders),
+    date:findColumn(headers,["Data de vencimento"]),
     status:findColumn(headers,["Situação"]),
-    original:findColumn(headers,["Valor original da parcela (R$)"]),
-    paid:findColumn(headers,["Valor total pago da parcela (R$)"]),
-    open:findColumn(headers,["Valor total da parcela em aberto (R$)"]),
-    costCenter:findColumn(headers,["Centro de Custo 1"])
+    original:findColumn(
+      headers,
+      ["Valor original da parcela (R$)"]
+    ),
+    done:findColumn(headers,config.doneHeaders),
+    open:findColumn(
+      headers,
+      ["Valor total da parcela em aberto (R$)"]
+    ),
+    costCenter:findColumn(
+      headers,
+      ["Centro de Custo 1"]
+    )
   };
 
-  if(columns.supplier<0||columns.dueDate<0||columns.original<0){
-    throw new Error("Faltam colunas obrigatórias no arquivo.");
+  if(
+    columns.entity<0||
+    columns.date<0||
+    columns.original<0
+  ){
+    throw new Error(
+      "Faltam colunas obrigatórias no arquivo."
+    );
   }
 
   const categoryColumns=[];
 
   for(let index=1;index<=12;index++){
-    const categoryIndex=findColumn(headers,[`Categoria ${index}`]);
+    const categoryIndex=findColumn(
+      headers,
+      [`Categoria ${index}`]
+    );
 
     if(categoryIndex>=0){
       categoryColumns.push({
         categoryIndex,
-        valueIndex:findColumn(headers,[`Valor na Categoria ${index}`])
+        valueIndex:findColumn(
+          headers,
+          [`Valor na Categoria ${index}`]
+        )
       });
     }
   }
@@ -625,10 +927,14 @@ async function parsePayables(file){
   const records=[];
 
   rows.slice(headerIndex+1).forEach(row=>{
-    const date=parseDate(row[columns.dueDate]);
+    const date=parseDate(row[columns.date]);
+
     if(!date)return;
 
-    const original=Math.abs(parseNumber(row[columns.original]));
+    const original=Math.abs(
+      parseNumber(row[columns.original])
+    );
+
     const allocations=[];
 
     categoryColumns.forEach(column=>{
@@ -641,7 +947,9 @@ async function parsePayables(file){
       allocations.push({
         code:category.code,
         name:category.name,
-        value:Math.abs(parseNumber(row[column.valueIndex]))
+        value:Math.abs(
+          parseNumber(row[column.valueIndex])
+        )
       });
     });
 
@@ -651,21 +959,43 @@ async function parsePayables(file){
         name:"Sem categoria",
         value:original
       });
-    }else if(!allocations.some(item=>item.value)){
+    }else if(
+      !allocations.some(allocation=>allocation.value)
+    ){
       allocations[0].value=original;
     }
 
-    const formattedDate=dateISO(date);
+    const formattedDate=dateToISO(date);
 
     records.push({
-      supplier:String(row[columns.supplier]||"Sem fornecedor").trim(),
-      status:String(row[columns.status]||"Não informado").trim(),
+      entity:String(
+        row[columns.entity]||
+        `Sem ${config.entityLabel.toLowerCase()}`
+      ).trim(),
+
+      status:String(
+        row[columns.status]||
+        "Não informado"
+      ).trim(),
+
       original,
-      paid:Math.abs(parseNumber(row[columns.paid])),
-      open:Math.abs(parseNumber(row[columns.open])),
-      costCenter:columns.costCenter>=0
-        ?String(row[columns.costCenter]||"Sem centro de custo").trim()
-        :"Sem centro de custo",
+
+      done:Math.abs(
+        parseNumber(row[columns.done])
+      ),
+
+      open:Math.abs(
+        parseNumber(row[columns.open])
+      ),
+
+      costCenter:
+        columns.costCenter>=0
+          ?String(
+            row[columns.costCenter]||
+            "Sem centro de custo"
+          ).trim()
+          :"Sem centro de custo",
+
       allocations,
       date:formattedDate,
       month:formattedDate.slice(0,7)
@@ -673,10 +1003,150 @@ async function parsePayables(file){
   });
 
   if(!records.length){
-    throw new Error("Nenhum lançamento válido foi encontrado.");
+    throw new Error(
+      "Nenhum lançamento válido foi encontrado."
+    );
   }
 
   return records;
+}
+
+async function parseStatement(file){
+  const workbook=XLSX.read(
+    await file.arrayBuffer(),
+    {type:"array"}
+  );
+
+  const sheetName=
+    workbook.SheetNames.find(name=>
+      /extrato/i.test(name)
+    )||workbook.SheetNames[0];
+
+  const worksheet=workbook.Sheets[sheetName];
+
+  const rows=XLSX.utils.sheet_to_json(
+    worksheet,
+    {
+      header:1,
+      raw:true,
+      defval:""
+    }
+  );
+
+  const dateHeaders=[
+    "Data",
+    "Data do Lançamento",
+    "Data Lançamento",
+    "Data lançamento"
+  ];
+
+  const valueHeaders=[
+    "Valor",
+    "Valor (R$)",
+    "Valor R$",
+    "Valor da Transação",
+    "Valor da transacao"
+  ];
+
+  const headerIndex=rows.findIndex(row=>
+    findColumn(row,dateHeaders)>=0&&
+    findColumn(row,valueHeaders)>=0
+  );
+
+  if(headerIndex<0){
+    throw new Error(
+      "Não reconheci o extrato. Preciso das colunas Data e Valor."
+    );
+  }
+
+  const headers=rows[headerIndex];
+
+  const columns={
+    date:findColumn(headers,dateHeaders),
+    value:findColumn(headers,valueHeaders),
+
+    description:findColumn(
+      headers,
+      [
+        "Descrição",
+        "Histórico",
+        "Descricao",
+        "Historico",
+        "Complemento",
+        "Detalhes"
+      ]
+    ),
+
+    type:findColumn(
+      headers,
+      [
+        "Tipo",
+        "Natureza",
+        "D/C",
+        "Tipo Lançamento"
+      ]
+    ),
+
+    balance:findColumn(
+      headers,
+      [
+        "Saldo",
+        "Saldo (R$)",
+        "Saldo Final",
+        "Saldo final"
+      ]
+    )
+  };
+
+  let balance=null;
+  const records=[];
+
+  rows.slice(headerIndex+1).forEach(row=>{
+    const date=parseDate(row[columns.date]);
+
+    if(!date)return;
+
+    const rawValue=parseNumber(row[columns.value]);
+    const rawType=normalize(row[columns.type]);
+
+    let type;
+
+    if(rawType.startsWith("d")){
+      type="exit";
+    }else if(rawType.startsWith("c")){
+      type="entry";
+    }else{
+      type=rawValue<0?"exit":"entry";
+    }
+
+    if(
+      columns.balance>=0&&
+      row[columns.balance]!==""
+    ){
+      balance=parseNumber(row[columns.balance]);
+    }
+
+    const formattedDate=dateToISO(date);
+
+    records.push({
+      date:formattedDate,
+      month:formattedDate.slice(0,7),
+      value:Math.abs(rawValue),
+      type,
+      description:String(
+        row[columns.description]||
+        "Sem descrição"
+      ).trim()
+    });
+  });
+
+  if(!records.length){
+    throw new Error(
+      "Nenhum lançamento válido foi encontrado no extrato."
+    );
+  }
+
+  return{records,balance};
 }
 
 function freshFilters(){
@@ -691,64 +1161,115 @@ function freshFilters(){
     period2From:"",
     period2To:"",
     status:"",
-    supplier:"",
-    category:"",
-    costCenter:""
+    entity:"",
+    categories:[],
+    costCenter:"",
+    type:""
   };
 }
 
 let state={
+  source:"pagar",
   view:"dashboard",
-  records:null,
-  updated:"",
+
+  data:{
+    pagar:null,
+    receber:null,
+    extrato:null
+  },
+
+  updated:{},
+  balance:null,
   error:"",
   filters:freshFilters()
 };
 
 function loadData(){
-  try{
-    const saved=JSON.parse(localStorage.getItem("dane-se-payables-v7"));
+  ["pagar","receber","extrato"].forEach(key=>{
+    try{
+      const saved=JSON.parse(
+        localStorage.getItem(
+          `dane-se-dashboard-${key}-v8`
+        )
+      );
 
-    if(saved){
-      state.records=saved.records;
-      state.updated=saved.updated;
+      if(!saved)return;
+
+      state.data[key]=saved.records;
+      state.updated[key]=saved.updated;
+
+      if(key==="extrato"){
+        state.balance=saved.balance;
+      }
+    }catch(error){
+      console.error(error);
     }
-  }catch(error){
-    console.error(error);
-  }
+  });
 }
 
-function saveData(){
-  localStorage.setItem("dane-se-payables-v7",JSON.stringify({
-    records:state.records,
-    updated:state.updated
-  }));
+function saveData(key){
+  localStorage.setItem(
+    `dane-se-dashboard-${key}-v8`,
+    JSON.stringify({
+      records:state.data[key],
+      updated:state.updated[key],
+      balance:state.balance
+    })
+  );
 }
 
-function monthOptions(){
-  return[...new Set((state.records||[]).map(record=>record.month))]
+function currentSourceRecords(){
+  return state.data[state.source]||[];
+}
+
+function availableMonths(){
+  const all=Object.values(state.data)
+    .filter(Boolean)
+    .flat();
+
+  return[
+    ...new Set(all.map(record=>record.month))
+  ]
     .sort()
     .map(key=>({
       key,
-      label:`${MONTHS[Number(key.slice(5))-1]}/${key.slice(0,4)}`
+      label:
+        `${MONTHS[Number(key.slice(5))-1]}/`+
+        key.slice(0,4)
     }));
 }
 
-function baseRecords(){
+function baseFilter(records){
   const filters=state.filters;
 
-  return(state.records||[])
-    .filter(record=>!filters.status||record.status===filters.status)
-    .filter(record=>!filters.supplier||record.supplier===filters.supplier)
-    .filter(record=>!filters.costCenter||record.costCenter===filters.costCenter)
+  return(records||[])
     .filter(record=>
-      !filters.category||
-      record.allocations.some(item=>item.name===filters.category)
+      !filters.status||
+      record.status===filters.status
+    )
+    .filter(record=>
+      !filters.entity||
+      record.entity===filters.entity
+    )
+    .filter(record=>
+      !filters.costCenter||
+      record.costCenter===filters.costCenter
+    )
+    .filter(record=>
+      !filters.categories.length||
+      record.allocations?.some(allocation=>
+        filters.categories.includes(allocation.name)
+      )
+    )
+    .filter(record=>
+      !filters.type||
+      record.type===filters.type
     );
 }
 
-function periodRecords(period=0){
+function periodFilter(records,period=0){
   const filters=state.filters;
+
   let from="";
   let to="";
   let month="";
@@ -765,448 +1286,1657 @@ function periodRecords(period=0){
     from=filters.dateFrom;
     to=filters.dateTo;
 
-    month=period===1
-      ?filters.month1
-      :period===2
-        ?filters.month2
-        :"";
+    month=
+      period===1
+        ?filters.month1
+        :period===2
+          ?filters.month2
+          :"";
   }
 
-  return baseRecords()
-    .filter(record=>!from||record.date>=from)
-    .filter(record=>!to||record.date<=to)
-    .filter(record=>!month||record.month===month);
+  return baseFilter(records)
+    .filter(record=>
+      !from||record.date>=from
+    )
+    .filter(record=>
+      !to||record.date<=to
+    )
+    .filter(record=>
+      !month||record.month===month
+    );
 }
 
-function currentRecords(){
-  return periodRecords(
-    state.filters.compare||state.filters.month2?2:1
+function selectedPeriodRecords(records){
+  return periodFilter(
+    records,
+    state.filters.compare||state.filters.month2
+      ?2
+      :1
   );
 }
 
-function variation(first,second){
-  if(first===0)return second===0?0:NaN;
-  return((second-first)/Math.abs(first))*100;
+function variation(firstValue,secondValue){
+  if(firstValue===0){
+    return secondValue===0?0:NaN;
+  }
+
+  return(
+    (secondValue-firstValue)/
+    Math.abs(firstValue)
+  )*100;
 }
 
-function variationText(first,second){
-  const value=variation(first,second);
+function percentageText(firstValue,secondValue){
+  const value=variation(firstValue,secondValue);
 
   if(!Number.isFinite(value))return "—";
 
-  return`${value>0?"↑ +":value<0?"↓ ":""}${value.toFixed(1).replace(".",",")}%`;
+  return`${value>0?"+":""}${value.toFixed(1).replace(".",",")}%`;
 }
 
-function section(eyebrow,title){
-  return element("div",{class:"section"},[
-    element("span",{class:"eyebrow"},eyebrow),
-    element("h2",{},title),
-    element("div",{class:"rule"})
-  ]);
+function periodLabels(){
+  const filters=state.filters;
+  const months=availableMonths();
+
+  const monthName=key=>
+    months.find(month=>month.key===key)?.label||
+    "Período";
+
+  if(filters.compare){
+    return[
+      `${filters.period1From||"início"} a ${filters.period1To||"fim"}`,
+      `${filters.period2From||"início"} a ${filters.period2To||"fim"}`
+    ];
+  }
+
+  return[
+    monthName(filters.month1),
+    monthName(filters.month2)
+  ];
 }
 
-function kpi(label,value,className="",detail=""){
-  return element("div",{class:`kpi ${className}`},[
-    element("div",{class:"label"},label),
-    element("div",{class:"value"},value),
-    detail?element("div",{class:"detail"},detail):null
-  ]);
+function sectionHeader(eyebrow,title){
+  return createElement(
+    "div",
+    {class:"section"},
+    [
+      createElement(
+        "span",
+        {class:"eyebrow"},
+        eyebrow
+      ),
+
+      createElement("h2",{},title),
+
+      createElement(
+        "div",
+        {class:"rule"}
+      )
+    ]
+  );
 }
 
-function selectField(label,value,options,onChange){
-  const select=element("select",{onchange:event=>onChange(event.target.value)},[
-    element("option",{value:""},"Todos"),
-    ...options.map(option=>{
-      const item=element("option",{value:option.key},option.label);
-      item.selected=option.key===value;
-      return item;
-    })
-  ]);
+function kpiCard(
+  label,
+  value,
+  tone="",
+  detail=""
+){
+  return createElement(
+    "div",
+    {class:`kpi ${tone}`},
+    [
+      createElement(
+        "div",
+        {class:"label"},
+        label
+      ),
 
-  return element("div",{class:"field"},[
-    element("label",{},label),
-    select
-  ]);
+      createElement(
+        "div",
+        {class:"value"},
+        value
+      ),
+
+      detail
+        ?createElement(
+          "div",
+          {class:"detail"},
+          detail
+        )
+        :null
+    ]
+  );
+}
+
+function selectField(
+  label,
+  value,
+  options,
+  onChange
+){
+  const select=createElement(
+    "select",
+    {
+      onchange:event=>
+        onChange(event.target.value)
+    },
+    [
+      createElement(
+        "option",
+        {value:""},
+        "Todos"
+      ),
+
+      ...options.map(option=>{
+        const item=createElement(
+          "option",
+          {value:option.key},
+          option.label
+        );
+
+        item.selected=option.key===value;
+        return item;
+      })
+    ]
+  );
+
+  return createElement(
+    "div",
+    {class:"field"},
+    [
+      createElement("label",{},label),
+      select
+    ]
+  );
 }
 
 function dateField(label,key){
-  return element("div",{class:"field"},[
-    element("label",{},label),
-    element("input",{
-      type:"date",
-      value:state.filters[key],
-      onchange:event=>{
-        state.filters[key]=event.target.value;
+  return createElement(
+    "div",
+    {class:"field"},
+    [
+      createElement("label",{},label),
 
-        if(!state.filters.compare&&event.target.value){
-          if(key==="dateFrom")state.filters.month1=event.target.value.slice(0,7);
-          if(key==="dateTo")state.filters.month2=event.target.value.slice(0,7);
+      createElement("input",{
+        type:"date",
+        value:state.filters[key],
+
+        onchange:event=>{
+          state.filters[key]=event.target.value;
+
+          if(
+            !state.filters.compare&&
+            event.target.value
+          ){
+            const month=event.target.value.slice(0,7);
+
+            if(key==="dateFrom"){
+              state.filters.month1=month;
+            }
+
+            if(key==="dateTo"){
+              state.filters.month2=month;
+            }
+          }
+
+          render();
         }
+      })
+    ]
+  );
+}
 
-        render();
+function multiCategoryField(categories){
+  const details=createElement(
+    "details",
+    {class:"multi field"}
+  );
+
+  const count=state.filters.categories.length;
+
+  details.append(
+    createElement(
+      "label",
+      {},
+      "Subcategorias"
+    ),
+
+    createElement(
+      "summary",
+      {},
+      count
+        ?`${count} selecionadas`
+        :"Todas as subcategorias"
+    )
+  );
+
+  const panel=createElement(
+    "div",
+    {class:"multiPanel"}
+  );
+
+  panel.append(
+    createElement(
+      "div",
+      {class:"multiActions"},
+      [
+        createElement(
+          "button",
+          {
+            type:"button",
+            onclick:event=>{
+              event.preventDefault();
+              state.filters.categories=[];
+              render();
+            }
+          },
+          "Limpar"
+        ),
+
+        createElement(
+          "button",
+          {
+            type:"button",
+            onclick:event=>{
+              event.preventDefault();
+              state.filters.categories=[...categories];
+              render();
+            }
+          },
+          "Selecionar todas"
+        )
+      ]
+    )
+  );
+
+  categories.forEach(category=>{
+    const checkbox=createElement(
+      "input",
+      {type:"checkbox"}
+    );
+
+    checkbox.checked=
+      state.filters.categories.includes(category);
+
+    checkbox.onchange=()=>{
+      if(checkbox.checked){
+        state.filters.categories=[
+          ...state.filters.categories,
+          category
+        ];
+      }else{
+        state.filters.categories=
+          state.filters.categories.filter(
+            item=>item!==category
+          );
       }
-    })
-  ]);
+
+      render();
+    };
+
+    panel.append(
+      createElement(
+        "label",
+        {class:"multiOpt"},
+        [checkbox,category]
+      )
+    );
+  });
+
+  details.append(panel);
+  return details;
 }
 
 function renderFilters(){
   const filters=state.filters;
-  const records=state.records||[];
+  const records=currentSourceRecords();
 
-  const options=property=>[...new Set(records.map(record=>record[property]).filter(Boolean))]
+  const options=property=>[
+    ...new Set(
+      records
+        .map(record=>record[property])
+        .filter(Boolean)
+    )
+  ]
     .sort((a,b)=>a.localeCompare(b,"pt-BR"))
-    .map(value=>({key:value,label:value}));
+    .map(value=>({
+      key:value,
+      label:value
+    }));
 
-  const categories=[...new Set(
-    records.flatMap(record=>record.allocations.map(item=>item.name))
-  )]
-    .sort((a,b)=>a.localeCompare(b,"pt-BR"))
-    .map(value=>({key:value,label:value}));
+  const categories=[
+    ...new Set(
+      records.flatMap(record=>
+        record.allocations?.map(
+          allocation=>allocation.name
+        )||[]
+      )
+    )
+  ].sort((a,b)=>a.localeCompare(b,"pt-BR"));
 
-  const row=element("div",{class:"filters"});
+  const row=createElement(
+    "div",
+    {class:"filters"}
+  );
 
   if(!filters.compare){
     row.append(
-      dateField("Data inicial","dateFrom"),
-      dateField("Data final","dateTo"),
-      selectField("Mês 1",filters.month1,monthOptions(),value=>{
-        filters.month1=value;
-        render();
-      }),
-      selectField("Mês 2",filters.month2,monthOptions(),value=>{
-        filters.month2=value;
-        render();
-      })
+      dateField(
+        "Data inicial",
+        "dateFrom"
+      ),
+
+      dateField(
+        "Data final",
+        "dateTo"
+      ),
+
+      selectField(
+        "Mês 1",
+        filters.month1,
+        availableMonths(),
+        value=>{
+          filters.month1=value;
+          render();
+        }
+      ),
+
+      selectField(
+        "Mês 2",
+        filters.month2,
+        availableMonths(),
+        value=>{
+          filters.month2=value;
+          render();
+        }
+      )
     );
   }
 
-  const checkbox=element("input",{
-    type:"checkbox",
-    onchange:event=>{
-      filters.compare=event.target.checked;
-      render();
-    }
-  });
+  const compareCheckbox=createElement(
+    "input",
+    {
+      type:"checkbox",
 
-  checkbox.checked=filters.compare;
+      onchange:event=>{
+        filters.compare=event.target.checked;
+        render();
+      }
+    }
+  );
+
+  compareCheckbox.checked=filters.compare;
 
   row.append(
-    element("label",{class:"compareToggle"},[
-      checkbox,
-      "Comparar períodos"
-    ])
+    createElement(
+      "label",
+      {class:"compareToggle"},
+      [
+        compareCheckbox,
+        "Comparar períodos"
+      ]
+    )
   );
 
   if(filters.compare){
     row.append(
-      element("div",{class:"compareDates"},[
-        dateField("Período 1 — início","period1From"),
-        dateField("Período 1 — fim","period1To"),
-        dateField("Período 2 — início","period2From"),
-        dateField("Período 2 — fim","period2To")
-      ])
+      createElement(
+        "div",
+        {class:"compareDates"},
+        [
+          dateField(
+            "Período 1 — início",
+            "period1From"
+          ),
+
+          dateField(
+            "Período 1 — fim",
+            "period1To"
+          ),
+
+          dateField(
+            "Período 2 — início",
+            "period2From"
+          ),
+
+          dateField(
+            "Período 2 — fim",
+            "period2To"
+          )
+        ]
+      )
+    );
+  }
+
+  if(
+    state.source==="pagar"||
+    state.source==="receber"
+  ){
+    row.append(
+      selectField(
+        "Situação",
+        filters.status,
+        options("status"),
+        value=>{
+          filters.status=value;
+          render();
+        }
+      ),
+
+      selectField(
+        CONFIG[state.source].entityLabel,
+        filters.entity,
+        options("entity"),
+        value=>{
+          filters.entity=value;
+          render();
+        }
+      ),
+
+      multiCategoryField(categories),
+
+      selectField(
+        "Centro de custo",
+        filters.costCenter,
+        options("costCenter"),
+        value=>{
+          filters.costCenter=value;
+          render();
+        }
+      )
+    );
+  }
+
+  if(state.source==="extrato"){
+    row.append(
+      selectField(
+        "Tipo",
+        filters.type,
+        [
+          {key:"entry",label:"Entradas"},
+          {key:"exit",label:"Saídas"}
+        ],
+        value=>{
+          filters.type=value;
+          render();
+        }
+      )
     );
   }
 
   row.append(
-    selectField("Situação",filters.status,options("status"),value=>{
-      filters.status=value;
-      render();
-    }),
-    selectField("Fornecedor",filters.supplier,options("supplier"),value=>{
-      filters.supplier=value;
-      render();
-    }),
-    selectField("Categoria",filters.category,categories,value=>{
-      filters.category=value;
-      render();
-    }),
-    selectField("Centro de custo",filters.costCenter,options("costCenter"),value=>{
-      filters.costCenter=value;
-      render();
-    }),
-    element("button",{
-      class:"btn secondary",
-      onclick:()=>{
-        state.filters=freshFilters();
-        render();
-      }
-    },"Limpar filtros")
+    createElement(
+      "button",
+      {
+        class:"btn secondary",
+
+        onclick:()=>{
+          state.filters=freshFilters();
+          render();
+        }
+      },
+      "Limpar filtros"
+    )
   );
 
-  return element("div",{class:"filterbox"},row);
+  return createElement(
+    "div",
+    {class:"filterbox"},
+    row
+  );
 }
 
-function totals(records){
+function accountTotals(records){
   return{
-    total:records.reduce((sum,record)=>sum+record.original,0),
-    paid:records.reduce((sum,record)=>sum+record.paid,0),
+    total:records.reduce(
+      (sum,record)=>sum+record.original,
+      0
+    ),
+
+    done:records.reduce(
+      (sum,record)=>sum+record.done,
+      0
+    ),
+
     open:records
       .filter(record=>record.status==="Em aberto")
-      .reduce((sum,record)=>sum+record.open,0),
+      .reduce(
+        (sum,record)=>sum+record.open,
+        0
+      ),
+
     late:records
       .filter(record=>record.status==="Atrasado")
-      .reduce((sum,record)=>sum+record.open,0),
-    suppliers:new Set(records.map(record=>record.supplier)).size
+      .reduce(
+        (sum,record)=>sum+record.open,
+        0
+      ),
+
+    entityCount:new Set(
+      records.map(record=>record.entity)
+    ).size
   };
 }
 
-function monthlyData(){
+function categoryMap(records){
   const map=new Map();
 
-  baseRecords().forEach(record=>{
-    map.set(record.month,(map.get(record.month)||0)+record.original);
+  records.forEach(record=>{
+    record.allocations?.forEach(allocation=>{
+      map.set(
+        allocation.name,
+        (map.get(allocation.name)||0)+
+        allocation.value
+      );
+    });
   });
 
-  return[...map.entries()]
-    .sort()
-    .map(([key,value])=>({
-      key,
-      label:`${MONTH_ABBR[Number(key.slice(5))-1]}/${key.slice(2,4)}`,
-      value
-    }));
+  return map;
 }
 
 function categoryGroups(records){
   const groups=new Map();
 
   records.forEach(record=>{
-    record.allocations.forEach(allocation=>{
+    record.allocations?.forEach(allocation=>{
       const parts=(allocation.code||"").split(".");
-      const key=parts.length>=2?parts.slice(0,2).join("."):allocation.name;
-      const label=GROUP_LABELS[key]||allocation.name;
+
+      const key=
+        parts.length>=2
+          ?parts.slice(0,2).join(".")
+          :allocation.name;
+
+      const label=
+        GROUP_LABELS[key]||
+        allocation.name;
 
       if(!groups.has(key)){
         groups.set(key,{
           label,
           total:0,
-          items:new Map()
+          subcategories:new Map()
         });
       }
 
       const group=groups.get(key);
       group.total+=allocation.value;
 
-      group.items.set(
+      group.subcategories.set(
         allocation.name,
-        (group.items.get(allocation.name)||0)+allocation.value
+        (
+          group.subcategories.get(
+            allocation.name
+          )||0
+        )+allocation.value
       );
     });
   });
 
-  return[...groups.values()].sort((a,b)=>b.total-a.total);
+  return[
+    ...groups.values()
+  ].sort(
+    (first,second)=>
+      second.total-first.total
+  );
 }
 
-function rankingMap(records,property){
+function rankingData(records,property){
   const map=new Map();
 
   records.forEach(record=>{
     map.set(
       record[property],
-      (map.get(record[property])||0)+record.original
+      (
+        map.get(record[property])||0
+      )+record.original
     );
   });
 
-  return[...map.entries()].sort((a,b)=>b[1]-a[1]);
+  return[
+    ...map.entries()
+  ].sort(
+    (first,second)=>
+      second[1]-first[1]
+  );
 }
 
-function renderChart(){
-  const data=monthlyData();
+function renderRanking(
+  records,
+  property,
+  color
+){
+  const data=rankingData(records,property);
+
+  const maximum=Math.max(
+    1,
+    ...data.map(item=>item[1])
+  );
+
+  return createElement(
+    "div",
+    {class:"card rankScroll"},
+
+    data.length
+      ?data.map(([name,value])=>
+        createElement(
+          "div",
+          {class:"ranking"},
+          [
+            createElement(
+              "div",
+              {
+                class:"rankname",
+                title:name
+              },
+              name
+            ),
+
+            createElement(
+              "div",
+              {class:"track"},
+              createElement(
+                "div",
+                {
+                  class:"fill",
+
+                  style:
+                    `width:${(value/maximum)*100}%;`+
+                    `background:${color}`
+                }
+              )
+            ),
+
+            createElement(
+              "div",
+              {class:"rankvalue"},
+              brl(value)
+            )
+          ]
+        )
+      )
+      :"Sem dados para os filtros atuais."
+  );
+}
+
+function monthlyAccountData(records){
+  const map=new Map();
+
+  baseFilter(records).forEach(record=>{
+    map.set(
+      record.month,
+      (map.get(record.month)||0)+
+      record.original
+    );
+  });
+
+  return[
+    ...map.entries()
+  ]
+    .sort()
+    .map(([key,value])=>({
+      key,
+      label:
+        `${ABBR[Number(key.slice(5))-1]}/`+
+        key.slice(2,4),
+      value
+    }));
+}
+
+function monthlyStatementData(){
+  const map=new Map();
+
+  baseFilter(state.data.extrato).forEach(record=>{
+    const current=map.get(record.month)||{
+      entry:0,
+      exit:0
+    };
+
+    current[record.type]+=record.value;
+    map.set(record.month,current);
+  });
+
+  return[
+    ...map.entries()
+  ]
+    .sort()
+    .map(([key,value])=>({
+      key,
+      label:
+        `${ABBR[Number(key.slice(5))-1]}/`+
+        key.slice(2,4),
+      ...value
+    }));
+}
+
+function barChart(data,color){
   const width=1000;
   const height=280;
   const left=65;
   const bottom=35;
-  const maximum=Math.max(1,...data.map(item=>item.value));
-  const gap=(width-left-20)/Math.max(data.length,1);
+
+  const maximum=Math.max(
+    1,
+    ...data.map(item=>item.value)
+  );
+
+  const gap=
+    (width-left-20)/
+    Math.max(data.length,1);
+
   const barWidth=Math.min(70,gap*.62);
 
-  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
+  const svg=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
 
   data.forEach((item,index)=>{
-    const barHeight=(height-bottom-20)*(item.value/maximum);
-    const x=left+index*gap+(gap-barWidth)/2;
-    const y=height-bottom-barHeight;
+    const barHeight=
+      (height-bottom-20)*
+      (item.value/maximum);
 
-    const rectangle=document.createElementNS(svg.namespaceURI,"rect");
+    const x=
+      left+
+      index*gap+
+      (gap-barWidth)/2;
+
+    const y=
+      height-
+      bottom-
+      barHeight;
+
+    const rectangle=
+      document.createElementNS(
+        svg.namespaceURI,
+        "rect"
+      );
+
     rectangle.setAttribute("x",x);
     rectangle.setAttribute("y",y);
     rectangle.setAttribute("width",barWidth);
     rectangle.setAttribute("height",barHeight);
     rectangle.setAttribute("rx",4);
-    rectangle.setAttribute("fill","#16233f");
+    rectangle.setAttribute("fill",color);
 
-    const tooltip=document.createElementNS(svg.namespaceURI,"title");
-    tooltip.textContent=`${item.label}: ${brl(item.value)}`;
+    const tooltip=
+      document.createElementNS(
+        svg.namespaceURI,
+        "title"
+      );
+
+    tooltip.textContent=
+      `${item.label}: ${brl(item.value)}`;
+
     rectangle.append(tooltip);
     svg.append(rectangle);
 
-    const label=document.createElementNS(svg.namespaceURI,"text");
-    label.setAttribute("x",x+barWidth/2);
-    label.setAttribute("y",height-10);
-    label.setAttribute("text-anchor","middle");
-    label.setAttribute("font-size","10");
+    const label=
+      document.createElementNS(
+        svg.namespaceURI,
+        "text"
+      );
+
+    label.setAttribute(
+      "x",
+      x+barWidth/2
+    );
+
+    label.setAttribute(
+      "y",
+      height-10
+    );
+
+    label.setAttribute(
+      "text-anchor",
+      "middle"
+    );
+
+    label.setAttribute(
+      "font-size",
+      "10"
+    );
+
     label.textContent=item.label;
     svg.append(label);
   });
 
-  return element("div",{class:"chart"},svg);
-}
-
-function renderRanking(records,property){
-  const data=rankingMap(records,property);
-  const maximum=Math.max(1,...data.map(item=>item[1]));
-
-  return element("div",{class:"card"},
-    data.length
-      ?data.map(([name,value])=>element("div",{class:"ranking"},[
-        element("div",{class:"rankname",title:name},name),
-        element("div",{class:"track"},
-          element("div",{
-            class:"fill",
-            style:`width:${(value/maximum)*100}%`
-          })
-        ),
-        element("div",{class:"rankvalue"},brl(value))
-      ]))
-      :"Sem dados para os filtros atuais."
+  return createElement(
+    "div",
+    {class:"chart"},
+    svg
   );
 }
 
-function renderDashboard(app){
-  const records=currentRecords();
-  const values=totals(records);
+function statementChart(data){
+  const width=1000;
+  const height=280;
+  const left=65;
+  const bottom=35;
 
-  app.append(
-    element("div",{class:"kpis"},[
-      kpi("Total no período",brl(values.total),"primary",`${records.length} lançamentos`),
-      kpi("Pago",brl(values.paid)),
-      kpi("Em aberto",brl(values.open)),
-      kpi("Atrasado",brl(values.late),values.late>0?"late":""),
-      kpi("Fornecedores",String(values.suppliers),"gold")
-    ]),
-    section("ANO","Gastos por mês"),
-    element("div",{class:"card"},renderChart()),
-    section("RANKING","Gastos por fornecedor"),
-    renderRanking(records,"supplier"),
-    section("RANKING","Gastos por centro de custo"),
-    renderRanking(records,"costCenter")
-  );
-}
-
-function renderComparison(app){
-  const first=totals(periodRecords(1));
-  const second=totals(periodRecords(2));
-  const difference=second.total-first.total;
-  const percentage=variation(first.total,second.total);
-  const labels=state.filters.compare
-    ?[
-      `${state.filters.period1From||"início"} a ${state.filters.period1To||"fim"}`,
-      `${state.filters.period2From||"início"} a ${state.filters.period2To||"fim"}`
-    ]
-    :[
-      monthOptions().find(item=>item.key===state.filters.month1)?.label||"Período 1",
-      monthOptions().find(item=>item.key===state.filters.month2)?.label||"Período 2"
-    ];
-
-  const table=element("table",{class:"table"},[
-    element("thead",{},element("tr",{},[
-      "Indicador",labels[0],labels[1],"Diferença","Variação"
-    ].map(value=>element("th",{},value)))),
-    element("tbody",{},element("tr",{},[
-      element("td",{},"Despesas"),
-      element("td",{},brl(first.total)),
-      element("td",{},brl(second.total)),
-      element("td",{},brl(difference)),
-      element("td",{
-        class:Number.isFinite(percentage)
-          ?percentage<=0?"positive":"negative"
-          :"neutral"
-      },variationText(first.total,second.total))
-    ]))
-  ]);
-
-  app.append(
-    section("COMPARAÇÃO","Comparação de despesas"),
-    element("div",{class:"card tablewrap"},table)
-  );
-
-  const firstGroups=categoryGroups(periodRecords(1));
-  const secondGroups=categoryGroups(periodRecords(2));
-  const firstMap=new Map(firstGroups.map(group=>[group.label,group.total]));
-  const secondMap=new Map(secondGroups.map(group=>[group.label,group.total]));
-
-  const changes=[...new Set([...firstMap.keys(),...secondMap.keys()])]
-    .map(name=>({
-      name,
-      difference:(secondMap.get(name)||0)-(firstMap.get(name)||0)
-    }))
-    .sort((a,b)=>b.difference-a.difference);
-
-  const increase=changes.find(item=>item.difference>0);
-  const reduction=[...changes].reverse().find(item=>item.difference<0);
-  const impact=[...changes].sort(
-    (a,b)=>Math.abs(b.difference)-Math.abs(a.difference)
-  )[0];
-
-  app.append(
-    section("ANÁLISE","Análise do período"),
-    element("div",{class:"card analysis"},[
-      element("div",{class:"analysisLead"},
-        Number.isFinite(percentage)
-          ?`As despesas apresentaram ${Math.abs(percentage).toFixed(1).replace(".",",")}% de ${percentage<=0?"redução":"aumento"}.`
-          :"Não existe base suficiente para calcular a variação."
-      ),
-      element("div",{class:"insights"},[
-        element("div",{class:"insight"},
-          `Maior aumento: ${increase?`${increase.name} (${brl(increase.difference)})`:"nenhum"}`
-        ),
-        element("div",{class:"insight"},
-          `Maior redução: ${reduction?`${reduction.name} (${brl(Math.abs(reduction.difference))})`:"nenhuma"}`
-        ),
-        element("div",{class:"insight"},
-          `Maior impacto: ${impact?impact.name:"sem dados"}`
-        )
-      ])
+  const maximum=Math.max(
+    1,
+    ...data.flatMap(item=>[
+      item.entry,
+      item.exit
     ])
+  );
+
+  const gap=
+    (width-left-20)/
+    Math.max(data.length,1);
+
+  const barWidth=Math.min(30,gap*.3);
+
+  const svg=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
+
+  data.forEach((item,index)=>{
+    [
+      ["entry","#287a4b"],
+      ["exit","#c5442e"]
+    ].forEach(([field,color],barIndex)=>{
+      const barHeight=
+        (height-bottom-20)*
+        (item[field]/maximum);
+
+      const center=
+        left+
+        index*gap+
+        gap/2;
+
+      const x=
+        center-
+        barWidth-
+        3+
+        barIndex*(barWidth+6);
+
+      const rectangle=
+        document.createElementNS(
+          svg.namespaceURI,
+          "rect"
+        );
+
+      rectangle.setAttribute("x",x);
+
+      rectangle.setAttribute(
+        "y",
+        height-bottom-barHeight
+      );
+
+      rectangle.setAttribute(
+        "width",
+        barWidth
+      );
+
+      rectangle.setAttribute(
+        "height",
+        barHeight
+      );
+
+      rectangle.setAttribute("rx",4);
+      rectangle.setAttribute("fill",color);
+
+      const tooltip=
+        document.createElementNS(
+          svg.namespaceURI,
+          "title"
+        );
+
+      tooltip.textContent=
+        `${item.label} · `+
+        `${field==="entry"?"Entradas":"Saídas"}: `+
+        brl(item[field]);
+
+      rectangle.append(tooltip);
+      svg.append(rectangle);
+    });
+
+    const label=
+      document.createElementNS(
+        svg.namespaceURI,
+        "text"
+      );
+
+    label.setAttribute(
+      "x",
+      left+index*gap+gap/2
+    );
+
+    label.setAttribute(
+      "y",
+      height-10
+    );
+
+    label.setAttribute(
+      "text-anchor",
+      "middle"
+    );
+
+    label.setAttribute(
+      "font-size",
+      "10"
+    );
+
+    label.textContent=item.label;
+    svg.append(label);
+  });
+
+  return createElement(
+    "div",
+    {class:"chart"},
+    svg
+  );
+}
+
+function comparisonInformation(){
+  const firstRecords=periodFilter(
+    state.data.pagar,
+    1
+  );
+
+  const secondRecords=periodFilter(
+    state.data.pagar,
+    2
+  );
+
+  const firstTotal=firstRecords.reduce(
+    (sum,record)=>sum+record.original,
+    0
+  );
+
+  const secondTotal=secondRecords.reduce(
+    (sum,record)=>sum+record.original,
+    0
+  );
+
+  const firstCategories=categoryMap(firstRecords);
+  const secondCategories=categoryMap(secondRecords);
+
+  const changes=[
+    ...new Set([
+      ...firstCategories.keys(),
+      ...secondCategories.keys()
+    ])
+  ]
+    .map(name=>{
+      const firstValue=
+        firstCategories.get(name)||0;
+
+      const secondValue=
+        secondCategories.get(name)||0;
+
+      return{
+        name,
+        firstValue,
+        secondValue,
+        difference:
+          secondValue-firstValue,
+
+        percentage:
+          variation(
+            firstValue,
+            secondValue
+          )
+      };
+    })
+    .sort(
+      (first,second)=>
+        Math.abs(second.difference)-
+        Math.abs(first.difference)
+    );
+
+  const biggestIncrease=[
+    ...changes
+  ]
+    .filter(item=>item.difference>0)
+    .sort(
+      (first,second)=>
+        second.difference-
+        first.difference
+    )[0];
+
+  const biggestReduction=[
+    ...changes
+  ]
+    .filter(item=>item.difference<0)
+    .sort(
+      (first,second)=>
+        first.difference-
+        second.difference
+    )[0];
+
+  const biggestImpact=changes[0];
+
+  const newExpenses=changes.filter(
+    item=>
+      item.firstValue===0&&
+      item.secondValue>0
+  );
+
+  const removedExpenses=changes.filter(
+    item=>
+      item.firstValue>0&&
+      item.secondValue===0
+  );
+
+  const totalDifference=
+    secondTotal-firstTotal;
+
+  const totalPercentage=
+    variation(firstTotal,secondTotal);
+
+  const labels=periodLabels();
+
+  const parts=[
+    `Na comparação entre ${labels[0]} e ${labels[1]}, `+
+    `as despesas ${totalDifference<=0?"diminuíram":"aumentaram"} `+
+    `${brl(Math.abs(totalDifference))}`+
+    (
+      Number.isFinite(totalPercentage)
+        ?`, representando ${Math.abs(totalPercentage)
+          .toFixed(1)
+          .replace(".",",")}% de `+
+          `${totalDifference<=0?"redução":"aumento"}.`
+        :"."
+    )
+  ];
+
+  if(biggestIncrease){
+    parts.push(
+      `O maior aumento ocorreu em ${biggestIncrease.name}, `+
+      `com crescimento de ${brl(biggestIncrease.difference)}.`
+    );
+  }else{
+    parts.push(
+      "Nenhuma subcategoria apresentou aumento no período."
+    );
+  }
+
+  if(biggestReduction){
+    parts.push(
+      `A maior redução ocorreu em ${biggestReduction.name}, `+
+      `com queda de ${brl(Math.abs(biggestReduction.difference))}.`
+    );
+  }else{
+    parts.push(
+      "Nenhuma subcategoria apresentou redução no período."
+    );
+  }
+
+  if(biggestImpact){
+    parts.push(
+      `${biggestImpact.name} foi a despesa de maior impacto `+
+      "na variação total observada."
+    );
+  }
+
+  if(newExpenses.length){
+    parts.push(
+      `${newExpenses.length} despesa(s) apareceram somente no segundo período.`
+    );
+  }
+
+  if(removedExpenses.length){
+    parts.push(
+      `${removedExpenses.length} despesa(s) deixaram de aparecer no segundo período.`
+    );
+  }
+
+  if(totalDifference>0){
+    parts.push(
+      "Ponto de atenção: houve aumento no custo total. " +
+      "Recomenda-se revisar as subcategorias com maior crescimento."
+    );
+  }else if(totalDifference<0){
+    parts.push(
+      "O período apresentou redução geral das despesas. " +
+      "Vale confirmar se a queda representa economia recorrente ou apenas mudança de vencimentos."
+    );
+  }
+
+  return{
+    firstRecords,
+    secondRecords,
+    firstTotal,
+    secondTotal,
+    totalDifference,
+    totalPercentage,
+    changes,
+    biggestIncrease,
+    biggestReduction,
+    biggestImpact,
+    newExpenses,
+    removedExpenses,
+    text:parts.join(" ")
+  };
+}
+
+function renderAnalysis(){
+  const comparisonEnabled=
+    state.filters.compare||
+    (
+      state.filters.month1&&
+      state.filters.month2
+    );
+
+  if(!comparisonEnabled){
+    return createElement(
+      "div",
+      {class:"card analysis"},
+      "Selecione dois meses ou ative “Comparar períodos” para visualizar a análise."
+    );
+  }
+
+  const information=comparisonInformation();
+
+  return createElement(
+    "div",
+    {class:"card analysis"},
+    [
+      createElement(
+        "div",
+        {class:"analysisLead"},
+        information.text
+      ),
+
+      createElement(
+        "div",
+        {class:"analysisList"},
+        [
+          createElement(
+            "div",
+            {class:"insight"},
+            `Variação total: ${
+              Number.isFinite(
+                information.totalPercentage
+              )
+                ?`${information.totalPercentage
+                  .toFixed(1)
+                  .replace(".",",")}%`
+                :"—"
+            }`
+          ),
+
+          createElement(
+            "div",
+            {class:"insight"},
+            `Maior aumento: ${
+              information.biggestIncrease
+                ?`${information.biggestIncrease.name} `+
+                `(${brl(information.biggestIncrease.difference)})`
+                :"nenhum"
+            }`
+          ),
+
+          createElement(
+            "div",
+            {class:"insight"},
+            `Maior redução: ${
+              information.biggestReduction
+                ?`${information.biggestReduction.name} `+
+                `(${brl(Math.abs(information.biggestReduction.difference))})`
+                :"nenhuma"
+            }`
+          )
+        ]
+      )
+    ]
+  );
+}
+
+function renderExpenseComparison(app){
+  const information=comparisonInformation();
+  const labels=periodLabels();
+
+  const rows=information.changes.map(item=>
+    createElement(
+      "tr",
+      {},
+      [
+        createElement(
+          "td",
+          {},
+          item.name
+        ),
+
+        createElement(
+          "td",
+          {},
+          brl(item.firstValue)
+        ),
+
+        createElement(
+          "td",
+          {},
+          brl(item.secondValue)
+        ),
+
+        createElement(
+          "td",
+          {},
+          brl(item.difference)
+        ),
+
+        createElement(
+          "td",
+          {
+            class:
+              !Number.isFinite(item.percentage)
+                ?"neutral"
+                :item.percentage<=0
+                  ?"positive"
+                  :"negative"
+          },
+          Number.isFinite(item.percentage)
+            ?`${item.percentage>0?"+":""}`+
+              `${item.percentage
+                .toFixed(1)
+                .replace(".",",")}%`
+            :"—"
+        )
+      ]
+    )
+  );
+
+  app.append(
+    sectionHeader(
+      "COMPARAÇÃO",
+      "Despesas comparadas por subcategoria"
+    ),
+
+    createElement(
+      "div",
+      {class:"card tablewrap"},
+      createElement(
+        "table",
+        {class:"table"},
+        [
+          createElement(
+            "thead",
+            {},
+            createElement(
+              "tr",
+              {},
+              [
+                "Despesa",
+                labels[0],
+                labels[1],
+                "Diferença",
+                "Variação %"
+              ].map(value=>
+                createElement(
+                  "th",
+                  {},
+                  value
+                )
+              )
+            )
+          ),
+
+          createElement(
+            "tbody",
+            {},
+            rows
+          )
+        ]
+      )
+    ),
+
+    sectionHeader(
+      "ANÁLISE",
+      "Análise detalhada do período"
+    ),
+
+    renderAnalysis()
   );
 }
 
 function renderCategories(app){
-  const groups=categoryGroups(currentRecords());
+  const source=
+    state.source==="receber"
+      ?"receber"
+      :"pagar";
+
+  const records=selectedPeriodRecords(
+    state.data[source]
+  );
+
+  const groups=categoryGroups(records);
 
   app.append(
-    section("DETALHAMENTO","Detalhamento por categoria (categoria › subcategoria)"),
-    element("div",{class:"card"},
+    sectionHeader(
+      "DETALHAMENTO",
+      "Detalhamento por categoria (categoria › subcategoria)"
+    ),
+
+    createElement(
+      "div",
+      {class:"card"},
+
       groups.length
-        ?groups.map(group=>element("div",{class:"catgroup"},[
-          element("div",{class:"cathead"},[
-            element("span",{},group.label),
-            element("span",{},brl(group.total))
-          ]),
-          ...[...group.items.entries()]
-            .sort((a,b)=>b[1]-a[1])
-            .map(([name,value])=>element("div",{class:"catsub"},[
-              element("span",{},name),
-              element("span",{},brl(value))
-            ]))
-        ]))
+        ?groups.map(group=>
+          createElement(
+            "div",
+            {class:"catgroup"},
+            [
+              createElement(
+                "div",
+                {class:"cathead"},
+                [
+                  createElement(
+                    "span",
+                    {},
+                    group.label
+                  ),
+
+                  createElement(
+                    "span",
+                    {},
+                    brl(group.total)
+                  )
+                ]
+              ),
+
+              ...[
+                ...group.subcategories.entries()
+              ]
+                .sort(
+                  (first,second)=>
+                    second[1]-first[1]
+                )
+                .map(([name,value])=>
+                  createElement(
+                    "div",
+                    {class:"catsub"},
+                    [
+                      createElement(
+                        "span",
+                        {},
+                        name
+                      ),
+
+                      createElement(
+                        "span",
+                        {},
+                        brl(value)
+                      )
+                    ]
+                  )
+                )
+            ]
+          )
+        )
         :"Sem dados para os filtros atuais."
     )
   );
 }
 
+function renderAccountsDashboard(app,key){
+  const config=CONFIG[key];
+
+  const records=selectedPeriodRecords(
+    state.data[key]
+  );
+
+  const totals=accountTotals(records);
+
+  app.append(
+    createElement(
+      "div",
+      {class:"kpis"},
+      [
+        kpiCard(
+          "Total no período",
+          brl(totals.total),
+          "primary",
+          `${records.length} lançamentos`
+        ),
+
+        kpiCard(
+          config.doneLabel,
+          brl(totals.done),
+          "paid"
+        ),
+
+        kpiCard(
+          config.openLabel,
+          brl(totals.open),
+          "open"
+        ),
+
+        kpiCard(
+          "Atrasado",
+          brl(totals.late),
+          totals.late>0
+            ?"late"
+            :""
+        ),
+
+        kpiCard(
+          `${config.entityLabel}s`,
+          String(totals.entityCount),
+          "entity"
+        )
+      ]
+    ),
+
+    sectionHeader(
+      "ANO",
+      key==="pagar"
+        ?"Gastos por mês"
+        :"Recebimentos por mês"
+    ),
+
+    createElement(
+      "div",
+      {class:"card"},
+      barChart(
+        monthlyAccountData(state.data[key]),
+        key==="pagar"
+          ?"#10234a"
+          :"#287a4b"
+      )
+    ),
+
+    createElement(
+      "div",
+      {class:"grid2"},
+      [
+        createElement(
+          "div",
+          {},
+          [
+            sectionHeader(
+              "RANKING",
+              key==="pagar"
+                ?"Gastos por fornecedor"
+                :"Recebimentos por cliente"
+            ),
+
+            renderRanking(
+              records,
+              "entity",
+              "#2457a7"
+            )
+          ]
+        ),
+
+        createElement(
+          "div",
+          {},
+          [
+            sectionHeader(
+              "RANKING",
+              "Valores por centro de custo"
+            ),
+
+            renderRanking(
+              records,
+              "costCenter",
+              "#d89a22"
+            )
+          ]
+        )
+      ]
+    )
+  );
+
+  if(key==="pagar"){
+    app.append(
+      sectionHeader(
+        "ANÁLISE",
+        "Análise do período"
+      ),
+      renderAnalysis()
+    );
+  }
+}
+
+function renderStatementDashboard(app){
+  const records=selectedPeriodRecords(
+    state.data.extrato
+  );
+
+  const entries=records
+    .filter(record=>record.type==="entry")
+    .reduce(
+      (sum,record)=>sum+record.value,
+      0
+    );
+
+  const exits=records
+    .filter(record=>record.type==="exit")
+    .reduce(
+      (sum,record)=>sum+record.value,
+      0
+    );
+
+  app.append(
+    createElement(
+      "div",
+      {class:"kpis"},
+      [
+        kpiCard(
+          "Entradas",
+          brl(entries),
+          "entry"
+        ),
+
+        kpiCard(
+          "Saídas",
+          brl(exits),
+          "exit"
+        ),
+
+        kpiCard(
+          "Saldo do período",
+          brl(entries-exits),
+          entries-exits>=0
+            ?"paid"
+            :"late"
+        ),
+
+        kpiCard(
+          "Saldo final do extrato",
+          state.balance===null
+            ?"—"
+            :brl(state.balance),
+          "entity"
+        ),
+
+        kpiCard(
+          "Lançamentos",
+          String(records.length)
+        )
+      ]
+    ),
+
+    sectionHeader(
+      "ANO",
+      "Entradas x saídas por mês"
+    ),
+
+    createElement(
+      "div",
+      {class:"card"},
+      [
+        createElement(
+          "div",
+          {class:"legend"},
+          [
+            createElement(
+              "div",
+              {class:"legendItem"},
+              [
+                createElement(
+                  "span",
+                  {
+                    class:"legendColor",
+                    style:"background:#287a4b"
+                  }
+                ),
+                "Entradas"
+              ]
+            ),
+
+            createElement(
+              "div",
+              {class:"legendItem"},
+              [
+                createElement(
+                  "span",
+                  {
+                    class:"legendColor",
+                    style:"background:#c5442e"
+                  }
+                ),
+                "Saídas"
+              ]
+            )
+          ]
+        ),
+
+        statementChart(
+          monthlyStatementData()
+        )
+      ]
+    )
+  );
+}
+
 function reportData(){
-  const records=currentRecords();
-  const values=totals(records);
+  const records=selectedPeriodRecords(
+    state.data.pagar
+  );
+
+  const totals=accountTotals(records);
+  const suppliers=rankingData(records,"entity");
+  const costCenters=rankingData(records,"costCenter");
+  const groups=categoryGroups(records);
+  const months=monthlyAccountData(state.data.pagar);
+  const analysis=comparisonInformation();
 
   return{
     records,
-    values,
-    months:monthlyData().map(item=>[item.label,item.value]),
-    suppliers:rankingMap(records,"supplier"),
-    costCenters:rankingMap(records,"costCenter"),
-    groups:categoryGroups(records)
+    totals,
+    suppliers,
+    costCenters,
+    groups,
+    months,
+    analysis
   };
 }
 
@@ -1214,7 +2944,9 @@ function downloadExcel(){
   const report=reportData();
 
   if(!report.records.length){
-    alert("Não há dados para gerar o relatório.");
+    alert(
+      "Não há dados de Contas a Pagar para os filtros atuais."
+    );
     return;
   }
 
@@ -1225,13 +2957,14 @@ function downloadExcel(){
     XLSX.utils.aoa_to_sheet([
       ["RELATÓRIO FINANCEIRO DANE-SE"],
       ["Gerado em",new Date().toLocaleString("pt-BR")],
+      ["Dados","Conforme filtros ativos"],
       [],
       ["Indicador","Valor"],
-      ["Total no período",report.values.total],
-      ["Pago",report.values.paid],
-      ["Em aberto",report.values.open],
-      ["Atrasado",report.values.late],
-      ["Fornecedores",report.values.suppliers],
+      ["Total no período",report.totals.total],
+      ["Pago",report.totals.done],
+      ["Em aberto",report.totals.open],
+      ["Atrasado",report.totals.late],
+      ["Fornecedores",report.totals.entityCount],
       ["Lançamentos",report.records.length]
     ]),
     "Resumo"
@@ -1240,8 +2973,35 @@ function downloadExcel(){
   XLSX.utils.book_append_sheet(
     workbook,
     XLSX.utils.aoa_to_sheet([
+      ["ANÁLISE DO PERÍODO"],
+      [report.analysis.text],
+      [],
+      [
+        "Despesa",
+        "Período 1",
+        "Período 2",
+        "Diferença",
+        "Variação %"
+      ],
+      ...report.analysis.changes.map(item=>[
+        item.name,
+        item.firstValue,
+        item.secondValue,
+        item.difference,
+        item.percentage
+      ])
+    ]),
+    "Análise do período"
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([
       ["Mês","Gastos"],
-      ...report.months
+      ...report.months.map(item=>[
+        item.label,
+        item.value
+      ])
     ]),
     "Gastos por mês"
   );
@@ -1264,17 +3024,25 @@ function downloadExcel(){
     "Centros de custo"
   );
 
-  const categories=[["Categoria","Subcategoria","Valor"]];
+  const categoryRows=[
+    ["Categoria","Subcategoria","Valor"]
+  ];
 
   report.groups.forEach(group=>{
-    [...group.items.entries()].forEach(([name,value])=>{
-      categories.push([group.label,name,value]);
+    [
+      ...group.subcategories.entries()
+    ].forEach(([name,value])=>{
+      categoryRows.push([
+        group.label,
+        name,
+        value
+      ]);
     });
   });
 
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.aoa_to_sheet(categories),
+    XLSX.utils.aoa_to_sheet(categoryRows),
     "Categorias"
   );
 
@@ -1288,23 +3056,36 @@ function downloadPDF(){
   const report=reportData();
 
   if(!report.records.length){
-    alert("Não há dados para gerar o relatório.");
+    alert(
+      "Não há dados de Contas a Pagar para os filtros atuais."
+    );
     return;
   }
 
   if(!window.jspdf){
-    alert("Não foi possível carregar o gerador de PDF.");
+    alert(
+      "Não foi possível carregar o gerador de PDF."
+    );
     return;
   }
 
   const{jsPDF}=window.jspdf;
-  const documentPDF=new jsPDF({orientation:"landscape"});
 
-  documentPDF.setTextColor(22,35,63);
+  const documentPDF=new jsPDF({
+    orientation:"landscape"
+  });
+
+  documentPDF.setTextColor(16,35,74);
   documentPDF.setFontSize(18);
-  documentPDF.text("Dane-se - Relatório financeiro",14,16);
+
+  documentPDF.text(
+    "Dane-se - Relatório financeiro",
+    14,
+    16
+  );
 
   documentPDF.setFontSize(9);
+
   documentPDF.text(
     `Gerado em ${new Date().toLocaleString("pt-BR")} | Conforme filtros ativos`,
     14,
@@ -1313,6 +3094,7 @@ function downloadPDF(){
 
   documentPDF.autoTable({
     startY:29,
+
     head:[[
       "Total no período",
       "Pago",
@@ -1320,53 +3102,159 @@ function downloadPDF(){
       "Atrasado",
       "Fornecedores"
     ]],
+
     body:[[
-      brl(report.values.total),
-      brl(report.values.paid),
-      brl(report.values.open),
-      brl(report.values.late),
-      String(report.values.suppliers)
+      brl(report.totals.total),
+      brl(report.totals.done),
+      brl(report.totals.open),
+      brl(report.totals.late),
+      String(report.totals.entityCount)
     ]],
-    headStyles:{fillColor:[22,35,63]}
+
+    headStyles:{
+      fillColor:[16,35,74]
+    }
   });
 
-  documentPDF.autoTable({
-    startY:documentPDF.lastAutoTable.finalY+8,
-    head:[["Mês","Gastos"]],
-    body:report.months.map(([month,value])=>[month,brl(value)]),
-    headStyles:{fillColor:[187,138,52]}
-  });
+  let y=
+    documentPDF.lastAutoTable.finalY+
+    9;
+
+  documentPDF.setFontSize(12);
+
+  documentPDF.text(
+    "Análise do período",
+    14,
+    y
+  );
+
+  documentPDF.setFontSize(9);
+
+  const analysisLines=
+    documentPDF.splitTextToSize(
+      report.analysis.text,
+      265
+    );
+
+  documentPDF.text(
+    analysisLines,
+    14,
+    y+6
+  );
+
+  y+=10+analysisLines.length*4;
 
   documentPDF.autoTable({
-    startY:documentPDF.lastAutoTable.finalY+8,
-    head:[["Categoria","Subcategoria","Valor"]],
-    body:report.groups.flatMap(group=>
-      [...group.items.entries()].map(([name,value])=>[
-        group.label,
-        name,
-        brl(value)
-      ])
-    ),
-    headStyles:{fillColor:[92,122,99]},
-    styles:{fontSize:8}
+    startY:y,
+
+    head:[[
+      "Despesa",
+      "Período 1",
+      "Período 2",
+      "Diferença",
+      "Variação"
+    ]],
+
+    body:report.analysis.changes.map(item=>[
+      item.name,
+      brl(item.firstValue),
+      brl(item.secondValue),
+      brl(item.difference),
+
+      Number.isFinite(item.percentage)
+        ?`${item.percentage.toFixed(1)}%`
+        :"—"
+    ]),
+
+    headStyles:{
+      fillColor:[36,87,167]
+    },
+
+    styles:{
+      fontSize:7
+    }
   });
 
   documentPDF.addPage();
 
   documentPDF.autoTable({
     startY:14,
-    head:[["Fornecedor","Valor"]],
-    body:report.suppliers.map(([name,value])=>[name,brl(value)]),
-    headStyles:{fillColor:[22,35,63]},
-    styles:{fontSize:8}
+
+    head:[[
+      "Categoria",
+      "Subcategoria",
+      "Valor"
+    ]],
+
+    body:report.groups.flatMap(group=>
+      [
+        ...group.subcategories.entries()
+      ].map(([name,value])=>[
+        group.label,
+        name,
+        brl(value)
+      ])
+    ),
+
+    headStyles:{
+      fillColor:[40,122,75]
+    },
+
+    styles:{
+      fontSize:8
+    }
+  });
+
+  documentPDF.addPage();
+
+  documentPDF.autoTable({
+    startY:14,
+
+    head:[[
+      "Fornecedor",
+      "Valor"
+    ]],
+
+    body:report.suppliers.map(
+      ([name,value])=>[
+        name,
+        brl(value)
+      ]
+    ),
+
+    headStyles:{
+      fillColor:[16,35,74]
+    },
+
+    styles:{
+      fontSize:8
+    }
   });
 
   documentPDF.autoTable({
-    startY:documentPDF.lastAutoTable.finalY+8,
-    head:[["Centro de custo","Valor"]],
-    body:report.costCenters.map(([name,value])=>[name,brl(value)]),
-    headStyles:{fillColor:[187,138,52]},
-    styles:{fontSize:8}
+    startY:
+      documentPDF.lastAutoTable.finalY+
+      8,
+
+    head:[[
+      "Centro de custo",
+      "Valor"
+    ]],
+
+    body:report.costCenters.map(
+      ([name,value])=>[
+        name,
+        brl(value)
+      ]
+    ),
+
+    headStyles:{
+      fillColor:[216,154,34]
+    },
+
+    styles:{
+      fontSize:8
+    }
   });
 
   documentPDF.save(
@@ -1374,38 +3262,75 @@ function downloadPDF(){
   );
 }
 
-async function uploadFile(file){
+async function uploadFile(key,file){
   if(!file)return;
 
   try{
     state.error="";
-    state.records=await parsePayables(file);
-    state.updated=new Date().toISOString();
+
+    if(key==="extrato"){
+      const result=await parseStatement(file);
+
+      state.data.extrato=result.records;
+      state.balance=result.balance;
+    }else{
+      state.data[key]=await parseAccounts(
+        file,
+        key
+      );
+    }
+
+    state.updated[key]=
+      new Date().toISOString();
+
     state.filters=freshFilters();
-    saveData();
+
+    saveData(key);
   }catch(error){
-    state.error=error.message||"Não foi possível ler o arquivo.";
+    state.error=
+      error.message||
+      "Não foi possível ler o arquivo.";
   }
 
   render();
 }
 
 function renderEmpty(){
-  const container=element("div",{class:"empty"},[
-    element("p",{},
-      'Envie o relatório "Visão Contas a Pagar" exportado pelo Conta Azul.'
-    )
-  ]);
+  const label=
+    CONFIG[state.source]?.label||
+    "Extrato Bancário";
 
-  const drop=element("div",{class:"drop"},
+  const container=createElement(
+    "div",
+    {class:"empty"},
+    [
+      createElement(
+        "p",
+        {},
+        `Carregue o arquivo de ${label} para visualizar esta área.`
+      )
+    ]
+  );
+
+  const drop=createElement(
+    "div",
+    {class:"drop"},
     "⬆ Arraste o arquivo aqui ou clique para escolher"
   );
 
-  const input=element("input",{
-    type:"file",
-    accept:".xlsx,.xls,.csv",
-    onchange:event=>uploadFile(event.target.files[0])
-  });
+  const input=createElement(
+    "input",
+    {
+      type:"file",
+      accept:".xlsx,.xls,.csv",
+
+      onchange:event=>
+        uploadFile(
+          state.source,
+          event.target.files[0]
+        )
+    }
+  );
 
   drop.onclick=()=>input.click();
 
@@ -1414,85 +3339,221 @@ function renderEmpty(){
     drop.classList.add("over");
   };
 
-  drop.ondragleave=()=>drop.classList.remove("over");
+  drop.ondragleave=()=>{
+    drop.classList.remove("over");
+  };
 
   drop.ondrop=event=>{
     event.preventDefault();
     drop.classList.remove("over");
-    uploadFile(event.dataTransfer.files[0]);
+
+    uploadFile(
+      state.source,
+      event.dataTransfer.files[0]
+    );
   };
 
   container.append(drop,input);
   return container;
 }
 
-function clearData(){
-  if(!confirm("Apagar todos os dados carregados?"))return;
+function clearCurrentData(){
+  if(
+    !confirm(
+      `Apagar os dados de ${
+        CONFIG[state.source]?.label||
+        "Extrato Bancário"
+      }?`
+    )
+  ){
+    return;
+  }
 
-  localStorage.removeItem("dane-se-payables-v7");
-  state.records=null;
-  state.updated="";
+  localStorage.removeItem(
+    `dane-se-dashboard-${state.source}-v8`
+  );
+
+  state.data[state.source]=null;
+
+  if(state.source==="extrato"){
+    state.balance=null;
+  }
+
   state.filters=freshFilters();
   render();
 }
 
 function render(){
-  const app=document.getElementById("app");
+  const app=
+    document.getElementById("app");
+
   app.innerHTML="";
 
-  const updated=state.updated
-    ?new Date(state.updated).toLocaleString("pt-BR")
-    :"—";
+  const sourceTabs=[
+    ["pagar","Contas a Pagar"],
+    ["receber","Contas a Receber"],
+    ["extrato","Extrato Bancário"]
+  ];
 
-  app.append(
-    element("div",{class:"header"},[
-      element("div",{},[
-        element("div",{class:"eyebrow"},"DASHBOARD FINANCEIRO"),
-        element("h1",{class:"title"},"Dane-se · Painel financeiro"),
-        element("div",{class:"sub"},
-          state.records
-            ?`Atualizado em ${updated} · ${state.records.length} lançamentos carregados`
-            :"Dados processados localmente no navegador"
-        )
-      ]),
-      element("div",{class:"actions"},[
-        element("button",{class:"btn secondary",onclick:downloadPDF},"Baixar PDF"),
-        element("button",{class:"btn secondary",onclick:downloadExcel},"Baixar Excel"),
-        state.records
-          ?element("button",{
-            class:"btn",
-            onclick:()=>document.getElementById("main-file").click()
-          },"⟳ Atualizar dados")
-          :null,
-        element("button",{class:"btn danger",onclick:clearData},"🗑 Limpar")
-      ])
-    ])
-  );
-
-  const views=[
+  const viewTabs=[
     ["dashboard","Dashboard"],
     ["comparacao","Comparação"],
     ["graficos","Gráficos"],
     ["categorias","Categorias"]
   ];
 
+  const updated=
+    state.updated[state.source]
+      ?new Date(
+        state.updated[state.source]
+      ).toLocaleString("pt-BR")
+      :"—";
+
   app.append(
-    element("div",{class:"tabs viewtabs"},
-      views.map(([key,label])=>element("button",{
-        class:`tab${state.view===key?" active":""}`,
-        onclick:()=>{
-          state.view=key;
-          render();
-        }
-      },label))
+    createElement(
+      "div",
+      {class:"header"},
+      [
+        createElement(
+          "div",
+          {},
+          [
+            createElement(
+              "div",
+              {class:"eyebrow"},
+              "DASHBOARD FINANCEIRO"
+            ),
+
+            createElement(
+              "h1",
+              {class:"title"},
+              "Dane-se · Painel financeiro"
+            ),
+
+            createElement(
+              "div",
+              {class:"sub"},
+              state.data[state.source]
+                ?`Atualizado em ${updated} · ${state.data[state.source].length} lançamentos carregados`
+                :"Dados processados localmente no navegador"
+            )
+          ]
+        ),
+
+        createElement(
+          "div",
+          {class:"actions"},
+          [
+            createElement(
+              "button",
+              {
+                class:"btn secondary",
+                onclick:downloadPDF
+              },
+              "Baixar PDF"
+            ),
+
+            createElement(
+              "button",
+              {
+                class:"btn secondary",
+                onclick:downloadExcel
+              },
+              "Baixar Excel"
+            ),
+
+            state.data[state.source]
+              ?createElement(
+                "button",
+                {
+                  class:"btn",
+
+                  onclick:()=>{
+                    document
+                      .getElementById("main-file")
+                      ?.click();
+                  }
+                },
+                "⟳ Atualizar dados"
+              )
+              :null,
+
+            state.data[state.source]
+              ?createElement(
+                "button",
+                {
+                  class:"btn danger",
+                  onclick:clearCurrentData
+                },
+                "🗑 Limpar"
+              )
+              :null
+          ]
+        )
+      ]
+    ),
+
+    createElement(
+      "div",
+      {class:"tabs"},
+
+      sourceTabs.map(([key,label])=>
+        createElement(
+          "button",
+          {
+            class:
+              `tab${state.source===key
+                ?" active"
+                :""}`,
+
+            onclick:()=>{
+              state.source=key;
+              state.filters=freshFilters();
+              render();
+            }
+          },
+          label
+        )
+      )
+    ),
+
+    createElement(
+      "div",
+      {
+        class:"tabs viewtabs"
+      },
+
+      viewTabs.map(([key,label])=>
+        createElement(
+          "button",
+          {
+            class:
+              `tab${state.view===key
+                ?" active"
+                :""}`,
+
+            onclick:()=>{
+              state.view=key;
+              render();
+            }
+          },
+          label
+        )
+      )
     )
   );
 
   if(state.error){
-    app.append(element("div",{class:"error"},`⚠ ${state.error}`));
+    app.append(
+      createElement(
+        "div",
+        {class:"error"},
+        `⚠ ${state.error}`
+      )
+    );
   }
 
-  if(!state.records){
+  if(!state.data[state.source]){
     app.append(renderEmpty());
     return;
   }
@@ -1500,31 +3561,128 @@ function render(){
   app.append(renderFilters());
 
   if(state.view==="dashboard"){
-    renderDashboard(app);
+    if(
+      state.source==="pagar"||
+      state.source==="receber"
+    ){
+      renderAccountsDashboard(
+        app,
+        state.source
+      );
+    }else{
+      renderStatementDashboard(app);
+    }
   }else if(state.view==="comparacao"){
-    renderComparison(app);
-  }else if(state.view==="graficos"){
-    app.append(
-      section("ANO","Gastos por mês"),
-      element("div",{class:"card"},renderChart()),
-      section("RANKING","Gastos por fornecedor"),
-      renderRanking(currentRecords(),"supplier"),
-      section("RANKING","Gastos por centro de custo"),
-      renderRanking(currentRecords(),"costCenter")
-    );
-  }else{
+    renderExpenseComparison(app);
+  }else if(state.view==="categorias"){
     renderCategories(app);
+  }else{
+    if(state.source==="extrato"){
+      app.append(
+        sectionHeader(
+          "ANO",
+          "Entradas x saídas por mês"
+        ),
+
+        createElement(
+          "div",
+          {class:"card"},
+          statementChart(
+            monthlyStatementData()
+          )
+        )
+      );
+    }else{
+      const records=selectedPeriodRecords(
+        state.data[state.source]
+      );
+
+      app.append(
+        sectionHeader(
+          "ANO",
+          state.source==="pagar"
+            ?"Gastos por mês"
+            :"Recebimentos por mês"
+        ),
+
+        createElement(
+          "div",
+          {class:"card"},
+          barChart(
+            monthlyAccountData(
+              state.data[state.source]
+            ),
+            state.source==="pagar"
+              ?"#10234a"
+              :"#287a4b"
+          )
+        ),
+
+        createElement(
+          "div",
+          {class:"grid2"},
+          [
+            createElement(
+              "div",
+              {},
+              [
+                sectionHeader(
+                  "RANKING",
+                  state.source==="pagar"
+                    ?"Gastos por fornecedor"
+                    :"Recebimentos por cliente"
+                ),
+
+                renderRanking(
+                  records,
+                  "entity",
+                  "#2457a7"
+                )
+              ]
+            ),
+
+            createElement(
+              "div",
+              {},
+              [
+                sectionHeader(
+                  "RANKING",
+                  "Valores por centro de custo"
+                ),
+
+                renderRanking(
+                  records,
+                  "costCenter",
+                  "#d89a22"
+                )
+              ]
+            )
+          ]
+        )
+      );
+    }
   }
 
   app.append(
-    element("input",{
-      id:"main-file",
-      type:"file",
-      accept:".xlsx,.xls,.csv",
-      onchange:event=>uploadFile(event.target.files[0])
-    }),
-    element("div",{class:"footer"},
-      "Dados processados somente neste navegador · relatórios sem IA"
+    createElement(
+      "input",
+      {
+        id:"main-file",
+        type:"file",
+        accept:".xlsx,.xls,.csv",
+
+        onchange:event=>
+          uploadFile(
+            state.source,
+            event.target.files[0]
+          )
+      }
+    ),
+
+    createElement(
+      "div",
+      {class:"footer"},
+      "Dados processados somente neste navegador · relatórios automáticos sem IA"
     )
   );
 }
