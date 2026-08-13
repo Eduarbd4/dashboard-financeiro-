@@ -1152,12 +1152,12 @@ function freshFilters(){
     period1To:"",
     period2From:"",
     period2To:"",
-    status:"",
-    entity:"",
+    status:[],
+    entity:[],
     groups:[],
     categories:[],
-    costCenter:"",
-    type:""
+    costCenter:[],
+    type:[]
   };
 }
 
@@ -1165,6 +1165,7 @@ function freshCategoryFilters(){
   return{
     month1:"",
     month2:"",
+    entity:[],
     groups:[],
     categories:[]
   };
@@ -1250,16 +1251,16 @@ function baseFilter(records){
 
   return(records||[])
     .filter(record=>
-      !filters.status||
-      record.status===filters.status
+      !filters.status.length||
+      filters.status.includes(record.status)
     )
     .filter(record=>
-      !filters.entity||
-      record.entity===filters.entity
+      !filters.entity.length||
+      filters.entity.includes(record.entity)
     )
     .filter(record=>
-      !filters.costCenter||
-      record.costCenter===filters.costCenter
+      !filters.costCenter.length||
+      filters.costCenter.includes(record.costCenter)
     )
     .filter(record=>{
       if(!filters.groups.length&&!filters.categories.length)return true;
@@ -1270,8 +1271,8 @@ function baseFilter(records){
       );
     })
     .filter(record=>
-      !filters.type||
-      record.type===filters.type
+      !filters.type.length||
+      filters.type.includes(record.type)
     );
 }
 
@@ -1576,9 +1577,11 @@ function multiChoiceField(label,items,filterKey,placeholder,target=state.filters
   function drawOptions(search=""){
     optionsContainer.innerHTML="";
 
+    const itemLabel=item=>item==="entry"?"Entradas":item==="exit"?"Saídas":item;
+
     const filtered=items.filter(
       item=>
-        item
+        itemLabel(item)
           .toLowerCase()
           .includes(search.toLowerCase())
     );
@@ -1631,7 +1634,7 @@ function multiChoiceField(label,items,filterKey,placeholder,target=state.filters
           {class:"multiOpt"},
           [
             checkbox,
-            item
+            itemLabel(item)
           ]
         )
       );
@@ -1850,67 +1853,21 @@ function renderFilters(){
     state.source==="receber"
   ){
     row.append(
-      selectField(
-        "Situação",
-        filters.status,
-        options("status"),
+      multiChoiceField("Situações",options("status").map(option=>option.key),"status","Buscar situação…"),
 
-        value=>{
-          filters.status=value;
-          render();
-        }
-      ),
-
-      selectField(
-        CONFIG[state.source].entityLabel,
-        filters.entity,
-        options("entity"),
-
-        value=>{
-          filters.entity=value;
-          render();
-        }
-      ),
+      multiChoiceField(CONFIG[state.source].entityLabel==="Fornecedor"?"Fornecedores":"Clientes",options("entity").map(option=>option.key),"entity",`Buscar ${CONFIG[state.source].entityLabel.toLowerCase()}…`),
 
       multiChoiceField("Categorias",groups,"groups","Buscar categoria…"),
 
       multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…"),
 
-      selectField(
-        "Centro de custo",
-        filters.costCenter,
-        options("costCenter"),
-
-        value=>{
-          filters.costCenter=value;
-          render();
-        }
-      )
+      multiChoiceField("Centros de custo",options("costCenter").map(option=>option.key),"costCenter","Buscar centro de custo…")
     );
   }
 
   if(state.source==="extrato"){
     row.append(
-      selectField(
-        "Tipo",
-        filters.type,
-        [
-          {
-            key:"entry",
-            label:"Entradas"
-          },
-
-          {
-            key:"exit",
-            label:"Saídas"
-          }
-        ],
-
-        value=>{
-          filters.type=value;
-          render();
-        }
-      )
+      multiChoiceField("Tipos",["entry","exit"],"type","Buscar tipo…")
     );
   }
 
@@ -3133,11 +3090,17 @@ function renderExpenseComparison(app){
 function renderCategoryFilters(){
   const filters=state.categoryFilters;
   const records=state.source==="receber"?(state.data.receber||[]):(state.data.pagar||[]);
+  const entityLabel=CONFIG[state.source]?.entityLabel||"Cliente/Fornecedor";
+  const entityPlural=entityLabel==="Fornecedor"?"Fornecedores":"Clientes";
+  const entities=[...new Set(records.map(record=>record.entity).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,"pt-BR"))
+    .map(value=>({key:value,label:value}));
   const categories=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocation.name)))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const groups=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocationGroup(allocation))))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const row=el("div",{class:"filters"},[
     selectField("Mês 1",filters.month1,availableMonths(),value=>{filters.month1=value;render();}),
     selectField("Mês 2",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
+    multiChoiceField(entityPlural,entities.map(option=>option.key),"entity",`Buscar ${entityLabel.toLowerCase()}…`,filters),
     multiChoiceField("Categorias",groups,"groups","Buscar categoria…",filters),
     multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…",filters),
     el("button",{class:"btn secondary",onclick:()=>{state.categoryFilters=freshCategoryFilters();render();}},"Limpar filtros da aba")
@@ -3166,7 +3129,9 @@ function renderCategories(app){
     (!filters.groups.length||filters.groups.includes(allocationGroup(allocation)))&&
     (!filters.categories.length||filters.categories.includes(allocation.name))
   );
-  const recordsForMonth=month=>source.filter(record=>!month||record.month===month);
+  const recordsForMonth=month=>source
+    .filter(record=>!filters.entity.length||filters.entity.includes(record.entity))
+    .filter(record=>!month||record.month===month);
   const mapFor=records=>{
     const map=new Map();
     records.forEach(record=>allocationsFor(record).forEach(allocation=>map.set(allocation.name,(map.get(allocation.name)||0)+allocation.value)));
@@ -3524,12 +3489,12 @@ function activeFilterDescription(){
     if(!f.dateFrom&&!f.dateTo&&f.month1)parts.push(`Mês 1: ${monthName(f.month1)}`);
     if(!f.dateFrom&&!f.dateTo&&f.month2)parts.push(`Mês 2: ${monthName(f.month2)}`);
   }
-  if(f.status)parts.push(`Situação: ${f.status}`);
-  if(f.entity)parts.push(`${CONFIG[state.source]?.entityLabel||"Entidade"}: ${f.entity}`);
+  if(f.status.length)parts.push(`Situações: ${f.status.join(", ")}`);
+  if(f.entity.length)parts.push(`${CONFIG[state.source]?.entityLabel||"Entidade"}: ${f.entity.join(", ")}`);
   if(f.groups.length)parts.push(`Categorias: ${f.groups.join(", ")}`);
   if(f.categories.length)parts.push(`Subcategorias: ${f.categories.join(", ")}`);
-  if(f.costCenter)parts.push(`Centro de custo: ${f.costCenter}`);
-  if(f.type)parts.push(`Tipo: ${f.type==="entry"?"Entradas":"Saídas"}`);
+  if(f.costCenter.length)parts.push(`Centros de custo: ${f.costCenter.join(", ")}`);
+  if(f.type.length)parts.push(`Tipos: ${f.type.map(type=>type==="entry"?"Entradas":"Saídas").join(", ")}`);
   return parts.length?parts.join(" · "):"Todos os dados carregados (sem filtros)";
 }
 
