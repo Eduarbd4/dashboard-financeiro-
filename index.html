@@ -2501,7 +2501,61 @@ function statementChart(data){
   );
 }
 
+function receivableComparisonInformation(){
+  const firstRecords=periodFilter(state.data.receber,1);
+  const secondRecords=periodFilter(state.data.receber,2);
+  const totalOf=records=>records.reduce((sum,record)=>sum+record.original,0);
+  const firstTotal=totalOf(firstRecords);
+  const secondTotal=totalOf(secondRecords);
+  const firstCategories=categoryMap(firstRecords);
+  const secondCategories=categoryMap(secondRecords);
+  const changes=[...new Set([...firstCategories.keys(),...secondCategories.keys()])].map(name=>{
+    const firstValue=firstCategories.get(name)||0;
+    const secondValue=secondCategories.get(name)||0;
+    return{name,firstValue,secondValue,difference:secondValue-firstValue,percentage:variation(firstValue,secondValue)};
+  }).sort((a,b)=>Math.abs(b.difference)-Math.abs(a.difference));
+  const biggestIncrease=[...changes].filter(item=>item.difference>0).sort((a,b)=>b.difference-a.difference)[0];
+  const biggestReduction=[...changes].filter(item=>item.difference<0).sort((a,b)=>a.difference-b.difference)[0];
+  const biggestImpact=changes[0];
+  const newExpenses=changes.filter(item=>item.firstValue===0&&item.secondValue>0);
+  const removedExpenses=changes.filter(item=>item.firstValue>0&&item.secondValue===0);
+  const totalDifference=secondTotal-firstTotal;
+  const totalPercentage=variation(firstTotal,secondTotal);
+  const firstTotals=accountTotals(firstRecords);
+  const secondTotals=accountTotals(secondRecords);
+  const labels=periodLabels();
+  const secondRanking=[...secondCategories.entries()].sort((a,b)=>b[1]-a[1]);
+  const concentration=secondTotal?secondRanking.slice(0,3).reduce((sum,[,value])=>sum+value,0)/secondTotal*100:0;
+  const paragraphs=[];
+
+  paragraphs.push(
+    `Na comparação entre ${labels[0]} e ${labels[1]}, o valor previsto a receber ${totalDifference>=0?"aumentou":"diminuiu"} ${brl(Math.abs(totalDifference))}`+
+    `${Number.isFinite(totalPercentage)?`, uma variação de ${Math.abs(totalPercentage).toFixed(1).replace(".",",")}% ${totalDifference>=0?"positiva":"negativa"} em relação ao primeiro período.`:"."}`
+  );
+  paragraphs.push(
+    `No primeiro período, havia ${firstRecords.length} ${firstRecords.length===1?"lançamento":"lançamentos"}, com ${brl(firstTotals.done)} recebido, ${brl(firstTotals.open)} a receber e ${brl(firstTotals.late)} atrasado. `+
+    `No segundo período, são ${secondRecords.length} ${secondRecords.length===1?"lançamento":"lançamentos"}, com ${brl(secondTotals.done)} recebido, ${brl(secondTotals.open)} a receber e ${brl(secondTotals.late)} atrasado.`
+  );
+  const receivedVariation=variation(firstTotals.done,secondTotals.done);
+  paragraphs.push(
+    `O valor efetivamente recebido ${secondTotals.done>=firstTotals.done?"cresceu":"recuou"} ${brl(Math.abs(secondTotals.done-firstTotals.done))}`+
+    `${Number.isFinite(receivedVariation)?` (${Math.abs(receivedVariation).toFixed(1).replace(".",",")}% ${secondTotals.done>=firstTotals.done?"de aumento":"de redução"}).`:"."} `+
+    `${secondTotals.late>firstTotals.late?`O saldo atrasado aumentou ${brl(secondTotals.late-firstTotals.late)}, o que exige reforço nas cobranças e acompanhamento dos clientes inadimplentes.`:secondTotals.late<firstTotals.late?`O saldo atrasado diminuiu ${brl(firstTotals.late-secondTotals.late)}, indicando melhora na recuperação dos recebíveis.`:"O saldo atrasado permaneceu estável entre os períodos."}`
+  );
+  if(secondRanking.length)paragraphs.push(
+    `As principais categorias de recebimento no segundo período foram ${secondRanking.slice(0,3).map(([name,value])=>`${name} (${brl(value)})`).join(", ")}. Juntas, representam ${concentration.toFixed(1).replace(".",",")}% do valor previsto a receber, ${concentration>=60?"demonstrando concentração relevante das receitas":"indicando uma composição mais distribuída das receitas"}.`
+  );
+  if(biggestIncrease)paragraphs.push(`O maior crescimento ocorreu em ${biggestIncrease.name}, com aumento de ${brl(biggestIncrease.difference)} em relação ao primeiro período.`);
+  if(biggestReduction)paragraphs.push(`A maior redução ocorreu em ${biggestReduction.name}, com queda de ${brl(Math.abs(biggestReduction.difference))}. É importante verificar se essa redução decorre de sazonalidade, menor volume de vendas ou alteração nas datas de vencimento.`);
+  paragraphs.push(totalDifference>=0
+    ?"A evolução do valor a receber é positiva, mas deve ser analisada em conjunto com o montante efetivamente recebido e com os atrasos, pois crescimento de contas a receber sem conversão em caixa pode aumentar a necessidade de capital de giro."
+    :"A redução do valor a receber merece acompanhamento comercial e financeiro para identificar se houve queda nas vendas, antecipação de recebimentos ou mudança no calendário de faturamento.");
+
+  return{firstRecords,secondRecords,firstTotal,secondTotal,totalDifference,totalPercentage,changes,biggestIncrease,biggestReduction,biggestImpact,newExpenses,removedExpenses,paragraphs,text:paragraphs.join(" ")};
+}
+
 function comparisonInformation(){
+  if(state.source==="receber")return receivableComparisonInformation();
   const sourceKey=state.source==="receber"?"receber":"pagar";
   const firstRecords=
     periodFilter(
@@ -2797,6 +2851,15 @@ function renderAnalysis(){
     );
 
   if(!enabled){
+    if(state.source==="receber"){
+      const records=displayRecords(state.data.receber);
+      const analysis=dashboardReportAnalysis(records,"receber");
+      const years=[...new Set(records.map(record=>record.month?.slice(0,4)).filter(Boolean))].join(", ");
+      return el("div",{class:"card analysis"},[
+        el("span",{class:"analysisTitle"},state.filters.dateFrom||state.filters.dateTo||state.filters.month1?"Análise dos recebimentos filtrados":`Análise anual de recebimentos${years?` · ${years}`:""}`),
+        el("div",{class:"analysisLead"},analysis.paragraphs.map(paragraph=>el("p",{},paragraph)))
+      ]);
+    }
     const records=displayRecords(state.data.pagar);
     const total=records.reduce((sum,record)=>sum+record.original,0);
     const months=new Map();
@@ -2959,7 +3022,9 @@ function renderExpenseComparison(app){
   app.append(
     sectionHeader(
       "COMPARAÇÃO",
-      "Despesas comparadas por subcategoria"
+      state.source==="receber"
+        ?"Recebimentos comparados por categoria"
+        :"Despesas comparadas por subcategoria"
     ),
 
     el(
@@ -3032,9 +3097,9 @@ function renderExpenseComparison(app){
                             item.percentage
                           )
                             ?"neutral"
-                            :item.percentage<=0
-                              ?"positive"
-                              :"negative"
+                            :state.source==="receber"
+                              ?item.percentage>=0?"positive":"negative"
+                              :item.percentage<=0?"positive":"negative"
                       },
 
                       Number.isFinite(
@@ -3350,11 +3415,13 @@ function renderAccountsDashboard(app,key){
     )
   );
 
-  if(key==="pagar"){
+  if(key==="pagar"||key==="receber"){
     app.append(
       sectionHeader(
         "ANÁLISE",
-        "Análise do período"
+        key==="receber"
+          ?"Análise dos recebimentos"
+          :"Análise do período"
       ),
 
       renderAnalysis()
@@ -3444,37 +3511,88 @@ function renderStatementDashboard(app){
   );
 }
 
+function activeFilterDescription(){
+  const f=state.filters;
+  const parts=[];
+  const monthName=key=>key?`${MONTHS[Number(key.slice(5))-1]}/${key.slice(0,4)}`:"";
+  if(f.compare){
+    parts.push(`Período 1: ${f.period1From?formatDateBR(f.period1From):"início"} a ${f.period1To?formatDateBR(f.period1To):"fim"}`);
+    parts.push(`Período 2: ${f.period2From?formatDateBR(f.period2From):"início"} a ${f.period2To?formatDateBR(f.period2To):"fim"}`);
+  }else{
+    if(f.dateFrom)parts.push(`Data inicial: ${formatDateBR(f.dateFrom)}`);
+    if(f.dateTo)parts.push(`Data final: ${formatDateBR(f.dateTo)}`);
+    if(!f.dateFrom&&!f.dateTo&&f.month1)parts.push(`Mês 1: ${monthName(f.month1)}`);
+    if(!f.dateFrom&&!f.dateTo&&f.month2)parts.push(`Mês 2: ${monthName(f.month2)}`);
+  }
+  if(f.status)parts.push(`Situação: ${f.status}`);
+  if(f.entity)parts.push(`${CONFIG[state.source]?.entityLabel||"Entidade"}: ${f.entity}`);
+  if(f.groups.length)parts.push(`Categorias: ${f.groups.join(", ")}`);
+  if(f.categories.length)parts.push(`Subcategorias: ${f.categories.join(", ")}`);
+  if(f.costCenter)parts.push(`Centro de custo: ${f.costCenter}`);
+  if(f.type)parts.push(`Tipo: ${f.type==="entry"?"Entradas":"Saídas"}`);
+  return parts.length?parts.join(" · "):"Todos os dados carregados (sem filtros)";
+}
+
+function dashboardReportAnalysis(records,key){
+  if(key==="extrato"){
+    const entries=records.filter(record=>record.type==="entry").reduce((sum,record)=>sum+record.value,0);
+    const exits=records.filter(record=>record.type==="exit").reduce((sum,record)=>sum+record.value,0);
+    const balance=entries-exits;
+    const months=monthlyStatementData();
+    return{paragraphs:[
+      `O extrato filtrado contém ${records.length} ${records.length===1?"lançamento":"lançamentos"}, com ${brl(entries)} em entradas e ${brl(exits)} em saídas. O saldo líquido do período é ${brl(balance)}.`,
+      balance>=0?"As entradas superaram as saídas no período analisado, indicando geração positiva de caixa.":"As saídas superaram as entradas no período analisado. Recomenda-se revisar os maiores desembolsos e a disponibilidade de caixa para os próximos vencimentos.",
+      `A análise considera ${months.length} ${months.length===1?"mês com movimentação":"meses com movimentação"} e respeita integralmente os filtros exibidos no relatório.`
+    ],changes:[]};
+  }
+
+  const totals=accountTotals(records);
+  const categories=[...categoryMap(records).entries()].sort((a,b)=>b[1]-a[1]);
+  const months=monthlyAccountData(state.data[key]);
+  const average=records.length?totals.total/records.length:0;
+  const top=categories.slice(0,3);
+  const topTotal=top.reduce((sum,[,value])=>sum+value,0);
+  const concentration=totals.total?topTotal/totals.total*100:0;
+  const highest=[...months].sort((a,b)=>b.value-a.value)[0];
+  const lowest=[...months].sort((a,b)=>a.value-b.value)[0];
+
+  if(key==="receber"){
+    const receivedShare=totals.total?totals.done/totals.total*100:0;
+    const openShare=totals.total?totals.open/totals.total*100:0;
+    const lateShare=totals.total?totals.late/totals.total*100:0;
+    return{paragraphs:[
+      `O relatório de Contas a Receber considera ${records.length} ${records.length===1?"lançamento":"lançamentos"}, somando ${brl(totals.total)} em valores previstos de clientes. O valor médio por lançamento é de ${brl(average)}.`,
+      `${brl(totals.done)} já foi recebido, equivalente a ${receivedShare.toFixed(1).replace(".",",")}% do total filtrado. Permanecem ${brl(totals.open)} a receber (${openShare.toFixed(1).replace(".",",")}%) e ${brl(totals.late)} em atraso (${lateShare.toFixed(1).replace(".",",")}%).`,
+      totals.late>0?`Os recebimentos atrasados precisam de acompanhamento prioritário. Recomenda-se identificar os clientes e títulos vencidos de maior valor, reforçar as cobranças e avaliar o efeito da inadimplência sobre o fluxo de caixa.`:"Não foram encontrados recebimentos atrasados nos filtros atuais, indicando regularidade nos vencimentos analisados.",
+      top.length?`As categorias de recebimento de maior peso são ${top.map(([name,value])=>`${name} (${brl(value)})`).join(", ")}. Juntas, concentram ${concentration.toFixed(1).replace(".",",")}% do valor previsto, ${concentration>=60?"o que demonstra dependência relevante dessas fontes de receita":"indicando uma composição mais distribuída das receitas"}.`:"Não foram encontradas categorias de recebimento com movimentação nos filtros atuais.",
+      highest&&lowest&&highest.key!==lowest.key?`${highest.label} apresentou o maior volume previsto de recebimentos, com ${brl(highest.value)}, enquanto ${lowest.label} registrou o menor, com ${brl(lowest.value)}. A diferença foi de ${brl(highest.value-lowest.value)}.`:"Há somente um mês com movimentação nos filtros atuais; por isso, não é possível analisar a evolução mensal dos recebimentos.",
+      `Foram identificados ${totals.entityCount} ${totals.entityCount===1?"cliente":"clientes"}. A leitura financeira deve considerar não apenas o crescimento do valor previsto, mas principalmente sua conversão em recebimentos efetivos e a evolução dos atrasos.`
+    ],changes:[]};
+  }
+
+  return{paragraphs:[
+    `O relatório considera ${records.length} ${records.length===1?"lançamento":"lançamentos"}, totalizando ${brl(totals.total)}. O valor médio por lançamento foi de ${brl(average)}.`,
+    `${brl(totals.done)} já foi ${CONFIG[key].doneLabel.toLowerCase()}, ${brl(totals.open)} permanece ${CONFIG[key].openLabel.toLowerCase()} e ${brl(totals.late)} está atrasado. ${totals.late>0?"O saldo atrasado deve ser acompanhado com prioridade para reduzir juros, multas e impacto no caixa.":"Não foram encontrados valores atrasados nos filtros atuais."}`,
+    top.length?`As subcategorias de maior peso foram ${top.map(([name,value])=>`${name} (${brl(value)})`).join(", ")}. Juntas, representam ${concentration.toFixed(1).replace(".",",")}% do total filtrado.`:"Não foram encontradas subcategorias com movimentação nos filtros atuais.",
+    highest&&lowest&&highest.key!==lowest.key?`${highest.label} apresentou o maior valor, com ${brl(highest.value)}, enquanto ${lowest.label} apresentou o menor, com ${brl(lowest.value)}. A diferença entre eles foi de ${brl(highest.value-lowest.value)}.`:"Há somente um mês com movimentação nos filtros atuais; por isso, não é possível avaliar a evolução entre meses.",
+    `Foram identificados ${totals.entityCount} ${totals.entityCount===1?CONFIG[key].entityLabel.toLowerCase():`${CONFIG[key].entityLabel.toLowerCase()}s`} no período selecionado. Todos os indicadores, rankings e detalhamentos deste relatório foram calculados conforme os filtros ativos no Dashboard.`
+  ],changes:[]};
+}
+
 function reportData(){
-  /*
-    Todos os dados dos relatórios são montados
-    a partir dos filtros ativos.
-  */
-  const key=state.source==="receber"?"receber":"pagar";
+  const key=state.source;
   const records=displayRecords(state.data[key]);
-
+  if(key==="extrato"){
+    const entries=records.filter(record=>record.type==="entry").reduce((sum,record)=>sum+record.value,0);
+    const exits=records.filter(record=>record.type==="exit").reduce((sum,record)=>sum+record.value,0);
+    return{key,records,filterDescription:activeFilterDescription(),entries,exits,balance:entries-exits,months:monthlyStatementData(),analysis:dashboardReportAnalysis(records,key),suppliers:[],costCenters:[],groups:[]};
+  }
+  const comparing=state.filters.compare||(state.filters.month1&&state.filters.month2&&!state.filters.dateFrom&&!state.filters.dateTo);
   return{
-    records,
-    key,
-    config:CONFIG[key],
-    totals:accountTotals(records),
-
-    suppliers:rankingData(
-      state.data[key],
-      "entity"
-    ),
-
-    costCenters:rankingData(
-      state.data[key],
-      "costCenter"
-    ),
-
-    groups:categoryGroups(records),
-
-    months:monthlyAccountData(
-      state.data[key]
-    ),
-
-    analysis:comparisonInformation()
+    key,records,config:CONFIG[key],filterDescription:activeFilterDescription(),totals:accountTotals(records),
+    suppliers:rankingData(state.data[key],"entity"),costCenters:rankingData(state.data[key],"costCenter"),
+    groups:categoryGroups(records),months:monthlyAccountData(state.data[key]),
+    analysis:comparing?comparisonInformation():dashboardReportAnalysis(records,key)
   };
 }
 
@@ -3492,6 +3610,28 @@ function downloadExcel(){
   const workbook=
     XLSX.utils.book_new();
 
+  if(report.key==="extrato"){
+    const summary=XLSX.utils.aoa_to_sheet([
+      ["RELATÓRIO DO EXTRATO BANCÁRIO"],
+      ["Gerado em",new Date().toLocaleString("pt-BR")],
+      ["Filtros ativos",report.filterDescription],[],
+      ["Indicador","Valor"],["Entradas",report.entries],["Saídas",report.exits],["Saldo do período",report.balance],["Lançamentos",report.records.length]
+    ]);
+    summary["!cols"]=[{wch:28},{wch:100}];
+    XLSX.utils.book_append_sheet(workbook,summary,"Resumo");
+    XLSX.utils.book_append_sheet(workbook,XLSX.utils.aoa_to_sheet([
+      ["ANÁLISE DO PERÍODO"],...report.analysis.paragraphs.map((paragraph,index)=>[`Análise ${index+1}`,paragraph])
+    ]),"Análise");
+    XLSX.utils.book_append_sheet(workbook,XLSX.utils.aoa_to_sheet([
+      ["Data","Descrição","Tipo","Valor"],...report.records.map(record=>[formatDateBR(record.date),record.description,record.type==="entry"?"Entrada":"Saída",record.value])
+    ]),"Lançamentos filtrados");
+    XLSX.utils.book_append_sheet(workbook,XLSX.utils.aoa_to_sheet([
+      ["Mês","Entradas","Saídas","Saldo"],...report.months.map(item=>[item.label,item.entry,item.exit,item.entry-item.exit])
+    ]),"Movimentação mensal");
+    XLSX.writeFile(workbook,`relatorio-extrato-${new Date().toISOString().slice(0,10)}.xlsx`);
+    return;
+  }
+
   const summarySheet=
     XLSX.utils.aoa_to_sheet([
       ["RELATÓRIO FINANCEIRO DANE-SE"],
@@ -3504,12 +3644,12 @@ function downloadExcel(){
       ],
 
       [
-        "Períodos comparados",
-        periodLabels().join(" × ")
+        "Filtros ativos",
+        report.filterDescription
       ],
 
       [
-        "Subcategorias filtradas",
+      "Subcategorias filtradas",
 
         state.filters.categories.length
           ?state.filters.categories.join(", ")
@@ -3565,8 +3705,8 @@ function downloadExcel(){
     ["ANÁLISE DO PERÍODO"],
 
     [
-      "Períodos comparados",
-      periodLabels().join(" × ")
+      "Filtros ativos",
+      report.filterDescription
     ],
 
     []
@@ -3633,7 +3773,7 @@ function downloadExcel(){
     workbook,
 
     XLSX.utils.aoa_to_sheet([
-      ["Mês","Gastos"],
+      ["Mês",report.key==="receber"?"Recebimentos previstos":"Gastos"],
 
       ...report.months.map(item=>[
         item.label,
@@ -3641,18 +3781,18 @@ function downloadExcel(){
       ])
     ]),
 
-    "Gastos por mês"
+    report.key==="receber"?"Recebimentos por mês":"Gastos por mês"
   );
 
   XLSX.utils.book_append_sheet(
     workbook,
 
     XLSX.utils.aoa_to_sheet([
-      ["Fornecedor","Valor"],
+      [report.config.entityLabel,"Valor"],
       ...report.suppliers
     ]),
 
-    "Fornecedores"
+    report.key==="receber"?"Clientes":"Fornecedores"
   );
 
   XLSX.utils.book_append_sheet(
@@ -3696,6 +3836,15 @@ function downloadExcel(){
     "Categorias"
   );
 
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([
+      ["Data",report.config.entityLabel,"Situação","Centro de custo","Valor original",report.config.doneLabel,report.config.openLabel],
+      ...report.records.map(record=>[formatDateBR(record.date),record.entity,record.status,record.costCenter,record.original,record.done,record.open])
+    ]),
+    "Lançamentos filtrados"
+  );
+
   XLSX.writeFile(
     workbook,
 
@@ -3730,6 +3879,24 @@ function downloadPDF(){
     orientation:"landscape"
   });
 
+  if(report.key==="extrato"){
+    pdf.setTextColor(16,35,74);pdf.setFont("helvetica","bold");pdf.setFontSize(18);
+    pdf.text("Dane-se - Relatório do extrato bancário",14,16);
+    pdf.setFont("helvetica","normal");pdf.setFontSize(9);
+    pdf.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`,14,23);
+    const filterLines=pdf.splitTextToSize(`Filtros ativos: ${report.filterDescription}`,265);
+    pdf.text(filterLines,14,29);
+    pdf.autoTable({startY:29+filterLines.length*4,head:[["Entradas","Saídas","Saldo do período","Lançamentos"]],body:[[brl(report.entries),brl(report.exits),brl(report.balance),String(report.records.length)]],headStyles:{fillColor:[16,35,74]}});
+    let analysisY=pdf.lastAutoTable.finalY+9;
+    pdf.setFont("helvetica","bold");pdf.setFontSize(14);pdf.text("Análise do período",14,analysisY);analysisY+=7;
+    pdf.setFont("helvetica","normal");pdf.setFontSize(10);
+    report.analysis.paragraphs.forEach(paragraph=>{const lines=pdf.splitTextToSize(paragraph,265);pdf.text(lines,14,analysisY);analysisY+=lines.length*5+3;if(analysisY>180){pdf.addPage();analysisY=18;}});
+    pdf.addPage();
+    pdf.autoTable({startY:14,head:[["Data","Descrição","Tipo","Valor"]],body:report.records.map(record=>[formatDateBR(record.date),record.description,record.type==="entry"?"Entrada":"Saída",brl(record.value)]),headStyles:{fillColor:[16,35,74]},styles:{fontSize:8}});
+    pdf.save(`relatorio-extrato-${new Date().toISOString().slice(0,10)}.pdf`);
+    return;
+  }
+
   pdf.setTextColor(16,35,74);
   pdf.setFont("helvetica","bold");
   pdf.setFontSize(18);
@@ -3750,7 +3917,7 @@ function downloadPDF(){
   );
 
   pdf.text(
-    `Períodos: ${periodLabels().join(" x ")}`,
+    `Filtros: ${report.filterDescription}`,
     14,
     28
   );
@@ -3760,10 +3927,10 @@ function downloadPDF(){
 
     head:[[
       "Total no período",
-      "Pago",
-      "Em aberto",
+      report.config.doneLabel,
+      report.config.openLabel,
       "Atrasado",
-      "Fornecedores"
+      `${report.config.entityLabel}s`
     ]],
 
     body:[[
@@ -3830,7 +3997,7 @@ function downloadPDF(){
     }
   );
 
-  pdf.autoTable({
+  if(report.analysis.changes.length)pdf.autoTable({
     startY:y+3,
 
     head:[[
@@ -3914,7 +4081,7 @@ function downloadPDF(){
     startY:14,
 
     head:[[
-      "Fornecedor",
+      report.config.entityLabel,
       "Valor"
     ]],
 
