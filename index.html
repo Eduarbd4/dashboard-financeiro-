@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -688,6 +689,7 @@ body{
 .rankScroll::-webkit-scrollbar-thumb,.tablewrap::-webkit-scrollbar-thumb,.multiPanel::-webkit-scrollbar-thumb{background:#aebbd0}
 @media(max-width:950px){.wrap{padding-left:18px;padding-right:18px}.header{margin-left:-18px;margin-right:-18px;padding-left:22px;padding-right:22px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.wrap{padding:0 12px 40px}.header{margin:0 -12px 14px;padding:22px 16px;border-radius:0 0 17px 17px}.title{font-size:25px}.actions{width:100%}.actions .btn{flex:1;padding:9px 10px}.tabs{border-radius:9px;padding:5px}.tab{padding:9px 11px}.viewtabs{padding:0}.kpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.kpi .value{font-size:18px}.grid2,.analysisList{grid-template-columns:1fr}.filterbox{padding:13px}.field,.multi{flex:1 1 145px}.multi summary{min-width:0}.card{padding:14px}}
+.adminBadge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:20px;background:rgba(255,255,255,.08);color:#c5d2e6;font-size:9px;border:1px solid rgba(255,255,255,.13)}.adminBadge:before{content:"";width:6px;height:6px;border-radius:50%;background:#7c8ba2}.adminBadge.online:before{background:#5ed4a7;box-shadow:0 0 0 4px rgba(94,212,167,.12)}.loginOverlay{position:fixed;inset:0;background:rgba(7,17,38,.78);display:grid;place-items:center;padding:20px;z-index:100;backdrop-filter:blur(7px)}.loginBox{width:min(430px,96vw);background:#fff;border-radius:15px;padding:25px;box-shadow:0 25px 80px rgba(0,0,0,.35)}.loginBox h2{margin:0 0 7px;font-size:20px}.loginBox p{color:var(--muted);font-size:11px;line-height:1.6}.loginBox input{width:100%;height:42px;border:1px solid var(--line);border-radius:8px;padding:0 11px;margin:5px 0}.loginButtons{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.cloudNotice{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#eef8f4;border:1px solid #cce9de;color:#27644f;border-radius:10px;padding:10px 13px;margin-bottom:13px;font-size:10px}.cloudNotice b{color:#17563f}.executiveStamp{display:inline-flex;align-items:center;gap:7px;color:#91a2bb;font-size:9px;margin-top:8px}.executiveStamp:before{content:"✓";display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:rgba(94,212,167,.13);color:#63d3a8}
 </style>
 </head>
 
@@ -695,6 +697,11 @@ body{
 <main class="wrap" id="app"></main>
 
 <script>
+/* Use apenas a chave PUBLICÁVEL (sb_publishable_). Nunca use sb_secret_. */
+const SUPABASE_URL="https://tohgvkvkvajqxhtvbija.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_ZLue4j1oo6ULkFIWVhkwNQ_iLkQHgah";
+const ONLINE_WORKSPACE="dane-se-financeiro";
+let cloudDb=null,adminSession=null,cloudChannel=null,cloudReady=false;
 const MONTHS=[
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
@@ -1309,6 +1316,90 @@ function saveData(key){
       balance:state.balance
     })
   );
+}
+
+function cloudPayload(){
+  return{
+    data:state.data,
+    updated:state.updated,
+    balance:state.balance
+  };
+}
+
+function applyCloudPayload(payload){
+  if(!payload)return;
+  state.data={pagar:null,receber:null,extrato:null,...(payload.data||{})};
+  state.updated=payload.updated||{};
+  state.balance=payload.balance??null;
+  Object.keys(state.data).forEach(key=>{
+    if(state.data[key])saveData(key);
+  });
+}
+
+async function saveOnline(){
+  if(!cloudDb||!adminSession)return;
+  const{error}=await cloudDb.from("finance_dashboard_state").upsert({
+    workspace:ONLINE_WORKSPACE,
+    payload:cloudPayload(),
+    updated_at:new Date().toISOString(),
+    updated_by:adminSession.user.id
+  },{onConflict:"workspace"});
+  if(error)throw error;
+}
+
+async function loadOnline(){
+  if(!cloudDb)return;
+  const{data,error}=await cloudDb.from("finance_dashboard_state").select("payload,updated_at").eq("workspace",ONLINE_WORKSPACE).maybeSingle();
+  if(error)throw error;
+  if(data?.payload)applyCloudPayload(data.payload);
+  cloudReady=true;
+}
+
+function subscribeOnline(){
+  if(!cloudDb)return;
+  if(cloudChannel)cloudDb.removeChannel(cloudChannel);
+  cloudChannel=cloudDb.channel("finance-dashboard-shared").on("postgres_changes",{
+    event:"*",schema:"public",table:"finance_dashboard_state",filter:`workspace=eq.${ONLINE_WORKSPACE}`
+  },async()=>{try{await loadOnline();render()}catch(error){console.error(error)}}).subscribe();
+}
+
+async function initOnline(){
+  if(SUPABASE_ANON_KEY.includes("COLE_AQUI"))return;
+  try{
+    cloudDb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    const{data}=await cloudDb.auth.getSession();
+    adminSession=data.session;
+    await loadOnline();
+    subscribeOnline();
+    render();
+  }catch(error){console.error("Conexão online indisponível",error)}
+}
+
+function showAdminLogin(){
+  const overlay=el("div",{class:"loginOverlay"});
+  const email=el("input",{type:"email",placeholder:"E-mail do administrador"});
+  const password=el("input",{type:"password",placeholder:"Senha"});
+  const errorBox=el("div",{class:"error"});
+  const cancel=el("button",{class:"btn secondary",onclick:()=>overlay.remove()},"Cancelar");
+  const enter=el("button",{class:"btn",onclick:async()=>{
+    errorBox.textContent="";
+    const{data,error}=await cloudDb.auth.signInWithPassword({email:email.value,password:password.value});
+    if(error){errorBox.textContent="E-mail ou senha inválidos.";return}
+    adminSession=data.session;overlay.remove();render();
+  }},"Entrar");
+  overlay.append(el("div",{class:"loginBox"},[
+    el("h2",{},"Área administrativa"),
+    el("p",{},"Somente administradores podem importar, substituir ou apagar os dados compartilhados."),
+    email,password,errorBox,el("div",{class:"loginButtons"},[cancel,enter])
+  ]));
+  document.body.append(overlay);
+  setTimeout(()=>email.focus(),0);
+}
+
+async function adminLogout(){
+  if(cloudDb)await cloudDb.auth.signOut();
+  adminSession=null;
+  render();
 }
 
 function sourceRecords(){
@@ -2962,6 +3053,11 @@ function renderAnalysis(){
     const lowest=[...ordered].sort((a,b)=>a[1]-b[1])[0];
     const topThree=categories.slice(0,3).reduce((sum,[,value])=>sum+value,0);
     const concentration=total?topThree/total*100:0;
+    const suppliers=[...records.reduce((map,record)=>map.set(record.entity,(map.get(record.entity)||0)+record.original),new Map()).entries()].sort((a,b)=>b[1]-a[1]);
+    const supplierTopFive=suppliers.slice(0,5).reduce((sum,[,value])=>sum+value,0);
+    const supplierConcentration=total?supplierTopFive/total*100:0;
+    const overdueRate=total?totals.late/total*100:0;
+    const openRate=total?totals.open/total*100:0;
     const first=ordered[0];
     const last=ordered.at(-1);
     const change=first&&last?variation(first[1],last[1]):0;
@@ -2980,7 +3076,12 @@ function renderAnalysis(){
         :"Não há meses suficientes para identificar o maior e o menor volume de despesas.",
       first&&last&&first[0]!==last[0]
         ?`Entre ${MONTHS[Number(first[0].slice(5))-1]}/${first[0].slice(0,4)} e ${MONTHS[Number(last[0].slice(5))-1]}/${last[0].slice(0,4)}, as despesas ${last[1]>=first[1]?"aumentaram":"diminuíram"} ${brl(Math.abs(last[1]-first[1]))}${Number.isFinite(change)?` (${Math.abs(change).toFixed(1).replace(".",",")}%)`:""}.`
-        :"O período disponível não permite comparar meses diferentes."
+        :"O período disponível não permite comparar meses diferentes.",
+      `A exposição financeira em aberto corresponde a ${openRate.toFixed(1).replace(".",",")}% do total analisado. O índice de atraso é de ${overdueRate.toFixed(1).replace(".",",")}%. ${overdueRate>=10?"Esse nível é crítico e recomenda um plano imediato de regularização e priorização por impacto financeiro.":overdueRate>0?"Embora controlável, o atraso deve ser acompanhado semanalmente para impedir juros e perda de previsibilidade.":"A ausência de atrasos indica boa disciplina de pagamentos no recorte atual."}`,
+      suppliers[0]
+        ?`Os cinco maiores fornecedores concentram ${supplierConcentration.toFixed(1).replace(".",",")}% das despesas. O maior é ${suppliers[0][0]}, com ${brl(suppliers[0][1])}. ${supplierConcentration>=60?"A concentração é elevada; recomenda-se avaliar dependência, condições comerciais, prazos e alternativas de fornecimento.":"A concentração encontra-se distribuída, reduzindo o risco de dependência excessiva de poucos fornecedores."}`
+        :"Não há fornecedores suficientes para avaliar concentração.",
+      `Recomendação executiva: priorizar a liquidação dos valores vencidos, revisar as três categorias de maior impacto, validar despesas extraordinárias e negociar prazos com fornecedores relevantes. Para o próximo ciclo, use a média mensal de ${brl(monthlyAverage)} como referência inicial, ajustando sazonalidades e compromissos já contratados.`
     ];
 
     return el("div",{class:"card analysis"},[
@@ -4227,6 +4328,11 @@ function downloadPDF(){
 async function uploadFile(key,file){
   if(!file)return;
 
+  if(cloudDb&&!adminSession){
+    showAdminLogin();
+    return;
+  }
+
   try{
     state.error="";
 
@@ -4254,6 +4360,10 @@ async function uploadFile(key,file){
       freshFilters();
 
     saveData(key);
+
+    if(cloudDb){
+      await saveOnline();
+    }
   }catch(error){
     state.error=
       error.message||
@@ -4279,6 +4389,11 @@ function renderEmpty(){
       )
     ]
   );
+
+  if(cloudDb&&!adminSession){
+    container.append(el("button",{class:"btn",onclick:showAdminLogin},"Entrar como administrador para importar"));
+    return container;
+  }
 
   const drop=el(
     "div",
@@ -4332,7 +4447,8 @@ function renderEmpty(){
   return container;
 }
 
-function clearCurrentData(){
+async function clearCurrentData(){
+  if(cloudDb&&!adminSession){showAdminLogin();return}
   const label=
     CONFIG[state.source]?.label||
     "Extrato Bancário";
@@ -4356,6 +4472,9 @@ function clearCurrentData(){
   }
 
   state.filters=freshFilters();
+  if(cloudDb){
+    try{await saveOnline()}catch(error){state.error="Não foi possível atualizar os dados compartilhados."}
+  }
   render();
 }
 
@@ -4373,6 +4492,7 @@ function render(){
 
   const viewTabs=[
     ["dashboard","Dashboard"],
+    ["relatorio","Relatório Executivo"],
     ["comparacao","Comparação"],
     ["categorias","Categorias"]
   ];
@@ -4422,6 +4542,12 @@ function render(){
           "div",
           {class:"actions"},
           [
+            el("span",{class:`adminBadge${cloudReady?" online":""}`},cloudReady?(adminSession?"Administrador conectado":"Dados compartilhados online"):"Modo local"),
+
+            cloudDb
+              ?el("button",{class:"btn secondary",onclick:adminSession?adminLogout:showAdminLogin},adminSession?"Sair":"Área administrativa")
+              :null,
+
             el(
               "button",
               {
@@ -4440,7 +4566,7 @@ function render(){
               "Baixar Excel"
             ),
 
-            state.data[state.source]
+            state.data[state.source]&&(!cloudDb||adminSession)
               ?el(
                 "button",
                 {
@@ -4458,7 +4584,7 @@ function render(){
               )
               :null,
 
-            state.data[state.source]
+            state.data[state.source]&&(!cloudDb||adminSession)
               ?el(
                 "button",
                 {
@@ -4565,6 +4691,8 @@ function render(){
     }else{
       renderStatementDashboard(app);
     }
+  }else if(state.view==="relatorio"){
+    app.append(renderAnalysis());
   }else if(
     state.view==="comparacao"
   ){
@@ -4594,13 +4722,16 @@ function render(){
     el(
       "div",
       {class:"footer"},
-      "Dados processados somente neste navegador · relatórios automáticos sem IA"
+      cloudReady
+        ?"Dados compartilhados online · atualização automática para todas as pessoas com o link · análise executiva"
+        :"Cópia local de segurança · configure o Supabase para compartilhamento online"
     )
   );
 }
 
 loadData();
 render();
+initOnline();
 </script>
 </body>
 </html>
