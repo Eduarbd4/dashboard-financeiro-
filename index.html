@@ -967,6 +967,18 @@ async function parseAccounts(file,key){
 
   const columns={
     entity:findColumn(headers,config.entityHeaders),
+    description:findColumn(
+      headers,
+      [
+        "Descrição",
+        "Descrição do lançamento",
+        "Descrição da parcela",
+        "Descricao",
+        "Descricao do lancamento",
+        "Histórico",
+        "Historico"
+      ]
+    ),
     date:findColumn(headers,["Data de vencimento"]),
     status:findColumn(headers,["Situação"]),
 
@@ -1070,6 +1082,14 @@ async function parseAccounts(file,key){
         row[columns.entity]||
         `Sem ${config.entityLabel.toLowerCase()}`
       ).trim(),
+
+      description:
+        columns.description>=0
+          ?String(
+            row[columns.description]||
+            "Sem descrição"
+          ).trim()
+          :"Sem descrição",
 
       status:String(
         row[columns.status]||
@@ -3216,7 +3236,7 @@ function allocationDetailRows(name,sets){
   const rows=[];
   sets.forEach(set=>set.records.forEach(record=>{
     const value=(record.allocations||[]).filter(allocation=>allocation.name===name).reduce((sum,allocation)=>sum+allocation.value,0);
-    if(value)rows.push({period:set.label,date:record.date,entity:record.entity,status:record.status,costCenter:record.costCenter,value});
+    if(value)rows.push({period:set.label,date:record.date,description:record.description||"Sem descrição",status:record.status,costCenter:record.costCenter,value});
   }));
   return rows.sort((a,b)=>a.date.localeCompare(b.date));
 }
@@ -3234,8 +3254,8 @@ function showAllocationDetails(name,sets){
       el("button",{class:"btn secondary",onclick:close},"Fechar")
     ]),
     el("div",{class:"detailScroll"},el("table",{class:"table"},[
-      el("thead",{},el("tr",{},["Período","Data",CONFIG[state.source]?.entityLabel||"Entidade","Situação","Centro de custo","Valor que compõe"].map(value=>el("th",{},value)))),
-      el("tbody",{},rows.map(row=>el("tr",{},[el("td",{},row.period),el("td",{},formatDateBR(row.date)),el("td",{},row.entity),el("td",{},row.status),el("td",{},row.costCenter),el("td",{},brl(row.value))])))
+      el("thead",{},el("tr",{},["Período","Data","Descrição do lançamento","Situação","Centro de custo","Valor que compõe"].map(value=>el("th",{},value)))),
+      el("tbody",{},rows.map(row=>el("tr",{},[el("td",{},row.period),el("td",{},formatDateBR(row.date)),el("td",{},row.description),el("td",{},row.status),el("td",{},row.costCenter),el("td",{},brl(row.value))])))
     ]))
   ]));
   document.body.append(overlay);
