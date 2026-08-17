@@ -598,6 +598,96 @@ input[type=file]{display:none}
   .multi{flex:1 1 190px}
   .rankname{width:125px}
 }
+/* ===== CAMADA VISUAL EXECUTIVA 2026 ===== */
+:root{
+  --ink:#13213c;
+  --paper:#f3f6fa;
+  --dim:#edf1f6;
+  --gold:#d1a64a;
+  --sage:#168363;
+  --rust:#cf5151;
+  --line:#e1e7ef;
+  --muted:#68758b;
+  --blue:#315fbd;
+}
+body{
+  background:
+    radial-gradient(circle at 92% 0%,rgba(49,95,189,.09),transparent 29%),
+    linear-gradient(180deg,#f8fafc 0,#f3f6fa 260px);
+  min-height:100vh;
+  color:var(--ink);
+}
+.wrap{max-width:1420px;padding:0 34px 64px}
+.header{
+  margin:0 -34px 18px;
+  padding:27px 34px 24px;
+  align-items:center;
+  background:linear-gradient(125deg,#101c35 0%,#172947 62%,#1d3763 100%);
+  color:#fff;
+  border-radius:0 0 22px 22px;
+  box-shadow:0 14px 38px rgba(16,28,53,.16);
+  position:relative;
+  overflow:hidden;
+}
+.header:after{content:"";position:absolute;width:320px;height:320px;border:1px solid rgba(255,255,255,.07);border-radius:50%;right:10%;top:-235px;box-shadow:0 0 0 45px rgba(255,255,255,.025),0 0 0 90px rgba(255,255,255,.018);pointer-events:none}
+.header>div{position:relative;z-index:1}
+.eyebrow{color:#73c3e4;font:600 10px "IBM Plex Mono";letter-spacing:.14em}
+.title{font:650 31px Fraunces;margin:5px 0 2px;letter-spacing:-.015em;color:#fff}
+.sub{color:#b9c6db;font:10px "IBM Plex Mono"}
+.actions{position:relative;z-index:2}
+.btn{padding:10px 15px;border:1px solid rgba(255,255,255,.20);border-radius:9px;background:#fff;color:#14233e;box-shadow:0 5px 14px rgba(4,13,29,.15);transition:.18s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(4,13,29,.22)}
+.btn.secondary{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.28);box-shadow:none;backdrop-filter:blur(6px)}
+.btn.secondary:hover{background:rgba(255,255,255,.15)}
+.btn.danger{background:rgba(207,81,81,.12);color:#ffd9d9;border-color:rgba(255,170,170,.3);box-shadow:none}
+.tabs{
+  gap:7px;
+  margin:0 0 11px;
+  padding:7px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.86);
+  box-shadow:0 5px 18px rgba(19,33,60,.055);
+  backdrop-filter:blur(9px);
+}
+.tab{padding:10px 16px;margin:0;border:0;border-radius:8px;font:500 11px Inter;color:var(--muted);transition:.15s}
+.tab:hover{background:#f0f4fa;color:var(--ink)}
+.tab.active{background:var(--ink);color:#fff;border:0;box-shadow:0 5px 13px rgba(19,33,60,.17)}
+.viewtabs{margin-top:0;margin-bottom:20px;background:transparent;box-shadow:none;border-color:transparent;padding:0;border-radius:0;border-bottom:1px solid var(--line)}
+.viewtabs .tab{border-radius:8px 8px 0 0;padding:11px 16px}
+.viewtabs .tab.active{color:var(--blue);background:#fff;box-shadow:inset 0 -3px var(--blue),0 -1px 0 var(--line);border:1px solid var(--line);border-bottom:0}
+.filterbox{border:1px solid var(--line);border-radius:13px;padding:17px 18px;margin-bottom:20px;box-shadow:0 7px 24px rgba(19,33,60,.055);background:rgba(255,255,255,.94)}
+.field label{font:650 9px "IBM Plex Mono";letter-spacing:.06em;color:#77849a}
+.field input,.field select,.multi summary{height:39px;border-color:#dce3ec;border-radius:8px;background:#fbfcfe;transition:.15s}
+.field input:focus,.field select:focus,.multi[open] summary{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(49,95,189,.1);background:#fff}
+.multiPanel{top:63px;border-color:var(--line);border-radius:11px;box-shadow:0 18px 48px rgba(19,33,60,.2);padding:10px}
+.multiOpt{border-radius:7px;padding:8px}.multiOpt:hover{background:#eef4ff}
+.multiActions button{background:#f2f6fc;border-radius:6px;color:var(--blue);font-weight:600}
+.kpis{gap:13px;margin-bottom:22px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:17px 18px;box-shadow:0 7px 24px rgba(19,33,60,.065);position:relative;overflow:hidden;background:#fff}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
+.kpi.primary,.kpi.late,.kpi.entity,.kpi.entry,.kpi.exit{color:var(--ink);background:#fff;border-color:var(--line)}
+.kpi.primary:before{background:var(--blue)}.kpi.paid:before,.kpi.entry:before{background:var(--sage)}.kpi.open:before,.kpi.entity:before{background:var(--gold)}.kpi.late:before,.kpi.exit:before{background:var(--rust)}
+.kpi.paid,.kpi.open{border-top:1px solid var(--line)}
+.kpi .label{color:var(--muted);opacity:1;font-size:9px;font-weight:650}
+.kpi .value{font:650 22px Inter;letter-spacing:-.03em;margin:12px 0 7px}
+.kpi .detail{color:#8390a3;opacity:1;font-size:9px}
+.section{margin:26px 0 13px}.section h2{font:650 17px Inter;letter-spacing:-.015em}.rule{background:var(--line)}
+.card{border:1px solid var(--line);border-radius:13px;padding:19px;margin-bottom:17px;box-shadow:0 7px 25px rgba(19,33,60,.055);background:rgba(255,255,255,.97)}
+.grid2{gap:15px}
+.tablewrap{border:1px solid var(--line);border-radius:9px;max-height:520px}
+.table th{background:#182844;color:#dce6f5;font:650 9px "IBM Plex Mono";letter-spacing:.045em;padding:12px 13px}
+.table td{padding:12px 13px;border-bottom-color:#e9edf3;font-size:11px}.table tbody tr:nth-child(even){background:#fafbfd}.table tbody tr:hover{background:#eff5ff}
+.track{height:18px;background:#edf1f6;border-radius:9px}.fill{border-radius:9px}.ranking{margin:12px 0}.rankname{font-size:11px}.rankvalue{font-size:10px}
+.analysis{border:1px solid #dfe7f2;border-left:4px solid var(--blue);background:linear-gradient(135deg,#fff,#f6f9fe);border-radius:12px;padding:22px;color:#3d4b62}
+.analysisTitle{font:650 18px Inter}.insight{border-color:#e2e8f1;background:#fff;border-radius:9px;box-shadow:none}
+.drop{border:1.5px dashed #9eb2d0;border-radius:14px;padding:44px 20px;background:linear-gradient(180deg,#fff,#f8faff);box-shadow:inset 0 0 0 5px #fff;transition:.18s;color:#40516c}
+.drop:hover,.drop.over{border-color:var(--blue);background:#f1f6ff;transform:translateY(-1px)}
+.empty{margin:55px auto}.empty>p:first-child{font-size:15px;color:var(--ink)}
+.footer{color:#8b97aa;margin-top:35px}
+.rankScroll::-webkit-scrollbar-thumb,.tablewrap::-webkit-scrollbar-thumb,.multiPanel::-webkit-scrollbar-thumb{background:#aebbd0}
+@media(max-width:950px){.wrap{padding-left:18px;padding-right:18px}.header{margin-left:-18px;margin-right:-18px;padding-left:22px;padding-right:22px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.wrap{padding:0 12px 40px}.header{margin:0 -12px 14px;padding:22px 16px;border-radius:0 0 17px 17px}.title{font-size:25px}.actions{width:100%}.actions .btn{flex:1;padding:9px 10px}.tabs{border-radius:9px;padding:5px}.tab{padding:9px 11px}.viewtabs{padding:0}.kpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:14px}.kpi .value{font-size:18px}.grid2,.analysisList{grid-template-columns:1fr}.filterbox{padding:13px}.field,.multi{flex:1 1 145px}.multi summary{min-width:0}.card{padding:14px}}
 </style>
 </head>
 
@@ -1152,12 +1242,12 @@ function freshFilters(){
     period1To:"",
     period2From:"",
     period2To:"",
-    status:[],
-    entity:[],
+    status:"",
+    entity:"",
     groups:[],
     categories:[],
-    costCenter:[],
-    type:[]
+    costCenter:"",
+    type:""
   };
 }
 
@@ -1165,7 +1255,6 @@ function freshCategoryFilters(){
   return{
     month1:"",
     month2:"",
-    entity:[],
     groups:[],
     categories:[]
   };
@@ -1251,16 +1340,16 @@ function baseFilter(records){
 
   return(records||[])
     .filter(record=>
-      !filters.status.length||
-      filters.status.includes(record.status)
+      !filters.status||
+      record.status===filters.status
     )
     .filter(record=>
-      !filters.entity.length||
-      filters.entity.includes(record.entity)
+      !filters.entity||
+      record.entity===filters.entity
     )
     .filter(record=>
-      !filters.costCenter.length||
-      filters.costCenter.includes(record.costCenter)
+      !filters.costCenter||
+      record.costCenter===filters.costCenter
     )
     .filter(record=>{
       if(!filters.groups.length&&!filters.categories.length)return true;
@@ -1271,8 +1360,8 @@ function baseFilter(records){
       );
     })
     .filter(record=>
-      !filters.type.length||
-      filters.type.includes(record.type)
+      !filters.type||
+      record.type===filters.type
     );
 }
 
@@ -1577,11 +1666,9 @@ function multiChoiceField(label,items,filterKey,placeholder,target=state.filters
   function drawOptions(search=""){
     optionsContainer.innerHTML="";
 
-    const itemLabel=item=>item==="entry"?"Entradas":item==="exit"?"Saídas":item;
-
     const filtered=items.filter(
       item=>
-        itemLabel(item)
+        item
           .toLowerCase()
           .includes(search.toLowerCase())
     );
@@ -1634,7 +1721,7 @@ function multiChoiceField(label,items,filterKey,placeholder,target=state.filters
           {class:"multiOpt"},
           [
             checkbox,
-            itemLabel(item)
+            item
           ]
         )
       );
@@ -1853,21 +1940,67 @@ function renderFilters(){
     state.source==="receber"
   ){
     row.append(
-      multiChoiceField("Situações",options("status").map(option=>option.key),"status","Buscar situação…"),
+      selectField(
+        "Situação",
+        filters.status,
+        options("status"),
 
-      multiChoiceField(CONFIG[state.source].entityLabel==="Fornecedor"?"Fornecedores":"Clientes",options("entity").map(option=>option.key),"entity",`Buscar ${CONFIG[state.source].entityLabel.toLowerCase()}…`),
+        value=>{
+          filters.status=value;
+          render();
+        }
+      ),
+
+      selectField(
+        CONFIG[state.source].entityLabel,
+        filters.entity,
+        options("entity"),
+
+        value=>{
+          filters.entity=value;
+          render();
+        }
+      ),
 
       multiChoiceField("Categorias",groups,"groups","Buscar categoria…"),
 
       multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…"),
 
-      multiChoiceField("Centros de custo",options("costCenter").map(option=>option.key),"costCenter","Buscar centro de custo…")
+      selectField(
+        "Centro de custo",
+        filters.costCenter,
+        options("costCenter"),
+
+        value=>{
+          filters.costCenter=value;
+          render();
+        }
+      )
     );
   }
 
   if(state.source==="extrato"){
     row.append(
-      multiChoiceField("Tipos",["entry","exit"],"type","Buscar tipo…")
+      selectField(
+        "Tipo",
+        filters.type,
+        [
+          {
+            key:"entry",
+            label:"Entradas"
+          },
+
+          {
+            key:"exit",
+            label:"Saídas"
+          }
+        ],
+
+        value=>{
+          filters.type=value;
+          render();
+        }
+      )
     );
   }
 
@@ -3090,17 +3223,11 @@ function renderExpenseComparison(app){
 function renderCategoryFilters(){
   const filters=state.categoryFilters;
   const records=state.source==="receber"?(state.data.receber||[]):(state.data.pagar||[]);
-  const entityLabel=CONFIG[state.source]?.entityLabel||"Cliente/Fornecedor";
-  const entityPlural=entityLabel==="Fornecedor"?"Fornecedores":"Clientes";
-  const entities=[...new Set(records.map(record=>record.entity).filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,"pt-BR"))
-    .map(value=>({key:value,label:value}));
   const categories=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocation.name)))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const groups=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocationGroup(allocation))))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const row=el("div",{class:"filters"},[
     selectField("Mês 1",filters.month1,availableMonths(),value=>{filters.month1=value;render();}),
     selectField("Mês 2",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
-    multiChoiceField(entityPlural,entities.map(option=>option.key),"entity",`Buscar ${entityLabel.toLowerCase()}…`,filters),
     multiChoiceField("Categorias",groups,"groups","Buscar categoria…",filters),
     multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…",filters),
     el("button",{class:"btn secondary",onclick:()=>{state.categoryFilters=freshCategoryFilters();render();}},"Limpar filtros da aba")
@@ -3129,9 +3256,7 @@ function renderCategories(app){
     (!filters.groups.length||filters.groups.includes(allocationGroup(allocation)))&&
     (!filters.categories.length||filters.categories.includes(allocation.name))
   );
-  const recordsForMonth=month=>source
-    .filter(record=>!filters.entity.length||filters.entity.includes(record.entity))
-    .filter(record=>!month||record.month===month);
+  const recordsForMonth=month=>source.filter(record=>!month||record.month===month);
   const mapFor=records=>{
     const map=new Map();
     records.forEach(record=>allocationsFor(record).forEach(allocation=>map.set(allocation.name,(map.get(allocation.name)||0)+allocation.value)));
@@ -3489,12 +3614,12 @@ function activeFilterDescription(){
     if(!f.dateFrom&&!f.dateTo&&f.month1)parts.push(`Mês 1: ${monthName(f.month1)}`);
     if(!f.dateFrom&&!f.dateTo&&f.month2)parts.push(`Mês 2: ${monthName(f.month2)}`);
   }
-  if(f.status.length)parts.push(`Situações: ${f.status.join(", ")}`);
-  if(f.entity.length)parts.push(`${CONFIG[state.source]?.entityLabel||"Entidade"}: ${f.entity.join(", ")}`);
+  if(f.status)parts.push(`Situação: ${f.status}`);
+  if(f.entity)parts.push(`${CONFIG[state.source]?.entityLabel||"Entidade"}: ${f.entity}`);
   if(f.groups.length)parts.push(`Categorias: ${f.groups.join(", ")}`);
   if(f.categories.length)parts.push(`Subcategorias: ${f.categories.join(", ")}`);
-  if(f.costCenter.length)parts.push(`Centros de custo: ${f.costCenter.join(", ")}`);
-  if(f.type.length)parts.push(`Tipos: ${f.type.map(type=>type==="entry"?"Entradas":"Saídas").join(", ")}`);
+  if(f.costCenter)parts.push(`Centro de custo: ${f.costCenter}`);
+  if(f.type)parts.push(`Tipo: ${f.type==="entry"?"Entradas":"Saídas"}`);
   return parts.length?parts.join(" · "):"Todos os dados carregados (sem filtros)";
 }
 
