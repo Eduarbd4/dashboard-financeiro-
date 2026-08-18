@@ -695,7 +695,7 @@ body{
 @media(min-width:851px){
   body{padding-left:248px;background:#f3f6fa}
   body:before{content:"";position:fixed;inset:0 auto 0 0;width:248px;background:linear-gradient(180deg,#101c35 0%,#0c1629 100%);z-index:40;box-shadow:5px 0 24px rgba(8,18,35,.12)}
-  body:after{content:"FC\A FINANCE CONTROL\A  GESTÃO EXECUTIVA";white-space:pre;position:fixed;left:27px;top:25px;z-index:44;color:#fff;font:750 15px Manrope;line-height:1.55;letter-spacing:.01em;padding-left:50px;background:linear-gradient(135deg,#35a8d4,#315fbd);background-repeat:no-repeat;background-size:38px 38px;background-position:0 2px}
+  body:after{content:"BF\A BR FLECHA\A  GESTÃO EXECUTIVA";white-space:pre;position:fixed;left:27px;top:25px;z-index:44;color:#fff;font:750 15px Manrope;line-height:1.55;letter-spacing:.01em;padding-left:50px;background:linear-gradient(135deg,#35a8d4,#315fbd);background-repeat:no-repeat;background-size:38px 38px;background-position:0 2px}
   .wrap{max-width:none;width:100%;margin:0;padding:0 29px 60px}
   .header{position:sticky;top:0;z-index:35;margin:0 -29px 22px;padding:17px 29px;background:rgba(255,255,255,.94);color:var(--ink);border-radius:0;border-bottom:1px solid var(--line);box-shadow:0 5px 22px rgba(19,33,60,.055);backdrop-filter:blur(12px);min-height:72px}
   .header:after{display:none}.header .title{color:var(--ink);font:750 20px Manrope;margin:3px 0}.header .eyebrow{color:var(--blue);font-size:8px}.header .sub{color:var(--muted);font-size:9px}.header .btn.secondary{color:var(--blue);border-color:#ccd7e8;background:#fff}.header .btn{box-shadow:none}.header .btn:hover{box-shadow:0 6px 16px rgba(19,33,60,.1)}.header .adminBadge{color:#64728a;border-color:#dce3ed;background:#f6f8fb}
@@ -4009,7 +4009,7 @@ function downloadExcel(){
 
   const summarySheet=
     XLSX.utils.aoa_to_sheet([
-      ["RELATÓRIO FINANCEIRO DANE-SE"],
+      ["RELATÓRIO FINANCEIRO BR FLECHA"],
 
       [
         "Gerado em",
@@ -4229,286 +4229,6 @@ function downloadExcel(){
   );
 }
 
-function downloadPDF(){
-  const report=reportData();
-
-  if(!report.records.length){
-    alert(
-      "Não há dados para os filtros ativos."
-    );
-
-    return;
-  }
-
-  if(!window.jspdf){
-    alert(
-      "Não foi possível carregar o gerador de PDF."
-    );
-
-    return;
-  }
-
-  const{jsPDF}=window.jspdf;
-
-  const pdf=new jsPDF({
-    orientation:"landscape"
-  });
-
-  if(report.key==="extrato"){
-    pdf.setTextColor(16,35,74);pdf.setFont("helvetica","bold");pdf.setFontSize(18);
-    pdf.text("Dane-se - Relatório do extrato bancário",14,16);
-    pdf.setFont("helvetica","normal");pdf.setFontSize(9);
-    pdf.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`,14,23);
-    const filterLines=pdf.splitTextToSize(`Filtros ativos: ${report.filterDescription}`,265);
-    pdf.text(filterLines,14,29);
-    pdf.autoTable({startY:29+filterLines.length*4,head:[["Entradas","Saídas","Saldo do período","Lançamentos"]],body:[[brl(report.entries),brl(report.exits),brl(report.balance),String(report.records.length)]],headStyles:{fillColor:[16,35,74]}});
-    let analysisY=pdf.lastAutoTable.finalY+9;
-    pdf.setFont("helvetica","bold");pdf.setFontSize(14);pdf.text("Análise do período",14,analysisY);analysisY+=7;
-    pdf.setFont("helvetica","normal");pdf.setFontSize(10);
-    report.analysis.paragraphs.forEach(paragraph=>{const lines=pdf.splitTextToSize(paragraph,265);pdf.text(lines,14,analysisY);analysisY+=lines.length*5+3;if(analysisY>180){pdf.addPage();analysisY=18;}});
-    pdf.addPage();
-    pdf.autoTable({startY:14,head:[["Data","Descrição","Tipo","Valor"]],body:report.records.map(record=>[formatDateBR(record.date),record.description,record.type==="entry"?"Entrada":"Saída",brl(record.value)]),headStyles:{fillColor:[16,35,74]},styles:{fontSize:8}});
-    pdf.save(`relatorio-extrato-${new Date().toISOString().slice(0,10)}.pdf`);
-    return;
-  }
-
-  pdf.setTextColor(16,35,74);
-  pdf.setFont("helvetica","bold");
-  pdf.setFontSize(18);
-
-  pdf.text(
-    "Dane-se - Relatório financeiro",
-    14,
-    16
-  );
-
-  pdf.setFont("helvetica","normal");
-  pdf.setFontSize(9);
-
-  pdf.text(
-    `Gerado em ${new Date().toLocaleString("pt-BR")} | Conforme filtros ativos`,
-    14,
-    23
-  );
-
-  pdf.text(
-    `Filtros: ${report.filterDescription}`,
-    14,
-    28
-  );
-
-  pdf.autoTable({
-    startY:33,
-
-    head:[[
-      "Total no período",
-      report.config.doneLabel,
-      report.config.openLabel,
-      "Atrasado",
-      `${report.config.entityLabel}s`
-    ]],
-
-    body:[[
-      brl(report.totals.total),
-      brl(report.totals.done),
-      brl(report.totals.open),
-      brl(report.totals.late),
-      String(report.totals.entityCount)
-    ]],
-
-    headStyles:{
-      fillColor:[16,35,74]
-    }
-  });
-
-  let y=
-    pdf.lastAutoTable.finalY+
-    10;
-
-  pdf.setFont(
-    "helvetica",
-    "bold"
-  );
-
-  pdf.setFontSize(14);
-  pdf.setTextColor(16,35,74);
-
-  pdf.text(
-    "Análise do período",
-    14,
-    y
-  );
-
-  y+=8;
-
-  pdf.setFont(
-    "helvetica",
-    "normal"
-  );
-
-  pdf.setFontSize(10);
-  pdf.setTextColor(48,58,75);
-
-  report.analysis.paragraphs.forEach(
-    paragraph=>{
-      const lines=
-        pdf.splitTextToSize(
-          paragraph,
-          265
-        );
-
-      pdf.text(
-        lines,
-        14,
-        y
-      );
-
-      y+=lines.length*5+4;
-
-      if(y>180){
-        pdf.addPage();
-        y=18;
-      }
-    }
-  );
-
-  if(report.analysis.changes.length)pdf.autoTable({
-    startY:y+3,
-
-    head:[[
-      "Subcategoria",
-      "Período 1",
-      "Período 2",
-      "Diferença",
-      "Variação"
-    ]],
-
-    body:report.analysis.changes.map(
-      item=>[
-        item.name,
-        brl(item.firstValue),
-        brl(item.secondValue),
-        brl(item.difference),
-
-        Number.isFinite(
-          item.percentage
-        )
-          ?`${item.percentage>0
-            ?"+"
-            :""}`+
-            `${item.percentage
-              .toFixed(1)
-              .replace(".",",")}%`
-          :"—"
-      ]
-    ),
-
-    headStyles:{
-      fillColor:[36,87,167],
-      textColor:[255,255,255]
-    },
-
-    alternateRowStyles:{
-      fillColor:[245,248,253]
-    },
-
-    styles:{
-      font:"helvetica",
-      fontSize:8,
-      cellPadding:3
-    }
-  });
-
-  pdf.addPage();
-
-  pdf.autoTable({
-    startY:14,
-
-    head:[[
-      "Categoria",
-      "Subcategoria",
-      "Valor"
-    ]],
-
-    body:report.groups.flatMap(
-      group=>
-        [
-          ...group.subcategories.entries()
-        ].map(([name,value])=>[
-          group.label,
-          name,
-          brl(value)
-        ])
-    ),
-
-    headStyles:{
-      fillColor:[40,122,75]
-    },
-
-    styles:{
-      fontSize:8
-    }
-  });
-
-  pdf.addPage();
-
-  pdf.autoTable({
-    startY:14,
-
-    head:[[
-      report.config.entityLabel,
-      "Valor"
-    ]],
-
-    body:report.suppliers.map(
-      ([name,value])=>[
-        name,
-        brl(value)
-      ]
-    ),
-
-    headStyles:{
-      fillColor:[16,35,74]
-    },
-
-    styles:{
-      fontSize:8
-    }
-  });
-
-  pdf.autoTable({
-    startY:
-      pdf.lastAutoTable.finalY+
-      8,
-
-    head:[[
-      "Centro de custo",
-      "Valor"
-    ]],
-
-    body:report.costCenters.map(
-      ([name,value])=>[
-        name,
-        brl(value)
-      ]
-    ),
-
-    headStyles:{
-      fillColor:[216,154,34]
-    },
-
-    styles:{
-      fontSize:8
-    }
-  });
-
-  pdf.save(
-    `relatorio-financeiro-${new Date()
-      .toISOString()
-      .slice(0,10)}.pdf`
-  );
-}
-
 /* PDF executivo com estrutura formal inspirada nas normas de apresentação ABNT. */
 function downloadPDF(){
   const report=reportData();
@@ -4518,8 +4238,8 @@ function downloadPDF(){
   const date=new Date(),typeLabel=report.key==="extrato"?"EXTRATO BANCÁRIO":report.config.label.toUpperCase();
   const addSection=(number,title,y=top)=>{pdf.setFont("times","bold");pdf.setFontSize(12);pdf.setTextColor(20,33,58);pdf.text(`${number} ${title.toUpperCase()}`,left,y);return y+8};
   const addParagraph=(text,y)=>{pdf.setFont("times","normal");pdf.setFontSize(12);pdf.setTextColor(35,35,35);const lines=pdf.splitTextToSize(text,width);if(y+lines.length*5.7>297-bottom){pdf.addPage();y=top}pdf.text(lines,left,y,{align:"justify",maxWidth:width,lineHeightFactor:1.5});return y+lines.length*5.7+4};
-  const pageHeader=()=>{pdf.setDrawColor(210,218,230);pdf.line(left,15,210-right,15);pdf.setFont("times","normal");pdf.setFontSize(8);pdf.setTextColor(105,115,132);pdf.text("DANE-SE · RELATÓRIO FINANCEIRO EXECUTIVO",left,12);};
-  pdf.setFillColor(16,28,53);pdf.rect(0,0,210,297,"F");pdf.setTextColor(255,255,255);pdf.setFont("times","bold");pdf.setFontSize(14);pdf.text("DANE-SE",105,58,{align:"center"});pdf.setFontSize(21);pdf.text("RELATÓRIO FINANCEIRO EXECUTIVO",105,110,{align:"center"});pdf.setFontSize(14);pdf.text(typeLabel,105,122,{align:"center"});pdf.setFont("times","normal");pdf.setFontSize(11);pdf.setTextColor(198,210,228);pdf.text("Documento gerencial para análise e tomada de decisão",105,136,{align:"center"});pdf.setTextColor(255,255,255);pdf.text("Brasília",105,260,{align:"center"});pdf.text(String(date.getFullYear()),105,267,{align:"center"});
+  const pageHeader=()=>{pdf.setDrawColor(210,218,230);pdf.line(left,15,210-right,15);pdf.setFont("times","normal");pdf.setFontSize(8);pdf.setTextColor(105,115,132);pdf.text("BR FLECHA · RELATÓRIO FINANCEIRO EXECUTIVO",left,12);};
+  pdf.setFillColor(16,28,53);pdf.rect(0,0,210,297,"F");pdf.setTextColor(255,255,255);pdf.setFont("times","bold");pdf.setFontSize(14);pdf.text("BR FLECHA",105,58,{align:"center"});pdf.setFontSize(21);pdf.text("RELATÓRIO FINANCEIRO EXECUTIVO",105,110,{align:"center"});pdf.setFontSize(14);pdf.text(typeLabel,105,122,{align:"center"});pdf.setFont("times","normal");pdf.setFontSize(11);pdf.setTextColor(198,210,228);pdf.text("Documento gerencial para análise e tomada de decisão",105,136,{align:"center"});pdf.setTextColor(255,255,255);pdf.text("Brasília",105,260,{align:"center"});pdf.text(String(date.getFullYear()),105,267,{align:"center"});
   pdf.addPage();pageHeader();let y=addSection("1","Identificação, objetivo e escopo");y=addParagraph(`Este relatório apresenta a análise financeira de ${typeLabel.toLowerCase()}, elaborada com base nos registros importados para o dashboard. O objetivo é apoiar a gestão na avaliação do desempenho, da exposição financeira, das variações relevantes e dos principais fatores de risco do período selecionado.`,y);y=addParagraph(`Filtros aplicados: ${report.filterDescription}. Data de emissão: ${date.toLocaleString("pt-BR")}. Total de registros examinados: ${report.records.length}.`,y);
   y=addSection("2","Síntese dos indicadores",y+4);
   if(report.key==="extrato"){
@@ -4738,7 +4458,7 @@ function render(){
             el(
               "h1",
               {class:"title"},
-              "Dane-se · Painel financeiro"
+              "BR Flecha · Painel financeiro"
             ),
 
             el(
