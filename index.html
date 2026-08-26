@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Financeiro</title>
+<title>Dashboard Contas a Pagar | DANE-SE</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -712,6 +712,26 @@ body{
 }
 @media(max-width:850px){body{padding-left:0}body:before,body:after{display:none}.wrap{padding:0 14px 45px}.header{margin:0 -14px 15px}.tabs{position:static;width:auto;display:flex}.tabs:before{display:none}.viewtabs{margin-top:0}.tabs .tab:before{display:none}}
 .execRanking{max-height:430px;overflow:auto;padding-right:6px}.execRanking::-webkit-scrollbar{width:7px}.execRanking::-webkit-scrollbar-thumb{background:#b5c1d2;border-radius:8px}.detailOverlay{position:fixed;inset:0;background:rgba(7,17,38,.78);display:grid;place-items:center;padding:20px;z-index:120;backdrop-filter:blur(7px)}.detailDialog{width:min(1100px,96vw);max-height:88vh;background:#fff;border-radius:15px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.34)}.detailHead{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}.detailHead h2{font-size:16px;margin:0}.detailHead p{font-size:9px;color:var(--muted);margin:4px 0 0}.detailScroll{overflow:auto;max-height:68vh}.clickDetail{cursor:pointer}.clickDetail:hover{color:var(--blue);text-decoration:underline}.analysis{font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.5;text-align:justify;padding:28px 32px}.analysisTitle{font-family:"Times New Roman",Times,serif;font-size:14pt;text-align:center;text-transform:uppercase;letter-spacing:0;margin-bottom:20px}.analysisLead{font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.5;text-align:justify}.analysisLead p{text-indent:1.25cm;margin:0 0 10px}.abntSection{font-family:"Times New Roman",Times,serif;font-size:12pt;font-weight:700;text-transform:uppercase;text-align:left;margin:18px 0 10px}.analysisList{font-family:Manrope,Arial,sans-serif;text-align:left}.catsub{cursor:pointer}.catsub span:first-child{color:var(--blue);font-weight:600}.table .clickDetail{font-weight:650;color:var(--blue)}
+/* ===== IDENTIDADE DANE-SE — MONOCROMÁTICA ===== */
+:root{--ink:#171717;--paper:#f5f5f4;--dim:#ededeb;--gold:#555;--sage:#287d65;--rust:#b84242;--line:#e2e2df;--muted:#707070;--blue:#171717}
+body{background:linear-gradient(180deg,#fafafa 0%,#f3f3f2 100%);color:#181818}
+.header{background:rgba(255,255,255,.95);border-color:#e5e5e3;box-shadow:0 5px 22px rgba(0,0,0,.045)}
+.header .title{font-weight:800;letter-spacing:-.04em}.header .eyebrow{color:#666;letter-spacing:.15em}.header .sub{color:#777}
+.btn{background:#171717;border-color:#171717;border-radius:9px;box-shadow:0 7px 18px rgba(0,0,0,.13)}.btn:hover{background:#000;transform:translateY(-1px)}.btn.secondary{background:#fff;color:#171717;border-color:#aaa}.btn.danger{background:#fff;color:#9c3434;border-color:#d5a5a5}
+.tabs{border-color:#ddd}.tab.active{border-bottom-color:#111;color:#111}.filterbox,.card,.kpi{border-color:#e3e3e1;box-shadow:0 9px 28px rgba(0,0,0,.055)}
+.field label{color:#777}.field input,.field select,.multi summary{background:#fcfcfb;border-color:#ddd}.field input:focus,.field select:focus,.multi[open] summary{border-color:#333;box-shadow:0 0 0 3px rgba(0,0,0,.08)}
+.multiActions button{background:#f1f1ef;color:#222}.multiOpt:hover{background:#f2f2f0}.kpi:before,.kpi.primary:before{background:#171717}.kpi.open:before,.kpi.entity:before{background:#777}.kpi .value{color:#171717}.kpi .label,.kpi .detail{color:#737373}
+.table th{background:#181818;color:#f4f4f4}.table td{border-bottom-color:#e8e8e6}.table tbody tr:nth-child(even){background:#fafaf9}.table tbody tr:hover{background:#f0f0ee}.track,.execBar{background:#ececea}
+.analysis,.execNarrative{border-color:#ddd;border-left-color:#222;background:linear-gradient(135deg,#fff,#f6f6f4);color:#333}.insight{border-color:#e2e2df}.drop{border-color:#aaa;background:linear-gradient(180deg,#fff,#f7f7f5);color:#444}.drop:hover,.drop.over{border-color:#222;background:#f1f1ef}
+.execHero{background:radial-gradient(circle at 88% 0,rgba(255,255,255,.13),transparent 34%),linear-gradient(135deg,#111,#292929);box-shadow:0 18px 46px rgba(0,0,0,.2)}.execHero small{color:#d4d4d4}.execHero p{color:#ccc}.execMeta{color:#aaa}.execRank>i{background:#ededeb;color:#222}.execNarrative p{color:#555}.donutCenter{color:#222}
+.adminBadge{background:#f5f5f3!important;border-color:#ddd!important;color:#666!important}.cloudNotice{background:#f4f7f5;border-color:#d8e5df}.loginOverlay,.detailOverlay{background:rgba(0,0,0,.76)}.loginBox,.detailDialog{border:1px solid #e1e1df}.clickDetail,.catsub span:first-child,.table .clickDetail{color:#171717;text-decoration:underline;text-decoration-color:#aaa;text-underline-offset:3px}
+@media(min-width:851px){
+  body{background:#f4f4f3}
+  body:before{background:linear-gradient(165deg,#1b1b1b 0%,#080808 78%);box-shadow:8px 0 30px rgba(0,0,0,.14)}
+  body:after{content:"dane-se";padding-left:0;background:none;color:#fff;font:800 30px Manrope;line-height:1;letter-spacing:-.085em;text-transform:lowercase}
+  .tabs:before{color:#777}.tabs:not(.viewtabs):before{content:"BASES FINANCEIRAS"}.tabs:not(.viewtabs):after{content:"INTELIGÊNCIA FINANCEIRA";position:fixed;left:28px;top:65px;color:#999;font:600 8px "IBM Plex Mono";letter-spacing:.14em}.tabs .tab,.viewtabs .tab{color:#aaa}.tabs .tab:hover,.viewtabs .tab:hover{background:rgba(255,255,255,.07);color:#fff}.tabs .tab.active,.viewtabs .tab.active{background:rgba(255,255,255,.12);box-shadow:inset 3px 0 #fff}.tabs .tab:before{color:#ddd}.header .btn.secondary{color:#171717;border-color:#ccc}.header .adminBadge{color:#666;border-color:#ddd;background:#f7f7f6}
+}
+@media(max-width:850px){.header{border-radius:0 0 16px 16px}.tabs{background:#fff;padding:6px;border-radius:10px}.tab.active{background:#171717;color:#fff;border-radius:7px;border-bottom-color:#171717}}
 </style>
 </head>
 
@@ -4519,7 +4539,7 @@ function downloadPDF(){
   const addSection=(number,title,y=top)=>{pdf.setFont("times","bold");pdf.setFontSize(12);pdf.setTextColor(20,33,58);pdf.text(`${number} ${title.toUpperCase()}`,left,y);return y+8};
   const addParagraph=(text,y)=>{pdf.setFont("times","normal");pdf.setFontSize(12);pdf.setTextColor(35,35,35);const lines=pdf.splitTextToSize(text,width);if(y+lines.length*5.7>297-bottom){pdf.addPage();y=top}pdf.text(lines,left,y,{align:"justify",maxWidth:width,lineHeightFactor:1.5});return y+lines.length*5.7+4};
   const pageHeader=()=>{pdf.setDrawColor(210,218,230);pdf.line(left,15,210-right,15);pdf.setFont("times","normal");pdf.setFontSize(8);pdf.setTextColor(105,115,132);pdf.text("DANE-SE · RELATÓRIO FINANCEIRO EXECUTIVO",left,12);};
-  pdf.setFillColor(16,28,53);pdf.rect(0,0,210,297,"F");pdf.setTextColor(255,255,255);pdf.setFont("times","bold");pdf.setFontSize(14);pdf.text("DANE-SE",105,58,{align:"center"});pdf.setFontSize(21);pdf.text("RELATÓRIO FINANCEIRO EXECUTIVO",105,110,{align:"center"});pdf.setFontSize(14);pdf.text(typeLabel,105,122,{align:"center"});pdf.setFont("times","normal");pdf.setFontSize(11);pdf.setTextColor(198,210,228);pdf.text("Documento gerencial para análise e tomada de decisão",105,136,{align:"center"});pdf.setTextColor(255,255,255);pdf.text("Brasília",105,260,{align:"center"});pdf.text(String(date.getFullYear()),105,267,{align:"center"});
+  pdf.setFillColor(18,18,18);pdf.rect(0,0,210,297,"F");pdf.setTextColor(255,255,255);pdf.setFont("helvetica","bold");pdf.setFontSize(27);pdf.text("dane-se",105,58,{align:"center"});pdf.setFont("times","bold");pdf.setFontSize(21);pdf.text("RELATÓRIO FINANCEIRO EXECUTIVO",105,110,{align:"center"});pdf.setFontSize(14);pdf.text(typeLabel,105,122,{align:"center"});pdf.setFont("times","normal");pdf.setFontSize(11);pdf.setTextColor(200,200,200);pdf.text("Documento gerencial para análise e tomada de decisão",105,136,{align:"center"});pdf.setTextColor(255,255,255);pdf.text("Brasília",105,260,{align:"center"});pdf.text(String(date.getFullYear()),105,267,{align:"center"});
   pdf.addPage();pageHeader();let y=addSection("1","Identificação, objetivo e escopo");y=addParagraph(`Este relatório apresenta a análise financeira de ${typeLabel.toLowerCase()}, elaborada com base nos registros importados para o dashboard. O objetivo é apoiar a gestão na avaliação do desempenho, da exposição financeira, das variações relevantes e dos principais fatores de risco do período selecionado.`,y);y=addParagraph(`Filtros aplicados: ${report.filterDescription}. Data de emissão: ${date.toLocaleString("pt-BR")}. Total de registros examinados: ${report.records.length}.`,y);
   y=addSection("2","Síntese dos indicadores",y+4);
   if(report.key==="extrato"){
@@ -4732,13 +4752,13 @@ function render(){
             el(
               "div",
               {class:"eyebrow"},
-              "DASHBOARD FINANCEIRO"
+              "GESTÃO FINANCEIRA · DANE-SE"
             ),
 
             el(
               "h1",
               {class:"title"},
-              "Dane-se · Painel financeiro"
+              "Dashboard Contas a Pagar"
             ),
 
             el(
