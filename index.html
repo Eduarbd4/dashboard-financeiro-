@@ -725,6 +725,7 @@ body{background:linear-gradient(180deg,#fafafa 0%,#f3f3f2 100%);color:#181818}
 .analysis,.execNarrative{border-color:#ddd;border-left-color:#222;background:linear-gradient(135deg,#fff,#f6f6f4);color:#333}.insight{border-color:#e2e2df}.drop{border-color:#aaa;background:linear-gradient(180deg,#fff,#f7f7f5);color:#444}.drop:hover,.drop.over{border-color:#222;background:#f1f1ef}
 .execHero{background:radial-gradient(circle at 88% 0,rgba(255,255,255,.13),transparent 34%),linear-gradient(135deg,#111,#292929);box-shadow:0 18px 46px rgba(0,0,0,.2)}.execHero small{color:#d4d4d4}.execHero p{color:#ccc}.execMeta{color:#aaa}.execRank>i{background:#ededeb;color:#222}.execNarrative p{color:#555}.donutCenter{color:#222}
 .adminBadge{background:#f5f5f3!important;border-color:#ddd!important;color:#666!important}.cloudNotice{background:#f4f7f5;border-color:#d8e5df}.loginOverlay,.detailOverlay{background:rgba(0,0,0,.76)}.loginBox,.detailDialog{border:1px solid #e1e1df}.clickDetail,.catsub span:first-child,.table .clickDetail{color:#171717;text-decoration:underline;text-decoration-color:#aaa;text-underline-offset:3px}
+.alertSummary{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;padding:13px 15px;border:1px solid #ddd;border-left:4px solid #555;border-radius:10px;background:#fafaf9}.alertSummary b{font-size:11px}.alertSummary span,.alertSummary small{color:#777;font-size:9px}
 @media(min-width:851px){
   body{background:#f4f4f3}
   body:before{background:linear-gradient(165deg,#1b1b1b 0%,#080808 78%);box-shadow:8px 0 30px rgba(0,0,0,.14)}
@@ -3393,6 +3394,7 @@ function renderExecutiveReport(){
   ]);
 }
 
+function comparisonChargesCard(){const first=periodFilter(state.data.pagar||[],1),second=periodFilter(state.data.pagar||[],2),estimate=records=>records.reduce((o,r)=>{o.charges+=Math.max(0,r.done-r.original);o.discounts+=r.open===0?Math.max(0,r.original-r.done):0;return o},{charges:0,discounts:0}),a=estimate(first),b=estimate(second),labels=comparisonLabels();return htmlCard("Juros, multas e descontos estimados",simpleTable(["Indicador",labels[0],labels[1],"Diferença"],[["Acréscimos estimados",brl(a.charges),brl(b.charges),brl(b.charges-a.charges)],["Descontos estimados",brl(a.discounts),brl(b.discounts),brl(b.discounts-a.discounts)]]),"Estimativa pela diferença entre valor original e pago")}
 function renderExpenseComparison(app){
   if(state.source==="extrato"){
     const first=periodFilter(state.data.extrato,1);
@@ -3519,6 +3521,8 @@ function renderExpenseComparison(app){
         ]
       )
     ),
+
+    state.source==="pagar"?comparisonChargesCard():null,
 
     sectionHeader(
       "ANÁLISE",
@@ -3813,6 +3817,10 @@ function renderAccountsDashboard(app,key){
       ]
     )
   );
+
+  if(key==="pagar"){
+    app.append(renderExecutiveCashSummary(),renderFinancialAlerts());
+  }
 
   if(key==="pagar"||key==="receber"){
     app.append(
@@ -4728,6 +4736,8 @@ function renderTreasury(){
  wrap.append(el("div",{class:"grid2"},[htmlCard("Aging do contas a pagar",simpleTable(["Faixa","Valor","Títulos"],aging.map(x=>[x.label,brl(x.total),String(x.rows.length)]))),htmlCard("Agenda dos próximos vencimentos",simpleTable(["Vencimento","Valor","Fornecedor"],future.sort((a,b)=>a.date.localeCompare(b.date)).slice(0,30).map(r=>[formatDateBR(r.date),brl(r.open),r.entity])))]));
  wrap.append(htmlCard("Juros, multas e descontos estimados",simpleTable(["Fornecedor","Vencimento","Acréscimo estimado","Desconto estimado"],charges.map(r=>[r.entity,formatDateBR(r.date),brl(r.charge),brl(r.discount)])),"Estimativa gerencial pela diferença entre valor original e valor pago"));return wrap
 }
+function renderExecutiveCashSummary(){const records=openPayables(),future=records.filter(r=>daysFromToday(r.date)>=0),overdue=records.filter(r=>daysFromToday(r.date)<0),sumOpen=list=>list.reduce((s,r)=>s+r.open,0),within=days=>future.filter(r=>daysFromToday(r.date)<=days);return el("div",{},[sectionHeader("AGENDA E CAIXA","Próximos compromissos financeiros"),el("div",{class:"kpis"},[kpiCard("Vencido",brl(sumOpen(overdue)),overdue.length?"late":"paid",`${overdue.length} títulos`),kpiCard("Próximos 7 dias",brl(sumOpen(within(7))),"primary"),kpiCard("Próximos 15 dias",brl(sumOpen(within(15))),"open"),kpiCard("Próximos 30 dias",brl(sumOpen(within(30))),"entity"),kpiCard("Total em aberto",brl(sumOpen(records)),"open")]),htmlCard("Agenda dos próximos vencimentos",simpleTable(["Vencimento","Valor","Fornecedor"],future.sort((a,b)=>a.date.localeCompare(b.date)).slice(0,15).map(r=>[formatDateBR(r.date),brl(r.open),r.entity])),"Compromissos mais próximos")])}
+function renderFinancialAlerts(){const findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),visible=findings.slice(0,20);return el("div",{},[sectionHeader("ALERTAS FINANCEIROS","Pontos que precisam de revisão"),el("div",{class:"alertSummary"},[el("div",{},[el("b",{},`${findings.length} alertas encontrados`),el("span",{},` · ${high.length} de prioridade alta`)]),el("small",{},"Valide cada ocorrência antes de alterar o lançamento de origem.")]),htmlCard("Ocorrências prioritárias",simpleTable(["Alerta","Prioridade","Fornecedor","Detalhe"],visible.map(x=>[x.type,x.severity,x.record.entity,x.detail])),"Visão resumida e integrada")])}
 function auditFindings(){const records=payableFiltered(),today=new Date().toISOString().slice(0,10),findings=[];const duplicates=new Map;records.forEach(r=>{const key=[normalize(r.entity),normalize(r.description),r.date,r.original.toFixed(2)].join("|");duplicates.set(key,[...(duplicates.get(key)||[]),r])});[...duplicates.values()].filter(v=>v.length>1).forEach(v=>findings.push({type:"Possível duplicidade",severity:"Alta",record:v[0],detail:`${v.length} lançamentos semelhantes`}));records.forEach(r=>{if(!r.allocations?.length||r.allocations.every(a=>normalize(a.name)==="sem categoria"))findings.push({type:"Sem categoria",severity:"Média",record:r,detail:"Classificação contábil ausente"});if(!r.costCenter||normalize(r.costCenter)==="sem centro de custo")findings.push({type:"Sem centro de custo",severity:"Média",record:r,detail:"Rateio gerencial ausente"});if(r.done>r.original+.01)findings.push({type:"Pago acima do original",severity:"Alta",record:r,detail:`Diferença de ${brl(r.done-r.original)}`});if(r.open>0&&r.date<today)findings.push({type:"Título vencido",severity:"Alta",record:r,detail:`${Math.abs(daysFromToday(r.date))} dias em atraso`})});return findings}
 function renderAutomaticAudit(){const wrap=el("div"),findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),medium=findings.filter(x=>x.severity==="Média");wrap.append(el("div",{class:"execHero"},[el("small",{},"AUDITORIA AUTOMÁTICA"),el("h2",{},"Inconsistências e pontos de controle"),el("p",{},"Rastreamento de duplicidades, atrasos, classificações ausentes e pagamentos acima do valor original.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Ocorrências",String(findings.length),findings.length?"late":"paid"),kpiCard("Prioridade alta",String(high.length),high.length?"late":"paid"),kpiCard("Prioridade média",String(medium.length),"open"),kpiCard("Duplicidades",String(findings.filter(x=>x.type.includes("duplicidade")).length),"entity"),kpiCard("Sem classificação",String(findings.filter(x=>x.type.includes("Sem ")).length),"primary")]));wrap.append(htmlCard("Relatório de ocorrências",simpleTable(["Ocorrência","Prioridade","Fornecedor","Vencimento","Detalhe"],findings.map(x=>[x.type,x.severity,x.record.entity,formatDateBR(x.record.date),x.detail])),"Revise individualmente antes de corrigir a origem"));return wrap}
 function recurringGroups(){const map=new Map;payableFiltered().forEach(r=>{const key=`${normalize(r.entity)}|${normalize(r.description)}`,item=map.get(key)||{entity:r.entity,description:r.description,months:new Set,total:0,records:[]};item.months.add(r.month);item.total+=r.original;item.records.push(r);map.set(key,item)});return[...map.values()].filter(x=>x.months.size>=3).map(x=>({...x,average:x.total/x.records.length})).sort((a,b)=>b.total-a.total)}
@@ -4750,8 +4760,6 @@ function render(){
     ["relatorio","Relatório Executivo"],
     ["comparacao","Comparação"],
     ["categorias","Categorias"],
-    ["tesouraria","Tesouraria"],
-    ["auditoria","Auditoria Automática"],
     ["recorrencias","Recorrências"]
   ];
 
@@ -4954,10 +4962,6 @@ function render(){
     state.view==="categorias"
   ){
     renderCategories(app);
-  }else if(state.view==="tesouraria"){
-    app.append(state.source==="pagar"?renderTreasury():el("div",{class:"empty"},"A visão de Tesouraria está disponível em Contas a Pagar."));
-  }else if(state.view==="auditoria"){
-    app.append(state.source==="pagar"?renderAutomaticAudit():el("div",{class:"empty"},"A Auditoria Automática está disponível em Contas a Pagar."));
   }else if(state.view==="recorrencias"){
     app.append(state.source==="pagar"?renderRecurring():el("div",{class:"empty"},"A análise de Recorrências está disponível em Contas a Pagar."));
   }
