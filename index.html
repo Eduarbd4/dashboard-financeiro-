@@ -726,6 +726,7 @@ body{background:linear-gradient(180deg,#fafafa 0%,#f3f3f2 100%);color:#181818}
 .execHero{background:radial-gradient(circle at 88% 0,rgba(255,255,255,.13),transparent 34%),linear-gradient(135deg,#111,#292929);box-shadow:0 18px 46px rgba(0,0,0,.2)}.execHero small{color:#d4d4d4}.execHero p{color:#ccc}.execMeta{color:#aaa}.execRank>i{background:#ededeb;color:#222}.execNarrative p{color:#555}.donutCenter{color:#222}
 .adminBadge{background:#f5f5f3!important;border-color:#ddd!important;color:#666!important}.cloudNotice{background:#f4f7f5;border-color:#d8e5df}.loginOverlay,.detailOverlay{background:rgba(0,0,0,.76)}.loginBox,.detailDialog{border:1px solid #e1e1df}.clickDetail,.catsub span:first-child,.table .clickDetail{color:#171717;text-decoration:underline;text-decoration-color:#aaa;text-underline-offset:3px}
 .alertSummary{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;padding:13px 15px;border:1px solid #ddd;border-left:4px solid #555;border-radius:10px;background:#fafaf9}.alertSummary b{font-size:11px}.alertSummary span,.alertSummary small{color:#777;font-size:9px}
+.comparisonPrompt{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:17px;padding:12px 15px;border:1px dashed #aaa;border-radius:10px;background:#fafaf9}.comparisonPrompt b{font-size:10px}.comparisonPrompt span{font-size:9px;color:#777}.universalComparison{margin-bottom:20px;padding:17px 17px 2px;border:1px solid #ddd;border-radius:14px;background:linear-gradient(180deg,#fff,#fafaf9)}.detailComparisonBody{padding:16px}.detailCompareFilters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.detailCompareFilters label span{display:block;margin-bottom:5px;color:#777;font-size:9px}.detailCompareFilters select{width:100%}.detailCompareKpis{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:700px){.comparisonPrompt{align-items:flex-start;flex-direction:column}.detailCompareFilters,.detailCompareKpis{grid-template-columns:1fr 1fr}}
 @media(min-width:851px){
   body{background:#f4f4f3}
   body:before{background:linear-gradient(165deg,#1b1b1b 0%,#080808 78%);box-shadow:8px 0 30px rgba(0,0,0,.14)}
@@ -2184,6 +2185,8 @@ function renderFilters(){
   );
 }
 
+function universalMonthComparison(){const f=state.view==="categorias"?state.categoryFilters:state.filters,m1=f.month1||"",m2=f.month2||"";if(!m1||!m2)return el("div",{class:"comparisonPrompt"},[el("b",{},"Comparação mensal desta aba"),el("span",{},"Selecione Mês 1 e Mês 2 para visualizar os resultados comparados.")]);const source=state.data[state.source]||[],first=baseFilter(source).filter(r=>r.month===m1),second=baseFilter(source).filter(r=>r.month===m2),labels=[monthNameForKey(m1),monthNameForKey(m2)];if(state.source==="extrato"){const total=(rows,type)=>rows.filter(r=>r.type===type).reduce((s,r)=>s+r.value,0),a=total(first,"entry")-total(first,"exit"),b=total(second,"entry")-total(second,"exit"),p=variation(a,b);return el("div",{class:"universalComparison"},[sectionHeader("COMPARAÇÃO MENSAL",`${labels[0]} × ${labels[1]}`),el("div",{class:"kpis"},[kpiCard(labels[0],brl(a),a>=0?"paid":"late"),kpiCard(labels[1],brl(b),b>=0?"paid":"late"),kpiCard("Diferença",brl(b-a),b-a>=0?"paid":"late"),kpiCard("Variação",Number.isFinite(p)?`${p>0?"+":""}${p.toFixed(1).replace(".",",")}%`:"—","entity")])])}const t1=accountTotals(first),t2=accountTotals(second),p=variation(t1.total,t2.total);return el("div",{class:"universalComparison"},[sectionHeader("COMPARAÇÃO MENSAL",`${labels[0]} × ${labels[1]} · filtros exclusivos desta aba`),el("div",{class:"kpis"},[kpiCard(labels[0],brl(t1.total),"primary",`${first.length} lançamentos`),kpiCard(labels[1],brl(t2.total),"primary",`${second.length} lançamentos`),kpiCard("Diferença",brl(t2.total-t1.total),t2.total>t1.total?"late":"paid"),kpiCard("Variação",Number.isFinite(p)?`${p>0?"+":""}${p.toFixed(1).replace(".",",")}%`:"—","entity"),kpiCard(CONFIG[state.source].openLabel,brl(t2.open),"open")])])}
+
 function accountTotals(records){
   return{
     total:records.reduce(
@@ -3269,20 +3272,12 @@ function allocationDetailRows(name,sets){
 function monthNameForKey(key){return key?`${MONTHS[Number(key.slice(5))-1]}/${key.slice(0,4)}`:"Período filtrado"}
 
 function showAllocationDetails(name,sets){
-  const rows=allocationDetailRows(name,sets),total=rows.reduce((sum,row)=>sum+row.value,0);
   const overlay=el("div",{class:"detailOverlay"});
   const close=()=>overlay.remove();
   overlay.onclick=event=>{if(event.target===overlay)close()};
-  overlay.append(el("div",{class:"detailDialog"},[
-    el("div",{class:"detailHead"},[
-      el("div",{},[el("h2",{},name),el("p",{},`${rows.length} lançamentos somando ${brl(total)}`)]),
-      el("button",{class:"btn secondary",onclick:close},"Fechar")
-    ]),
-    el("div",{class:"detailScroll"},el("table",{class:"table"},[
-      el("thead",{},el("tr",{},["Período","Data","Descrição do lançamento","Situação","Centro de custo","Valor que compõe"].map(value=>el("th",{},value)))),
-      el("tbody",{},rows.map(row=>el("tr",{},[el("td",{},row.period),el("td",{},formatDateBR(row.date)),el("td",{},row.description),el("td",{},row.status),el("td",{},row.costCenter),el("td",{},brl(row.value))])))
-    ]))
-  ]));
+  const months=availableMonths(),defaults=state.view==="categorias"?state.categoryFilters:state.filters;let month1=defaults.month1||months.at(-2)?.key||months.at(-1)?.key||"",month2=defaults.month2||months.at(-1)?.key||"";
+  const dialog=el("div",{class:"detailDialog"}),head=el("div",{class:"detailHead"},[el("div",{},[el("h2",{},name),el("p",{},"Comparação mensal exclusiva deste detalhamento")]),el("button",{class:"btn secondary",onclick:close},"Fechar")]),content=el("div",{class:"detailScroll detailComparisonBody"});dialog.append(head,content);overlay.append(dialog);
+  const draw=()=>{const source=state.data[state.source]||[],recordsFor=month=>baseFilter(source).filter(r=>r.month===month),comparisonSets=month1&&month2?[{label:monthNameForKey(month1),records:recordsFor(month1)},{label:monthNameForKey(month2),records:recordsFor(month2)}]:sets,rows=allocationDetailRows(name,comparisonSets),firstRows=rows.filter(r=>r.period===monthNameForKey(month1)),secondRows=rows.filter(r=>r.period===monthNameForKey(month2)),first=firstRows.reduce((s,r)=>s+r.value,0),second=secondRows.reduce((s,r)=>s+r.value,0),diff=second-first,p=variation(first,second);const select=(value,onchange)=>{const item=el("select",{class:"control"},months.map(m=>el("option",{value:m.key},m.label)));item.value=value;item.onchange=e=>{onchange(e.target.value);draw()};return item};content.replaceChildren(el("div",{class:"detailCompareFilters"},[el("label",{},[el("span",{},"Mês 1"),select(month1,v=>month1=v)]),el("label",{},[el("span",{},"Mês 2"),select(month2,v=>month2=v)])]),el("div",{class:"kpis detailCompareKpis"},[kpiCard(monthNameForKey(month1),brl(first),"primary",`${firstRows.length} lançamentos`),kpiCard(monthNameForKey(month2),brl(second),"primary",`${secondRows.length} lançamentos`),kpiCard("Diferença",brl(diff),diff>0?"late":"paid"),kpiCard("Variação",Number.isFinite(p)?`${p>0?"+":""}${p.toFixed(1).replace(".",",")}%`:"—","entity")]),el("table",{class:"table"},[el("thead",{},el("tr",{},["Período","Data","Descrição do lançamento","Situação","Centro de custo","Valor que compõe"].map(value=>el("th",{},value)))),el("tbody",{},rows.map(row=>el("tr",{},[el("td",{},row.period),el("td",{},formatDateBR(row.date)),el("td",{},row.description),el("td",{},row.status),el("td",{},row.costCenter),el("td",{},brl(row.value))])))]))};draw();
   document.body.append(overlay);
 }
 
@@ -4939,6 +4934,7 @@ function render(){
       ?renderCategoryFilters()
       :renderFilters()
   );
+  app.append(universalMonthComparison());
 
   if(state.view==="dashboard"){
     if(
