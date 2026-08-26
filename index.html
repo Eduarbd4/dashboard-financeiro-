@@ -1345,6 +1345,10 @@ let state={
   filters:freshFilters(),
   categoryFilters:freshCategoryFilters()
 };
+const filterScopes={};
+function filterScopeKey(source=state.source,view=state.view){return `${source}:${view}`}
+function activateFilterScope(source=state.source,view=state.view){const key=filterScopeKey(source,view);if(!filterScopes[key])filterScopes[key]={filters:freshFilters(),categoryFilters:freshCategoryFilters()};state.filters=filterScopes[key].filters;state.categoryFilters=filterScopes[key].categoryFilters}
+activateFilterScope();
 
 function loadData(){
   ["pagar","receber","extrato"].forEach(key=>{
@@ -2164,7 +2168,7 @@ function renderFilters(){
         class:"btn secondary",
 
         onclick:()=>{
-          state.filters=freshFilters();
+          filterScopes[filterScopeKey()].filters=freshFilters();state.filters=filterScopes[filterScopeKey()].filters;
           render();
         }
       },
@@ -3535,7 +3539,7 @@ function renderCategoryFilters(){
     selectField("Mês 2",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
     multiChoiceField("Categorias",groups,"groups","Buscar categoria…",filters),
     multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…",filters),
-    el("button",{class:"btn secondary",onclick:()=>{state.categoryFilters=freshCategoryFilters();render();}},"Limpar filtros da aba")
+    el("button",{class:"btn secondary",onclick:()=>{filterScopes[filterScopeKey()].categoryFilters=freshCategoryFilters();state.categoryFilters=filterScopes[filterScopeKey()].categoryFilters;render();}},"Limpar filtros da aba")
   ]);
 
   return el("div",{class:"filterbox"},[
@@ -4705,12 +4709,29 @@ async function clearCurrentData(){
     state.balance=null;
   }
 
-  state.filters=freshFilters();
+  filterScopes[filterScopeKey()].filters=freshFilters();state.filters=filterScopes[filterScopeKey()].filters;
   if(cloudDb){
     try{await saveOnline()}catch(error){state.error="Não foi possível atualizar os dados compartilhados."}
   }
   render();
 }
+
+function daysFromToday(iso){if(!iso)return null;const today=new Date();today.setHours(0,0,0,0);const date=parseDate(iso);return date?Math.round((date-today)/86400000):null}
+function htmlCard(title,body,subtitle=""){return el("section",{class:"card",html:`<div class="execCardHead"><h3>${title}</h3><span>${subtitle}</span></div><div class="execBody">${body}</div>`})}
+function simpleTable(headers,rows){return `<div class="tablewrap"><table class="table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.length?rows.map(row=>`<tr>${row.map((cell,index)=>`<td${index?" class=\"num\"":""}>${cell}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${headers.length}">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
+function payableFiltered(){return state.source==="pagar"?displayRecords(state.data.pagar||[]):[]}
+function openPayables(){return payableFiltered().filter(r=>r.open>0)}
+function renderTreasury(){
+ const wrap=el("div"),records=openPayables(),future=records.filter(r=>daysFromToday(r.date)>=0),overdue=records.filter(r=>daysFromToday(r.date)<0),sumOpen=list=>list.reduce((s,r)=>s+r.open,0),within=days=>future.filter(r=>daysFromToday(r.date)<=days),aging=[{label:"1 a 7 dias",min:-7,max:-1},{label:"8 a 15 dias",min:-15,max:-8},{label:"16 a 30 dias",min:-30,max:-16},{label:"31 a 60 dias",min:-60,max:-31},{label:"Acima de 60 dias",min:-99999,max:-61}].map(b=>{const rows=overdue.filter(r=>{const d=daysFromToday(r.date);return d>=b.min&&d<=b.max});return{...b,rows,total:sumOpen(rows)}}),charges=payableFiltered().map(r=>({...r,charge:Math.max(0,r.done-r.original),discount:r.open===0?Math.max(0,r.original-r.done):0})).filter(r=>r.charge||r.discount);
+ wrap.append(el("div",{class:"execHero"},[el("small",{},"TESOURARIA E PREVISÃO DE CAIXA"),el("h2",{},"Agenda de vencimentos e necessidade financeira"),el("p",{},"Visão dos compromissos em aberto, atrasos, necessidade de caixa e diferenças estimadas entre valor original e valor pago.")]));
+ wrap.append(el("div",{class:"kpis execKpis"},[kpiCard("Vencido",brl(sumOpen(overdue)),overdue.length?"late":"paid",`${overdue.length} títulos`),kpiCard("Próximos 7 dias",brl(sumOpen(within(7))),"primary",`${within(7).length} títulos`),kpiCard("Próximos 15 dias",brl(sumOpen(within(15))),"open"),kpiCard("Próximos 30 dias",brl(sumOpen(within(30))),"entity"),kpiCard("Após 30 dias",brl(sumOpen(future.filter(r=>daysFromToday(r.date)>30))),"primary"),kpiCard("Total em aberto",brl(sumOpen(records)),"open")]));
+ wrap.append(el("div",{class:"grid2"},[htmlCard("Aging do contas a pagar",simpleTable(["Faixa","Valor","Títulos"],aging.map(x=>[x.label,brl(x.total),String(x.rows.length)]))),htmlCard("Agenda dos próximos vencimentos",simpleTable(["Vencimento","Valor","Fornecedor"],future.sort((a,b)=>a.date.localeCompare(b.date)).slice(0,30).map(r=>[formatDateBR(r.date),brl(r.open),r.entity])))]));
+ wrap.append(htmlCard("Juros, multas e descontos estimados",simpleTable(["Fornecedor","Vencimento","Acréscimo estimado","Desconto estimado"],charges.map(r=>[r.entity,formatDateBR(r.date),brl(r.charge),brl(r.discount)])),"Estimativa gerencial pela diferença entre valor original e valor pago"));return wrap
+}
+function auditFindings(){const records=payableFiltered(),today=new Date().toISOString().slice(0,10),findings=[];const duplicates=new Map;records.forEach(r=>{const key=[normalize(r.entity),normalize(r.description),r.date,r.original.toFixed(2)].join("|");duplicates.set(key,[...(duplicates.get(key)||[]),r])});[...duplicates.values()].filter(v=>v.length>1).forEach(v=>findings.push({type:"Possível duplicidade",severity:"Alta",record:v[0],detail:`${v.length} lançamentos semelhantes`}));records.forEach(r=>{if(!r.allocations?.length||r.allocations.every(a=>normalize(a.name)==="sem categoria"))findings.push({type:"Sem categoria",severity:"Média",record:r,detail:"Classificação contábil ausente"});if(!r.costCenter||normalize(r.costCenter)==="sem centro de custo")findings.push({type:"Sem centro de custo",severity:"Média",record:r,detail:"Rateio gerencial ausente"});if(r.done>r.original+.01)findings.push({type:"Pago acima do original",severity:"Alta",record:r,detail:`Diferença de ${brl(r.done-r.original)}`});if(r.open>0&&r.date<today)findings.push({type:"Título vencido",severity:"Alta",record:r,detail:`${Math.abs(daysFromToday(r.date))} dias em atraso`})});return findings}
+function renderAutomaticAudit(){const wrap=el("div"),findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),medium=findings.filter(x=>x.severity==="Média");wrap.append(el("div",{class:"execHero"},[el("small",{},"AUDITORIA AUTOMÁTICA"),el("h2",{},"Inconsistências e pontos de controle"),el("p",{},"Rastreamento de duplicidades, atrasos, classificações ausentes e pagamentos acima do valor original.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Ocorrências",String(findings.length),findings.length?"late":"paid"),kpiCard("Prioridade alta",String(high.length),high.length?"late":"paid"),kpiCard("Prioridade média",String(medium.length),"open"),kpiCard("Duplicidades",String(findings.filter(x=>x.type.includes("duplicidade")).length),"entity"),kpiCard("Sem classificação",String(findings.filter(x=>x.type.includes("Sem ")).length),"primary")]));wrap.append(htmlCard("Relatório de ocorrências",simpleTable(["Ocorrência","Prioridade","Fornecedor","Vencimento","Detalhe"],findings.map(x=>[x.type,x.severity,x.record.entity,formatDateBR(x.record.date),x.detail])),"Revise individualmente antes de corrigir a origem"));return wrap}
+function recurringGroups(){const map=new Map;payableFiltered().forEach(r=>{const key=`${normalize(r.entity)}|${normalize(r.description)}`,item=map.get(key)||{entity:r.entity,description:r.description,months:new Set,total:0,records:[]};item.months.add(r.month);item.total+=r.original;item.records.push(r);map.set(key,item)});return[...map.values()].filter(x=>x.months.size>=3).map(x=>({...x,average:x.total/x.records.length})).sort((a,b)=>b.total-a.total)}
+function renderRecurring(){const wrap=el("div"),groups=recurringGroups(),records=payableFiltered(),supplierMap=new Map;records.forEach(r=>supplierMap.set(r.entity,(supplierMap.get(r.entity)||0)+r.original));const suppliers=[...supplierMap].sort((a,b)=>b[1]-a[1]),total=records.reduce((s,r)=>s+r.original,0),top5=suppliers.slice(0,5).reduce((s,x)=>s+x[1],0);wrap.append(el("div",{class:"execHero"},[el("small",{},"RECORRÊNCIAS E CONCENTRAÇÃO"),el("h2",{},"Despesas fixas e dependência de fornecedores"),el("p",{},"Identificação de cobranças presentes em três ou mais competências e análise da concentração dos maiores fornecedores.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Recorrências",String(groups.length),"primary"),kpiCard("Valor recorrente",brl(groups.reduce((s,x)=>s+x.total,0)),"open"),kpiCard("Fornecedores",String(suppliers.length),"entity"),kpiCard("Top 5",brl(top5),"primary",`${(total?top5/total*100:0).toFixed(1).replace(".",",")}% do total`),kpiCard("Maior fornecedor",suppliers[0]?.[0]||"—",suppliers[0]&&total&&suppliers[0][1]/total>.35?"late":"paid",suppliers[0]?brl(suppliers[0][1]):"")]));wrap.append(el("div",{class:"grid2"},[htmlCard("Despesas recorrentes",simpleTable(["Fornecedor / despesa","Competências","Média","Total"],groups.map(x=>[`${x.entity} · ${x.description}`,String(x.months.size),brl(x.average),brl(x.total)]))),htmlCard("Concentração por fornecedor",simpleTable(["Fornecedor","Valor","Participação"],suppliers.slice(0,20).map(x=>[x[0],brl(x[1]),`${(total?x[1]/total*100:0).toFixed(1).replace(".",",")}%`])))]));return wrap}
 
 function render(){
   const app=
@@ -4728,7 +4749,10 @@ function render(){
     ["dashboard","Dashboard"],
     ["relatorio","Relatório Executivo"],
     ["comparacao","Comparação"],
-    ["categorias","Categorias"]
+    ["categorias","Categorias"],
+    ["tesouraria","Tesouraria"],
+    ["auditoria","Auditoria Automática"],
+    ["recorrencias","Recorrências"]
   ];
 
   if(state.view==="graficos")state.view="dashboard";
@@ -4797,7 +4821,7 @@ function render(){
                 class:"btn secondary",
                 onclick:downloadExcel
               },
-              "Baixar Excel"
+              "Exportar dados filtrados"
             ),
 
             state.data[state.source]&&(!cloudDb||adminSession)
@@ -4814,7 +4838,7 @@ function render(){
                       ?.click();
                   }
                 },
-                "⟳ Atualizar dados"
+                "Atualizar dados"
               )
               :null,
 
@@ -4825,7 +4849,7 @@ function render(){
                   class:"btn danger",
                   onclick:clearCurrentData
                 },
-                "🗑 Limpar"
+                "Limpar dados"
               )
               :null
           ]
@@ -4849,13 +4873,7 @@ function render(){
 
               onclick:()=>{
                 state.source=key;
-
-                state.filters=
-                  freshFilters();
-
-                state.categoryFilters=
-                  freshCategoryFilters();
-
+                activateFilterScope(state.source,state.view);
                 render();
               }
             },
@@ -4880,6 +4898,7 @@ function render(){
 
               onclick:()=>{
                 state.view=key;
+                activateFilterScope(state.source,state.view);
                 render();
               }
             },
@@ -4935,6 +4954,12 @@ function render(){
     state.view==="categorias"
   ){
     renderCategories(app);
+  }else if(state.view==="tesouraria"){
+    app.append(state.source==="pagar"?renderTreasury():el("div",{class:"empty"},"A visão de Tesouraria está disponível em Contas a Pagar."));
+  }else if(state.view==="auditoria"){
+    app.append(state.source==="pagar"?renderAutomaticAudit():el("div",{class:"empty"},"A Auditoria Automática está disponível em Contas a Pagar."));
+  }else if(state.view==="recorrencias"){
+    app.append(state.source==="pagar"?renderRecurring():el("div",{class:"empty"},"A análise de Recorrências está disponível em Contas a Pagar."));
   }
 
   app.append(
