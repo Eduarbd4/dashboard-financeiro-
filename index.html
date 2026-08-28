@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Contas a Pagar | DANE-SE</title>
+<title>Gestão Financeira | DANE-SE</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -735,6 +735,113 @@ body{background:linear-gradient(180deg,#fafafa 0%,#f3f3f2 100%);color:#181818}
   .tabs:before{color:#777}.tabs:not(.viewtabs):before{content:"BASES FINANCEIRAS"}.tabs:not(.viewtabs):after{content:"INTELIGÊNCIA FINANCEIRA";position:fixed;left:28px;top:65px;color:#999;font:600 8px "IBM Plex Mono";letter-spacing:.14em}.tabs .tab,.viewtabs .tab{color:#aaa}.tabs .tab:hover,.viewtabs .tab:hover{background:rgba(255,255,255,.07);color:#fff}.tabs .tab.active,.viewtabs .tab.active{background:rgba(255,255,255,.12);box-shadow:inset 3px 0 #fff}.tabs .tab:before{color:#ddd}.header .btn.secondary{color:#171717;border-color:#ccc}.header .adminBadge{color:#666;border-color:#ddd;background:#f7f7f6}
 }
 @media(max-width:850px){.header{border-radius:0 0 16px 16px}.tabs{background:#fff;padding:6px;border-radius:10px}.tab.active{background:#171717;color:#fff;border-radius:7px;border-bottom-color:#171717}}
+
+/* ===== REDESIGN OPERACIONAL 2026 · CAMADA FINAL ===== */
+:root{
+  --ink:#172033;
+  --paper:#f3f6fa;
+  --dim:#edf2f7;
+  --gold:#f0a33a;
+  --sage:#11976f;
+  --rust:#d94d58;
+  --line:#dfe6ee;
+  --muted:#66758a;
+  --blue:#3267d6;
+  --navy:#10192b;
+}
+html{scroll-behavior:smooth}
+body{background:#f4f7fb;color:var(--ink);font-size:14px}
+button,input,select{font-family:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid rgba(50,103,214,.2);outline-offset:2px}
+.wrap{max-width:none;width:100%;margin:0;padding:0 32px 56px}
+.header{
+  min-height:86px;margin:0 -32px 24px;padding:16px 32px;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  background:rgba(255,255,255,.96);border:0;border-bottom:1px solid var(--line);
+  border-radius:0;box-shadow:0 6px 24px rgba(24,39,65,.05);backdrop-filter:blur(14px)
+}
+.header:after{display:none}.headerCopy{min-width:235px}.header .eyebrow{color:var(--blue);font:700 9px "IBM Plex Mono";letter-spacing:.11em}
+.header .title{margin:4px 0 2px;color:var(--ink);font:800 24px Manrope;letter-spacing:-.045em}
+.header .sub{color:var(--muted);font:500 10px "IBM Plex Mono"}
+.actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.btn{min-height:38px;padding:9px 13px;border:1px solid var(--blue);border-radius:9px;background:var(--blue);color:#fff;font-size:11px;font-weight:750;box-shadow:0 6px 16px rgba(50,103,214,.14);transition:.16s ease}
+.btn:hover{transform:translateY(-1px);filter:brightness(.98);box-shadow:0 9px 20px rgba(50,103,214,.18)}
+.btn.secondary,.header .btn.secondary{background:#fff;color:#334155;border-color:#d3dce8;box-shadow:none}
+.btn.secondary:hover,.header .btn.secondary:hover{background:#f8fafc;border-color:#aebed3;box-shadow:none}
+.btn.danger{background:#fff;color:#b63d49;border-color:#efc7cb;box-shadow:none}.btn.danger:hover{background:#fff5f6}
+.btn.editShortcut{background:var(--blue);color:#fff;border-color:var(--blue)}
+.adminBadge{padding:7px 10px!important;border:1px solid #dfe6ee!important;background:#f8fafc!important;color:#64748b!important;font-size:9px!important}
+.adminBadge.online:before{background:var(--sage)}
+
+.tabs{border:0;box-shadow:none}.tabs .tab:before{display:none!important;content:""!important}
+.filterbox{margin:0 0 22px;padding:18px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 26px rgba(28,45,74,.055)}
+.filterHead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #edf1f5}
+.filterHead strong{display:block;font-size:14px;letter-spacing:-.01em}.filterHead small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+.filterCount{display:grid;place-items:center;min-width:27px;height:27px;padding:0 8px;border-radius:20px;background:#eaf1ff;color:var(--blue);font-size:11px;font-weight:800}
+.quickFilters{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.quickFilters>span{margin-right:3px;color:#7a889b;font:700 9px "IBM Plex Mono";text-transform:uppercase;letter-spacing:.06em}
+.quickFilters button{height:30px;padding:0 10px;border:1px solid #dce4ee;border-radius:16px;background:#f8fafc;color:#4b5c72;cursor:pointer;font-size:10px;font-weight:650}
+.quickFilters button:hover{border-color:#adc0dc;background:#eef4ff;color:var(--blue)}
+.filters{display:grid;grid-template-columns:repeat(5,minmax(145px,1fr));align-items:end;gap:12px}
+.field{min-width:0;width:100%;gap:6px}.field label,.editField>span{color:#69788d;font:700 9px "IBM Plex Mono";letter-spacing:.045em;text-transform:uppercase}
+.field input,.field select,.multi summary,.editControl{width:100%;height:41px;border:1px solid #d7e0eb;border-radius:9px;background:#fbfcfe;color:#253247;padding:0 11px;font-size:11px}
+.field input:hover,.field select:hover,.multi summary:hover,.editControl:hover{border-color:#b9c7d8;background:#fff}
+.field input:focus,.field select:focus,.multi[open] summary,.editControl:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(50,103,214,.11);background:#fff}
+.searchField{grid-column:span 2}.searchField input{padding-left:36px;background:#fbfcfe url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364758b' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center}
+.compareToggle{height:41px;padding:0 10px;border:1px solid #e0e7ef;border-radius:9px;background:#f8fafc;color:#4c5d72;font-size:11px}.compareToggle input{accent-color:var(--blue)}
+.compareDates{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;width:100%;padding-top:12px;border-top:1px solid #edf1f5}
+.multi summary{display:flex;align-items:center;min-width:0}.multiPanel{top:65px;width:min(330px,85vw);border:1px solid #dce4ed;border-radius:12px;box-shadow:0 22px 55px rgba(25,42,70,.2)}
+.multiActions button{color:var(--blue);background:#eef4ff}.filters>.btn{height:41px;align-self:end}
+
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.kpi,.kpi.primary,.kpi.paid,.kpi.open,.kpi.late,.kpi.entity,.kpi.entry,.kpi.exit{min-height:116px;padding:17px 18px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);box-shadow:0 7px 24px rgba(28,45,74,.052)}
+.kpi:before{top:16px;bottom:auto;left:17px;width:28px;height:4px;border-radius:8px;background:var(--blue)}
+.kpi.primary:before{background:var(--blue)}.kpi.paid:before,.kpi.entry:before{background:var(--sage)}.kpi.open:before,.kpi.entity:before{background:var(--gold)}.kpi.late:before,.kpi.exit:before{background:var(--rust)}
+.kpi .label{margin-top:13px;color:#748196;font-size:9px;font-weight:750;letter-spacing:.055em}.kpi .value{margin:10px 0 5px;color:#172033;font:800 22px Manrope;letter-spacing:-.045em}.kpi .detail{color:#8794a6;font-size:9px}
+.section{margin:27px 0 13px}.section .eyebrow{padding:4px 7px;border-radius:5px;background:#eaf1ff;color:var(--blue);font-size:8px}.section h2{font-size:17px;font-weight:800;letter-spacing:-.025em}.rule{background:#dfe6ee}
+.card{margin-bottom:18px;padding:19px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 28px rgba(28,45,74,.052)}
+.grid2{gap:16px}.execGrid{gap:16px}.execHero{padding:24px 26px;border-radius:15px;background:linear-gradient(135deg,#17243b,#223c65);box-shadow:0 14px 34px rgba(20,35,59,.14)}
+.execHero h2{font-size:23px;letter-spacing:-.035em}.execHero small{color:#9bc3ff}.execHero p{font-size:11px;line-height:1.65}.execMeta{font-size:9px}
+.execCardHead{padding:15px 18px}.execCardHead h3{font-size:13px;font-weight:800}.execBody{padding:18px}
+
+.chart,.modernChart{width:100%;overflow-x:auto;padding:6px 0 0}.modernChart svg{display:block;width:100%;min-width:760px;min-height:320px}
+.chartBar{transition:opacity .15s ease,filter .15s ease;cursor:pointer}.chartBar:hover{opacity:.82;filter:drop-shadow(0 5px 6px rgba(30,45,70,.18))}
+.chartEmpty{display:grid;place-items:center;min-height:260px;color:var(--muted);font-size:12px}
+.chartWithLegend{position:relative}.chartLegend{display:flex;justify-content:flex-end;gap:15px;padding:1px 6px 3px;color:#5f6e82;font-size:10px}.chartLegend span{display:flex;align-items:center;gap:6px}.chartLegend i{display:inline-block;width:9px;height:9px;border-radius:3px}
+.ranking{display:grid;grid-template-columns:minmax(130px,190px) 1fr auto;gap:12px;margin:13px 0}.rankname{width:auto;font-weight:600;color:#405067}.track{height:10px;border-radius:8px;background:#edf2f7}.fill{border-radius:8px}.rankvalue{width:104px;color:#344258;font-weight:700}.rankScroll{max-height:390px}
+
+.tablewrap{max-height:560px;border:1px solid #e0e7ef;border-radius:10px;background:#fff}.table{min-width:820px}.table th,.table td{text-align:left;padding:12px 13px;border-bottom:1px solid #e9eef4;vertical-align:middle}.table th{top:0;background:#f3f6fa;color:#59687c;font:750 9px "IBM Plex Mono";letter-spacing:.045em;box-shadow:inset 0 -1px #dce4ee}.table td{color:#344258;font-size:11px}.table td.num,.table th.num{text-align:right;font-variant-numeric:tabular-nums}.table tbody tr:nth-child(even){background:#fbfcfd}.table tbody tr:hover{background:#f0f5ff}.tablewrap::-webkit-scrollbar-thumb,.rankScroll::-webkit-scrollbar-thumb,.multiPanel::-webkit-scrollbar-thumb{background:#b6c3d4}
+.analysis,.analysisLead{font-family:Manrope,Arial,sans-serif!important;text-align:left!important}.analysis{padding:23px 25px;border:1px solid #dfe7f1;border-left:4px solid var(--blue);background:linear-gradient(135deg,#fff,#f7faff);font-size:12px!important;line-height:1.72!important}.analysisTitle{font-family:Manrope,Arial,sans-serif!important;text-align:left!important;text-transform:none!important;font-size:17px!important}.analysisLead p{text-indent:0!important;margin:0 0 11px!important}
+.comparisonPrompt{display:none}.universalComparison{padding:17px 17px 2px;border:1px solid #dfe7f1;background:#fff}.alertSummary{display:none}
+
+.ledgerHero{margin-bottom:14px}.ledgerToolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 11px;padding:0 2px}.ledgerToolbar strong{display:block;font-size:13px}.ledgerToolbar small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.safeBadge{padding:6px 9px;border-radius:16px;background:#eaf8f3;color:#19765b;font-size:9px;font-weight:750}.ledgerCard{padding:0;overflow:visible}.ledgerCard .tablewrap{max-height:calc(100vh - 250px);border:0;border-radius:14px}.ledgerTable{min-width:1320px}.ledgerTable th:last-child,.ledgerTable td:last-child{position:sticky;right:0;background:inherit;box-shadow:-8px 0 14px rgba(32,48,73,.05)}.ledgerTable th:last-child{background:#f3f6fa}.classificationCell{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rowEdit,.iconButton{border:1px solid #c8d6e8;border-radius:7px;background:#fff;color:var(--blue);padding:6px 9px;cursor:pointer;font-size:9px;font-weight:750}.rowEdit:hover{background:#eef4ff;border-color:#9db5d8}
+.editDialog{width:min(1080px,96vw);max-height:92vh}.editBody{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;padding:20px;overflow:auto}.editField{display:flex;flex-direction:column;gap:6px;min-width:0}.editField.wide{grid-column:span 2}.editControl{height:42px}.allocationEditor{grid-column:1/-1;margin-top:4px;padding-top:17px;border-top:1px solid var(--line)}.allocationHead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:11px}.allocationHead strong{display:block;font-size:13px}.allocationHead small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.allocationRows{display:grid;gap:9px}.allocationRow{display:grid;grid-template-columns:1.25fr 1.25fr .55fr .7fr auto;align-items:end;gap:9px;padding:11px;border:1px solid #e1e8f0;border-radius:10px;background:#f8fafc}.dangerText{height:42px;color:#b33f4a;border-color:#ecc6ca}.editFooter{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px 20px;border-top:1px solid var(--line);background:#fafbfd}.editFooter>div:last-child{display:flex;gap:8px}.editError{margin:0}
+.loginBox,.detailDialog{border:1px solid #dce4ed;border-radius:16px}.detailHead{background:#fff}.detailHead h2{font-size:17px}.pageError{padding:11px 13px;border:1px solid #f0c9cd;border-radius:10px;background:#fff5f6}.empty{margin:70px auto}.drop{border:2px dashed #b5c4d8;background:#fff;color:#4d5f77}.footer{margin-top:36px;color:#8a97a8}
+
+@media(min-width:851px){
+  body{padding-left:270px;background:#f4f7fb}
+  body:before{display:block;content:"";position:fixed;inset:0 auto 0 0;width:270px;background:linear-gradient(180deg,#111a2d,#0c1424);box-shadow:8px 0 30px rgba(13,23,41,.12);z-index:40}
+  body:after{display:block;content:"dane-se\A financeiro";white-space:pre;position:fixed;left:27px;top:25px;z-index:44;padding:0;background:none;color:#fff;font:800 27px Manrope;line-height:.9;letter-spacing:-.075em;text-transform:lowercase}
+  .header{position:sticky;top:0;z-index:35}
+  .tabs{position:fixed;left:18px;width:234px;z-index:43;display:grid;gap:5px;margin:0;padding:0;background:transparent;overflow:visible}
+  .sourceTabs{top:112px}.viewtabs{top:315px;bottom:22px;align-content:start;overflow-y:auto;padding-right:3px}
+  .tabs:before{display:block;padding:0 10px 8px;color:#74839c;font:700 8px "IBM Plex Mono";letter-spacing:.13em}
+  .sourceTabs:before{content:"BASES FINANCEIRAS"}.viewtabs:before{content:"PAINÉIS E FERRAMENTAS"}
+  .tabs .tab,.viewtabs .tab{width:100%;min-height:39px;margin:0;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:#a9b5c8;text-align:left;font:650 11px Manrope;box-shadow:none}
+  .tabs .tab:hover,.viewtabs .tab:hover{background:rgba(255,255,255,.07);color:#fff}
+  .tabs .tab.active,.viewtabs .tab.active{background:rgba(80,132,235,.18);color:#fff;box-shadow:inset 3px 0 #72a2ff}
+}
+
+@media(max-width:1180px){.filters{grid-template-columns:repeat(3,minmax(145px,1fr))}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.execKpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){
+  body{padding-left:0}.wrap{padding:0 16px 44px}.header{position:static;margin:0 -16px 16px;padding:17px 16px;border-radius:0}.header .title{font-size:22px}
+  body:before,body:after{display:none}.tabs{position:static;width:auto;display:flex;overflow-x:auto;margin:0 0 10px;padding:5px;border:1px solid var(--line);border-radius:10px;background:#fff}.tabs:before{display:none}.tabs .tab,.viewtabs .tab{width:auto;min-height:36px;padding:9px 11px;border-radius:7px;color:#637287;text-align:center}.tabs .tab.active,.viewtabs .tab.active{background:var(--blue);color:#fff;box-shadow:none}
+  .viewtabs{margin-bottom:16px}.filters{grid-template-columns:repeat(2,minmax(140px,1fr))}.searchField{grid-column:1/-1}.compareDates{grid-template-columns:repeat(2,minmax(140px,1fr))}.kpis,.execKpis{grid-template-columns:repeat(2,minmax(0,1fr))}.execGrid,.execGrid.equal,.grid2{grid-template-columns:1fr}.editBody{grid-template-columns:repeat(2,minmax(0,1fr))}.allocationRow{grid-template-columns:1fr 1fr}.allocationRow .iconButton{grid-column:1/-1}.header{align-items:flex-start}.actions{justify-content:flex-start}
+}
+@media(max-width:560px){
+  .wrap{padding:0 11px 38px}.header{margin:0 -11px 13px;padding:15px 12px}.header .title{font-size:20px}.header .sub{font-size:8px}.actions{width:100%}.actions .adminBadge{width:100%;justify-content:center}.actions .btn{flex:1;min-width:88px;padding:8px}
+  .filters{grid-template-columns:1fr}.searchField{grid-column:auto}.compareDates{grid-template-columns:1fr}.kpis,.execKpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{min-height:105px;padding:14px}.kpi .value{font-size:18px}.card{padding:14px}.filterbox{padding:14px}.quickFilters>span{width:100%}.editBody{grid-template-columns:1fr;padding:14px}.editField.wide{grid-column:auto}.allocationHead{align-items:flex-start;flex-direction:column}.allocationRow{grid-template-columns:1fr}.editFooter{align-items:stretch;flex-direction:column}.editFooter>div:last-child{width:100%}.editFooter .btn{flex:1}.ledgerToolbar{align-items:flex-start;flex-direction:column}.execHero{padding:20px 18px}.execHero h2{font-size:20px}
+}
 </style>
 </head>
 
@@ -1305,6 +1412,7 @@ async function parseStatement(file){
 
 function freshFilters(){
   return{
+    search:"",
     dateFrom:"",
     dateTo:"",
     month1:"",
@@ -1499,6 +1607,22 @@ function baseFilter(records){
   const filters=state.filters;
 
   return(records||[])
+    .filter(record=>{
+      if(!filters.search)return true;
+      const haystack=normalize([
+        record.entity,
+        record.description,
+        record.status,
+        record.costCenter,
+        record.type,
+        ...(record.allocations||[]).flatMap(allocation=>[
+          allocationGroup(allocation),
+          allocation.name,
+          allocation.code
+        ])
+      ].filter(Boolean).join(" "));
+      return haystack.includes(normalize(filters.search));
+    })
     .filter(record=>
       !filters.status||
       record.status===filters.status
@@ -1577,17 +1701,9 @@ function selectedRecords(records){
 }
 
 function displayRecords(records){
-  const filters=state.filters;
-
-  if(filters.compare||filters.month2){
-    return[
-      ...new Set([
-        ...periodFilter(records,1),
-        ...periodFilter(records,2)
-      ])
-    ];
-  }
-
+  /* O painel principal sempre representa o período principal.
+     O segundo período aparece apenas nos blocos de comparação, evitando
+     somas duplicadas ou indicadores que misturam duas competências. */
   return periodFilter(records,1);
 }
 
@@ -1796,6 +1912,63 @@ function dateField(label,key){
     ]
   );
 }
+
+function activeFilterCount(filters=state.filters){
+  return Object.entries(filters).reduce((total,[key,value])=>{
+    if(key==="compare")return total+(value?1:0);
+    if(Array.isArray(value))return total+(value.length?1:0);
+    return total+(value?1:0);
+  },0);
+}
+
+function applyPeriodShortcut(kind){
+  const filters=state.filters;
+  const today=new Date();
+  const year=today.getFullYear();
+  const month=today.getMonth();
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  filters.compare=false;
+  filters.period1From="";
+  filters.period1To="";
+  filters.period2From="";
+  filters.period2To="";
+  filters.month2="";
+
+  if(kind==="month"){
+    filters.dateFrom=dateToISO(firstDay);
+    filters.dateTo=dateToISO(lastDay);
+    filters.month1=`${year}-${String(month+1).padStart(2,"0")}`;
+  }else if(kind==="year"){
+    filters.dateFrom=`${year}-01-01`;
+    filters.dateTo=`${year}-12-31`;
+    filters.month1="";
+  }else if(kind==="next30"){
+    const future=new Date(today);
+    future.setDate(future.getDate()+30);
+    filters.dateFrom=dateToISO(today);
+    filters.dateTo=dateToISO(future);
+    filters.month1="";
+  }else{
+    filters.dateFrom="";
+    filters.dateTo="";
+    filters.month1="";
+  }
+  render();
+}
+
+function quickPeriodBar(){
+  return el("div",{class:"quickFilters"},[
+    el("span",{},"Período rápido"),
+    el("button",{type:"button",onclick:()=>applyPeriodShortcut("month")},"Este mês"),
+    el("button",{type:"button",onclick:()=>applyPeriodShortcut("year")},"Este ano"),
+    state.source==="pagar"
+      ?el("button",{type:"button",onclick:()=>applyPeriodShortcut("next30")},"Próximos 30 dias")
+      :null,
+    el("button",{type:"button",onclick:()=>applyPeriodShortcut("all")},"Todo o período")
+  ]);
+}
+
 function multiChoiceField(label,items,filterKey,placeholder,target=state.filters){
   const details=el(
     "details",
@@ -2001,6 +2174,30 @@ function renderFilters(){
     {class:"filters"}
   );
 
+  const searchInput=el("input",{
+    type:"search",
+    value:filters.search||"",
+    placeholder:state.source==="extrato"
+      ?"Buscar descrição…"
+      :"Buscar fornecedor, descrição, categoria ou centro de custo…",
+    onchange:event=>{
+      filters.search=event.target.value.trim();
+      render();
+    },
+    onkeydown:event=>{
+      if(event.key==="Enter"){
+        event.preventDefault();
+        filters.search=event.target.value.trim();
+        render();
+      }
+    }
+  });
+
+  row.append(el("div",{class:"field searchField"},[
+    el("label",{},"Busca rápida"),
+    searchInput
+  ]));
+
   if(!filters.compare){
     row.append(
       dateField(
@@ -2014,7 +2211,7 @@ function renderFilters(){
       ),
 
       selectField(
-        "Mês 1",
+        "Período principal — mês",
         filters.month1,
         availableMonths(),
 
@@ -2025,7 +2222,7 @@ function renderFilters(){
       ),
 
       selectField(
-        "Mês 2",
+        "Comparar com — mês",
         filters.month2,
         availableMonths(),
 
@@ -2179,11 +2376,18 @@ function renderFilters(){
     )
   );
 
-  return el(
-    "div",
-    {class:"filterbox"},
+  const count=activeFilterCount(filters);
+  return el("div",{class:"filterbox"},[
+    el("div",{class:"filterHead"},[
+      el("div",{},[
+        el("strong",{},"Filtros do painel"),
+        el("small",{},count?`${count} filtro${count===1?"":"s"} ativo${count===1?"":"s"}`:"Visualizando toda a base")
+      ]),
+      count?el("span",{class:"filterCount"},String(count)):null
+    ]),
+    quickPeriodBar(),
     row
-  );
+  ]);
 }
 
 function universalMonthComparison(){const f=state.view==="categorias"?state.categoryFilters:state.filters,m1=f.month1||"",m2=f.month2||"";if(!m1||!m2)return el("div",{class:"comparisonPrompt"},[el("b",{},"Comparação mensal desta aba"),el("span",{},"Selecione Mês 1 e Mês 2 para visualizar os resultados comparados.")]);const source=state.data[state.source]||[],first=baseFilter(source).filter(r=>r.month===m1),second=baseFilter(source).filter(r=>r.month===m2),labels=[monthNameForKey(m1),monthNameForKey(m2)];if(state.source==="extrato"){const total=(rows,type)=>rows.filter(r=>r.type===type).reduce((s,r)=>s+r.value,0),a=total(first,"entry")-total(first,"exit"),b=total(second,"entry")-total(second,"exit"),p=variation(a,b);return el("div",{class:"universalComparison"},[sectionHeader("COMPARAÇÃO MENSAL",`${labels[0]} × ${labels[1]}`),el("div",{class:"kpis"},[kpiCard(labels[0],brl(a),a>=0?"paid":"late"),kpiCard(labels[1],brl(b),b>=0?"paid":"late"),kpiCard("Diferença",brl(b-a),b-a>=0?"paid":"late"),kpiCard("Variação",Number.isFinite(p)?`${p>0?"+":""}${p.toFixed(1).replace(".",",")}%`:"—","entity")])])}const t1=accountTotals(first),t2=accountTotals(second),p=variation(t1.total,t2.total);return el("div",{class:"universalComparison"},[sectionHeader("COMPARAÇÃO MENSAL",`${labels[0]} × ${labels[1]} · filtros exclusivos desta aba`),el("div",{class:"kpis"},[kpiCard(labels[0],brl(t1.total),"primary",`${first.length} lançamentos`),kpiCard(labels[1],brl(t2.total),"primary",`${second.length} lançamentos`),kpiCard("Diferença",brl(t2.total-t1.total),t2.total>t1.total?"late":"paid"),kpiCard("Variação",Number.isFinite(p)?`${p>0?"+":""}${p.toFixed(1).replace(".",",")}%`:"—","entity"),kpiCard(CONFIG[state.source].openLabel,brl(t2.open),"open")])])}
@@ -2243,6 +2447,7 @@ function filteredAllocations(record){
 }
 
 function allocationGroup(allocation){
+  if(allocation.group)return allocation.group;
   const parts=(allocation.code||"").split(".");
   const key=parts.length>=2?parts.slice(0,2).join("."):allocation.name;
   return GROUP_LABELS[key]||allocation.name;
@@ -2503,254 +2708,91 @@ function monthlyStatementData(){
     }));
 }
 
+function compactMoney(value){
+  const number=Number(value)||0;
+  if(Math.abs(number)>=1000000)return `R$ ${(number/1000000).toFixed(number>=10000000?0:1).replace(".",",")} mi`;
+  if(Math.abs(number)>=1000)return `R$ ${(number/1000).toFixed(number>=100000?0:1).replace(".",",")} mil`;
+  return brl(number);
+}
+
+function svgNode(svg,tag,attributes={},textValue=""){
+  const node=document.createElementNS(svg.namespaceURI,tag);
+  Object.entries(attributes).forEach(([key,value])=>node.setAttribute(key,value));
+  if(textValue!=="")node.textContent=textValue;
+  svg.append(node);
+  return node;
+}
+
+function chartScaffold(maximum,width=1000,height=340){
+  const left=82,right=24,top=32,bottom=48,plotHeight=height-top-bottom;
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
+  svg.setAttribute("role","img");
+  for(let index=0;index<=4;index++){
+    const y=top+plotHeight*(index/4);
+    const value=maximum*(1-index/4);
+    svgNode(svg,"line",{x1:left,y1:y,x2:width-right,y2:y,stroke:"#e7edf5","stroke-width":1});
+    svgNode(svg,"text",{x:left-12,y:y+4,"text-anchor":"end","font-size":10,fill:"#64748b"},compactMoney(value));
+  }
+  return{svg,left,right,top,bottom,plotHeight};
+}
+
 function barChart(data,color){
-  const width=1000;
-  const height=280;
-  const left=65;
-  const bottom=35;
-
-  const maximum=Math.max(
-    1,
-    ...data.map(item=>item.value)
-  );
-
-  const gap=
-    (width-left-20)/
-    Math.max(data.length,1);
-
-  const barWidth=
-    Math.min(70,gap*.62);
-
-  const svg=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg"
-  );
-
-  svg.setAttribute(
-    "viewBox",
-    `0 0 ${width} ${height}`
-  );
+  if(!data.length)return el("div",{class:"chartEmpty"},"Sem movimentação para os filtros atuais.");
+  const width=Math.max(900,data.length*82);
+  const height=340;
+  const maximum=Math.max(1,...data.map(item=>item.value))*1.12;
+  const{svg,left,right,top,bottom,plotHeight}=chartScaffold(maximum,width,height);
+  const gap=(width-left-right)/data.length;
+  const barWidth=Math.min(54,gap*.58);
+  const points=[];
 
   data.forEach((item,index)=>{
-    const barHeight=
-      (height-bottom-20)*
-      (item.value/maximum);
-
-    const x=
-      left+
-      index*gap+
-      (gap-barWidth)/2;
-
-    const y=
-      height-
-      bottom-
-      barHeight;
-
-    const rectangle=
-      document.createElementNS(
-        svg.namespaceURI,
-        "rect"
-      );
-
-    rectangle.setAttribute("x",x);
-    rectangle.setAttribute("y",y);
-    rectangle.setAttribute(
-      "width",
-      barWidth
-    );
-    rectangle.setAttribute(
-      "height",
-      barHeight
-    );
-    rectangle.setAttribute("rx",4);
-    rectangle.setAttribute(
-      "fill",
-      color
-    );
-
-    const tooltip=
-      document.createElementNS(
-        svg.namespaceURI,
-        "title"
-      );
-
-    tooltip.textContent=
-      `${item.label}: ${brl(item.value)}`;
-
-    rectangle.append(tooltip);
-    svg.append(rectangle);
-
-    const label=
-      document.createElementNS(
-        svg.namespaceURI,
-        "text"
-      );
-
-    label.setAttribute(
-      "x",
-      x+barWidth/2
-    );
-
-    label.setAttribute(
-      "y",
-      height-10
-    );
-
-    label.setAttribute(
-      "text-anchor",
-      "middle"
-    );
-
-    label.setAttribute(
-      "font-size",
-      "10"
-    );
-
-    label.textContent=item.label;
-    svg.append(label);
+    const barHeight=plotHeight*(item.value/maximum);
+    const x=left+index*gap+(gap-barWidth)/2;
+    const y=height-bottom-barHeight;
+    const rect=svgNode(svg,"rect",{x,y,width:barWidth,height:Math.max(2,barHeight),rx:7,fill:color,class:"chartBar"});
+    const tooltip=document.createElementNS(svg.namespaceURI,"title");
+    tooltip.textContent=`${item.label}: ${brl(item.value)}`;
+    rect.append(tooltip);
+    points.push(`${x+barWidth/2},${y}`);
+    if(data.length<=14){
+      svgNode(svg,"text",{x:x+barWidth/2,y:Math.max(top+9,y-8),"text-anchor":"middle","font-size":9,"font-weight":700,fill:"#334155"},compactMoney(item.value).replace("R$ ",""));
+    }
+    svgNode(svg,"text",{x:x+barWidth/2,y:height-17,"text-anchor":"middle","font-size":10,"font-weight":600,fill:"#475569"},item.label);
   });
 
-  return el(
-    "div",
-    {class:"chart"},
-    svg
-  );
+  if(points.length>1)svgNode(svg,"polyline",{points:points.join(" "),fill:"none",stroke:color,"stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round",opacity:.38});
+  return el("div",{class:"chart modernChart"},svg);
 }
 
 function statementChart(data){
-  const width=1000;
-  const height=280;
-  const left=65;
-  const bottom=35;
-
-  const maximum=Math.max(
-    1,
-    ...data.flatMap(item=>[
-      item.entry,
-      item.exit
-    ])
-  );
-
-  const gap=
-    (width-left-20)/
-    Math.max(data.length,1);
-
-  const barWidth=
-    Math.min(30,gap*.3);
-
-  const svg=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg"
-  );
-
-  svg.setAttribute(
-    "viewBox",
-    `0 0 ${width} ${height}`
-  );
+  if(!data.length)return el("div",{class:"chartEmpty"},"Sem movimentação para os filtros atuais.");
+  const width=Math.max(900,data.length*92);
+  const height=350;
+  const maximum=Math.max(1,...data.flatMap(item=>[item.entry,item.exit]))*1.12;
+  const{svg,left,right,top,bottom,plotHeight}=chartScaffold(maximum,width,height);
+  const gap=(width-left-right)/data.length;
+  const barWidth=Math.min(28,gap*.28);
+  const colors={entry:"#0f9f75",exit:"#e05252"};
 
   data.forEach((item,index)=>{
-    [
-      ["entry","#287a4b"],
-      ["exit","#c5442e"]
-    ].forEach(
-      ([field,color],barIndex)=>{
-        const barHeight=
-          (height-bottom-20)*
-          (item[field]/maximum);
-
-        const center=
-          left+
-          index*gap+
-          gap/2;
-
-        const x=
-          center-
-          barWidth-
-          3+
-          barIndex*(barWidth+6);
-
-        const rectangle=
-          document.createElementNS(
-            svg.namespaceURI,
-            "rect"
-          );
-
-        rectangle.setAttribute("x",x);
-
-        rectangle.setAttribute(
-          "y",
-          height-bottom-barHeight
-        );
-
-        rectangle.setAttribute(
-          "width",
-          barWidth
-        );
-
-        rectangle.setAttribute(
-          "height",
-          barHeight
-        );
-
-        rectangle.setAttribute("rx",4);
-        rectangle.setAttribute(
-          "fill",
-          color
-        );
-
-        const tooltip=
-          document.createElementNS(
-            svg.namespaceURI,
-            "title"
-          );
-
-        tooltip.textContent=
-          `${item.label} · `+
-          `${field==="entry"
-            ?"Entradas"
-            :"Saídas"}: `+
-          brl(item[field]);
-
-        rectangle.append(tooltip);
-        svg.append(rectangle);
-      }
-    );
-
-    const label=
-      document.createElementNS(
-        svg.namespaceURI,
-        "text"
-      );
-
-    label.setAttribute(
-      "x",
-      left+index*gap+gap/2
-    );
-
-    label.setAttribute(
-      "y",
-      height-10
-    );
-
-    label.setAttribute(
-      "text-anchor",
-      "middle"
-    );
-
-    label.setAttribute(
-      "font-size",
-      "10"
-    );
-
-    label.textContent=item.label;
-    svg.append(label);
+    const center=left+index*gap+gap/2;
+    [["entry","Entradas",-barWidth-3],["exit","Saídas",3]].forEach(([field,label,offset])=>{
+      const barHeight=plotHeight*(item[field]/maximum);
+      const rect=svgNode(svg,"rect",{x:center+offset,y:height-bottom-barHeight,width:barWidth,height:Math.max(2,barHeight),rx:6,fill:colors[field],class:"chartBar"});
+      const tooltip=document.createElementNS(svg.namespaceURI,"title");
+      tooltip.textContent=`${item.label} · ${label}: ${brl(item[field])}`;
+      rect.append(tooltip);
+    });
+    svgNode(svg,"text",{x:center,y:height-17,"text-anchor":"middle","font-size":10,"font-weight":600,fill:"#475569"},item.label);
   });
 
-  return el(
-    "div",
-    {class:"chart"},
-    svg
-  );
+  const legend=el("div",{class:"chartLegend"},[
+    el("span",{},[el("i",{style:`background:${colors.entry}`}),"Entradas"]),
+    el("span",{},[el("i",{style:`background:${colors.exit}`}),"Saídas"])
+  ]);
+  return el("div",{class:"chartWithLegend"},[legend,el("div",{class:"chart modernChart"},svg)]);
 }
 
 function receivableComparisonInformation(){
@@ -3535,15 +3577,22 @@ function renderCategoryFilters(){
   const categories=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocation.name)))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const groups=[...new Set(records.flatMap(record=>(record.allocations||[]).map(allocation=>allocationGroup(allocation))))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
   const row=el("div",{class:"filters"},[
-    selectField("Mês 1",filters.month1,availableMonths(),value=>{filters.month1=value;render();}),
-    selectField("Mês 2",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
+    selectField("Período principal — mês",filters.month1,availableMonths(),value=>{filters.month1=value;render();}),
+    selectField("Comparar com — mês",filters.month2,availableMonths(),value=>{filters.month2=value;render();}),
     multiChoiceField("Categorias",groups,"groups","Buscar categoria…",filters),
     multiChoiceField("Subcategorias",categories,"categories","Buscar subcategoria…",filters),
     el("button",{class:"btn secondary",onclick:()=>{filterScopes[filterScopeKey()].categoryFilters=freshCategoryFilters();state.categoryFilters=filterScopes[filterScopeKey()].categoryFilters;render();}},"Limpar filtros da aba")
   ]);
 
+  const count=[filters.month1,filters.month2,filters.groups.length,filters.categories.length].filter(Boolean).length;
   return el("div",{class:"filterbox"},[
-    el("div",{class:"sub",style:"margin-bottom:12px"},"Estes filtros pertencem somente à aba Categorias e não são alterados pelos filtros do Dashboard ou da Comparação."),
+    el("div",{class:"filterHead"},[
+      el("div",{},[
+        el("strong",{},"Filtros de categorias"),
+        el("small",{},count?`${count} filtro${count===1?"":"s"} ativo${count===1?"":"s"}`:"Visualizando todas as classificações")
+      ]),
+      count?el("span",{class:"filterCount"},String(count)):null
+    ]),
     row
   ]);
 }
@@ -3813,10 +3862,6 @@ function renderAccountsDashboard(app,key){
       ]
     )
   );
-
-  if(key==="pagar"){
-    app.append(renderExecutiveCashSummary(),renderFinancialAlerts());
-  }
 
   if(key==="pagar"||key==="receber"){
     app.append(
@@ -4722,7 +4767,186 @@ async function clearCurrentData(){
 
 function daysFromToday(iso){if(!iso)return null;const today=new Date();today.setHours(0,0,0,0);const date=parseDate(iso);return date?Math.round((date-today)/86400000):null}
 function htmlCard(title,body,subtitle=""){return el("section",{class:"card",html:`<div class="execCardHead"><h3>${title}</h3><span>${subtitle}</span></div><div class="execBody">${body}</div>`})}
-function simpleTable(headers,rows){return `<div class="tablewrap"><table class="table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.length?rows.map(row=>`<tr>${row.map((cell,index)=>`<td${index?" class=\"num\"":""}>${cell}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${headers.length}">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
+function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[character])}
+function isNumericCell(value){return /^(R\$\s*)?[+-]?[\d.]+(?:,\d+)?(?:\s*(?:%|x|mil|mi))?$/.test(String(value??"").trim())}
+function simpleTable(headers,rows){return `<div class="tablewrap"><table class="table"><thead><tr>${headers.map(h=>`<th>${escapeHTML(h)}</th>`).join("")}</tr></thead><tbody>${rows.length?rows.map(row=>`<tr>${row.map(cell=>`<td${isNumericCell(cell)?" class=\"num\"":""}>${escapeHTML(cell)}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${headers.length}">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`}
+
+function formField(label,input,wide=false){return el("label",{class:`editField${wide?" wide":""}`},[el("span",{},label),input])}
+function editorInput(value,type="text",attributes={}){return el("input",{class:"editControl",type,value:value??"",...attributes})}
+
+async function persistManualChange(){
+  const key=state.source;
+  state.updated[key]=new Date().toISOString();
+  saveData(key);
+  if(cloudDb){
+    if(!adminSession)throw new Error("Entre como administrador para alterar os dados compartilhados.");
+    await saveOnline();
+  }
+}
+
+function showRecordEditor(record){
+  if(cloudDb&&!adminSession){showAdminLogin();return}
+  const source=state.source;
+  const overlay=el("div",{class:"detailOverlay"});
+  const dialog=el("div",{class:"detailDialog editDialog"});
+  const errorBox=el("div",{class:"error editError"});
+  const close=()=>overlay.remove();
+  overlay.onclick=event=>{if(event.target===overlay)close()};
+
+  const body=el("div",{class:"editBody"});
+  let allocations=(record.allocations||[]).map(item=>({
+    ...item,
+    group:item.group||allocationGroup(item),
+    code:item.code||"",
+    name:item.name||""
+  }));
+  if(source!=="extrato"&&!allocations.length)allocations=[{group:"Sem categoria",code:"",name:"Sem categoria",value:record.original||0}];
+
+  const fields={};
+  const addField=(key,label,value,type="text",wide=false,attributes={})=>{
+    const input=editorInput(value,type,attributes);
+    fields[key]=input;
+    body.append(formField(label,input,wide));
+    return input;
+  };
+
+  addField("date","Data",record.date,"date");
+  if(source==="extrato"){
+    const typeSelect=el("select",{class:"editControl"},[
+      el("option",{value:"entry"},"Entrada"),
+      el("option",{value:"exit"},"Saída")
+    ]);
+    typeSelect.value=record.type;
+    fields.type=typeSelect;
+    body.append(formField("Tipo",typeSelect));
+    addField("description","Descrição",record.description,"text",true);
+    addField("value","Valor",record.value,"number",false,{step:"0.01",min:"0"});
+  }else{
+    addField("entity",CONFIG[source].entityLabel,record.entity,"text",true);
+    addField("description","Descrição",record.description,"text",true);
+    addField("status","Situação",record.status);
+    addField("costCenter","Centro de custo",record.costCenter);
+    addField("original","Valor original",record.original,"number",false,{step:"0.01",min:"0"});
+    addField("done",CONFIG[source].doneLabel,record.done,"number",false,{step:"0.01",min:"0"});
+    addField("open",CONFIG[source].openLabel,record.open,"number",false,{step:"0.01",min:"0"});
+
+    const allocationArea=el("section",{class:"allocationEditor"});
+    const rows=el("div",{class:"allocationRows"});
+    const drawAllocations=()=>{
+      rows.replaceChildren(...allocations.map((allocation,index)=>{
+        const group=editorInput(allocation.group||allocationGroup(allocation));
+        const name=editorInput(allocation.name);
+        const code=editorInput(allocation.code||"");
+        const value=editorInput(allocation.value,"number",{step:"0.01",min:"0"});
+        group.oninput=event=>allocation.group=event.target.value;
+        name.oninput=event=>allocation.name=event.target.value;
+        code.oninput=event=>allocation.code=event.target.value;
+        value.oninput=event=>allocation.value=Math.abs(parseNumber(event.target.value));
+        return el("div",{class:"allocationRow"},[
+          formField("Categoria",group),
+          formField("Subcategoria",name),
+          formField("Código",code),
+          formField("Valor",value),
+          el("button",{type:"button",class:"iconButton dangerText",title:"Remover rateio",onclick:()=>{allocations.splice(index,1);drawAllocations()}},"Remover")
+        ]);
+      }));
+    };
+    allocationArea.append(
+      el("div",{class:"allocationHead"},[
+        el("div",{},[el("strong",{},"Categorias e subcategorias"),el("small",{},"Edite os rateios deste lançamento")]),
+        el("button",{type:"button",class:"btn secondary",onclick:()=>{allocations.push({group:"",code:"",name:"",value:0});drawAllocations()}},"+ Adicionar categoria")
+      ]),
+      rows
+    );
+    body.append(allocationArea);
+    drawAllocations();
+  }
+
+  const saveButton=el("button",{class:"btn",onclick:async()=>{
+    try{
+      errorBox.textContent="";
+      if(!fields.date.value)throw new Error("Informe uma data válida.");
+      record.date=fields.date.value;
+      record.month=record.date.slice(0,7);
+      if(source==="extrato"){
+        record.type=fields.type.value;
+        record.description=fields.description.value.trim()||"Sem descrição";
+        record.value=Math.abs(parseNumber(fields.value.value));
+      }else{
+        record.entity=fields.entity.value.trim()||`Sem ${CONFIG[source].entityLabel.toLowerCase()}`;
+        record.description=fields.description.value.trim()||"Sem descrição";
+        record.status=fields.status.value.trim()||"Não informado";
+        record.costCenter=fields.costCenter.value.trim()||"Sem centro de custo";
+        record.original=Math.abs(parseNumber(fields.original.value));
+        record.done=Math.abs(parseNumber(fields.done.value));
+        record.open=Math.abs(parseNumber(fields.open.value));
+        record.allocations=allocations.filter(item=>item.name.trim()).map(item=>({
+          group:item.group.trim()||"Sem categoria",
+          code:item.code.trim(),
+          name:item.name.trim(),
+          value:Math.abs(parseNumber(item.value))
+        }));
+        if(!record.allocations.length)record.allocations=[{group:"Sem categoria",code:"",name:"Sem categoria",value:record.original}];
+      }
+      saveButton.disabled=true;
+      saveButton.textContent="Salvando…";
+      await persistManualChange();
+      close();
+      render();
+    }catch(error){
+      errorBox.textContent=error.message||"Não foi possível salvar a alteração.";
+      saveButton.disabled=false;
+      saveButton.textContent="Salvar alterações";
+    }
+  }},"Salvar alterações");
+
+  dialog.append(
+    el("div",{class:"detailHead"},[
+      el("div",{},[el("h2",{},"Editar lançamento"),el("p",{},"As alterações atualizam todos os indicadores, gráficos e relatórios.")]),
+      el("button",{class:"btn secondary",onclick:close},"Fechar")
+    ]),
+    body,
+    el("div",{class:"editFooter"},[errorBox,el("div",{},[el("button",{class:"btn secondary",onclick:close},"Cancelar"),saveButton])])
+  );
+  overlay.append(dialog);
+  document.body.append(overlay);
+}
+
+function renderLedger(){
+  const records=displayRecords(state.data[state.source]||[]);
+  const limit=500;
+  const visible=records.slice(0,limit);
+  const table=el("table",{class:"table ledgerTable"});
+  const account=state.source!=="extrato";
+  const headers=account
+    ?["Data",CONFIG[state.source].entityLabel,"Descrição","Situação","Categoria › Subcategoria","Centro de custo","Original",CONFIG[state.source].doneLabel,CONFIG[state.source].openLabel,"Ação"]
+    :["Data","Descrição","Tipo","Valor","Ação"];
+  table.append(el("thead",{},el("tr",{},headers.map(header=>el("th",{},header)))));
+  table.append(el("tbody",{},visible.length?visible.map(record=>{
+    const edit=el("button",{class:"rowEdit",onclick:()=>showRecordEditor(record)},"Editar");
+    if(!account)return el("tr",{},[
+      el("td",{},formatDateBR(record.date)),el("td",{},record.description),el("td",{},record.type==="entry"?"Entrada":"Saída"),el("td",{class:"num"},brl(record.value)),el("td",{},edit)
+    ]);
+    const classification=(record.allocations||[]).map(allocation=>`${allocationGroup(allocation)} › ${allocation.name}`).join(" · ")||"Sem categoria";
+    return el("tr",{},[
+      el("td",{},formatDateBR(record.date)),el("td",{},record.entity),el("td",{},record.description),el("td",{},record.status),el("td",{class:"classificationCell",title:classification},classification),el("td",{},record.costCenter),el("td",{class:"num"},brl(record.original)),el("td",{class:"num"},brl(record.done)),el("td",{class:"num"},brl(record.open)),el("td",{},edit)
+    ]);
+  }):el("tr",{},el("td",{colspan:String(headers.length)},"Nenhum lançamento encontrado com os filtros atuais."))));
+
+  return el("div",{},[
+    el("div",{class:"execHero ledgerHero"},[
+      el("small",{},"BASE EDITÁVEL"),
+      el("h2",{},"Lançamentos e classificações"),
+      el("p",{},"Altere fornecedor ou cliente, descrição, situação, valores, centro de custo, categoria e subcategoria sem editar o código."),
+      el("div",{class:"execMeta"},[el("span",{},`${records.length} registros filtrados`),el("span",{},cloudDb&&!adminSession?"Entre como administrador para editar":"Edição habilitada")])
+    ]),
+    el("div",{class:"ledgerToolbar"},[
+      el("div",{},[el("strong",{},"Dados detalhados"),el("small",{},visible.length<records.length?`Exibindo os primeiros ${limit} registros`:`${records.length} registros exibidos`)]),
+      el("span",{class:"safeBadge"},"Alterações salvas na base")
+    ]),
+    el("div",{class:"card ledgerCard"},el("div",{class:"tablewrap"},table))
+  ]);
+}
 function payableFiltered(){return state.source==="pagar"?displayRecords(state.data.pagar||[]):[]}
 function openPayables(){return payableFiltered().filter(r=>r.open>0)}
 function renderTreasury(){
@@ -4734,13 +4958,12 @@ function renderTreasury(){
 }
 function renderExecutiveCashSummary(){const records=openPayables(),future=records.filter(r=>daysFromToday(r.date)>=0),overdue=records.filter(r=>daysFromToday(r.date)<0),sumOpen=list=>list.reduce((s,r)=>s+r.open,0),within=days=>future.filter(r=>daysFromToday(r.date)<=days);return el("div",{},[sectionHeader("AGENDA E CAIXA","Próximos compromissos financeiros"),el("div",{class:"kpis"},[kpiCard("Vencido",brl(sumOpen(overdue)),overdue.length?"late":"paid",`${overdue.length} títulos`),kpiCard("Próximos 7 dias",brl(sumOpen(within(7))),"primary"),kpiCard("Próximos 15 dias",brl(sumOpen(within(15))),"open"),kpiCard("Próximos 30 dias",brl(sumOpen(within(30))),"entity"),kpiCard("Total em aberto",brl(sumOpen(records)),"open")]),htmlCard("Agenda dos próximos vencimentos",simpleTable(["Vencimento","Valor","Fornecedor"],future.sort((a,b)=>a.date.localeCompare(b.date)).slice(0,15).map(r=>[formatDateBR(r.date),brl(r.open),r.entity])),"Compromissos mais próximos")])}
 function showAuditFindingDetails(finding){const records=finding.records||[finding.record],overlay=el("div",{class:"detailOverlay"}),close=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)close()};overlay.append(el("div",{class:"detailDialog"},[el("div",{class:"detailHead"},[el("div",{},[el("h2",{},finding.type),el("p",{},`${records.length} lançamento(s) encontrado(s) · ${finding.detail}`)]),el("button",{class:"btn secondary",onclick:close},"Fechar")]),el("div",{class:"detailScroll"},el("table",{class:"table"},[el("thead",{},el("tr",{},["Fornecedor","Descrição","Vencimento","Situação","Centro de custo","Valor original","Pago","Em aberto"].map(x=>el("th",{},x)))),el("tbody",{},records.map(r=>el("tr",{},[el("td",{},r.entity),el("td",{},r.description||"Sem descrição"),el("td",{},formatDateBR(r.date)),el("td",{},r.status),el("td",{},r.costCenter),el("td",{},brl(r.original)),el("td",{},brl(r.done)),el("td",{},brl(r.open))])))]))]));document.body.append(overlay)}
-function renderFinancialAlerts(){const findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),visible=findings.slice(0,20),table=el("table",{class:"table alertTable"},[el("thead",{},el("tr",{},["Alerta","Prioridade","Fornecedor","Detalhe"].map(x=>el("th",{},x)))),el("tbody",{},visible.map(finding=>el("tr",{class:"alertRow",onclick:()=>showAuditFindingDetails(finding)},[el("td",{class:"clickDetail"},finding.type),el("td",{},finding.severity),el("td",{},finding.record.entity),el("td",{},`${finding.detail} · clique para conferir`)])))]),card=el("section",{class:"card"},[el("div",{class:"execCardHead"},[el("h3",{},"Ocorrências prioritárias"),el("span",{},"Clique em qualquer alerta para abrir os lançamentos")]),el("div",{class:"tablewrap"},table)]);return el("div",{},[sectionHeader("ALERTAS FINANCEIROS","Pontos que precisam de revisão"),el("div",{class:"alertSummary"},[el("div",{},[el("b",{},`${findings.length} alertas encontrados`),el("span",{},` · ${high.length} de prioridade alta`)]),el("small",{},"Valide cada ocorrência antes de alterar o lançamento de origem.")]),card])}
-function auditFindings(){const records=payableFiltered(),today=new Date().toISOString().slice(0,10),findings=[];const duplicates=new Map;records.forEach(r=>{const key=[normalize(r.entity),normalize(r.description),r.date,r.original.toFixed(2)].join("|");duplicates.set(key,[...(duplicates.get(key)||[]),r])});[...duplicates.values()].filter(v=>v.length>1).forEach(v=>findings.push({type:"Possível duplicidade",severity:"Alta",record:v[0],records:v,detail:`${v.length} lançamentos semelhantes`}));records.forEach(r=>{if(!r.allocations?.length||r.allocations.every(a=>normalize(a.name)==="sem categoria"))findings.push({type:"Sem categoria",severity:"Média",record:r,records:[r],detail:"Classificação contábil ausente"});if(!r.costCenter||normalize(r.costCenter)==="sem centro de custo")findings.push({type:"Sem centro de custo",severity:"Média",record:r,records:[r],detail:"Rateio gerencial ausente"});if(r.done>r.original+.01)findings.push({type:"Pago acima do original",severity:"Alta",record:r,records:[r],detail:`Diferença de ${brl(r.done-r.original)}`});if(r.open>0&&r.date<today)findings.push({type:"Título vencido",severity:"Alta",record:r,records:[r],detail:`${Math.abs(daysFromToday(r.date))} dias em atraso`})});return findings}
-function renderAutomaticAudit(){const wrap=el("div"),findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),medium=findings.filter(x=>x.severity==="Média");wrap.append(el("div",{class:"execHero"},[el("small",{},"AUDITORIA AUTOMÁTICA"),el("h2",{},"Inconsistências e pontos de controle"),el("p",{},"Rastreamento de duplicidades, atrasos, classificações ausentes e pagamentos acima do valor original.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Ocorrências",String(findings.length),findings.length?"late":"paid"),kpiCard("Prioridade alta",String(high.length),high.length?"late":"paid"),kpiCard("Prioridade média",String(medium.length),"open"),kpiCard("Duplicidades",String(findings.filter(x=>x.type.includes("duplicidade")).length),"entity"),kpiCard("Sem classificação",String(findings.filter(x=>x.type.includes("Sem ")).length),"primary")]));wrap.append(htmlCard("Relatório de ocorrências",simpleTable(["Ocorrência","Prioridade","Fornecedor","Vencimento","Detalhe"],findings.map(x=>[x.type,x.severity,x.record.entity,formatDateBR(x.record.date),x.detail])),"Revise individualmente antes de corrigir a origem"));return wrap}
+function auditFindings(){const records=payableFiltered(),today=new Date().toISOString().slice(0,10),findings=[];records.forEach(r=>{if(!r.allocations?.length||r.allocations.every(a=>normalize(a.name)==="sem categoria"))findings.push({type:"Sem categoria",severity:"Média",record:r,records:[r],detail:"Classificação contábil ausente"});if(!r.costCenter||normalize(r.costCenter)==="sem centro de custo")findings.push({type:"Sem centro de custo",severity:"Média",record:r,records:[r],detail:"Rateio gerencial ausente"});if(r.done>r.original+.01)findings.push({type:"Pago acima do original",severity:"Alta",record:r,records:[r],detail:`Diferença de ${brl(r.done-r.original)}`});if(r.open>0&&r.date<today)findings.push({type:"Título vencido",severity:"Alta",record:r,records:[r],detail:`${Math.abs(daysFromToday(r.date))} dias em atraso`})});return findings}
+function renderAutomaticAudit(){const wrap=el("div"),findings=auditFindings(),high=findings.filter(x=>x.severity==="Alta"),medium=findings.filter(x=>x.severity==="Média");wrap.append(el("div",{class:"execHero"},[el("small",{},"REVISÃO DA BASE"),el("h2",{},"Classificações, atrasos e valores para revisar"),el("p",{},"A conferência considera apenas pontos objetivos: classificações ausentes, títulos vencidos e pagamentos acima do valor original. Lançamentos semelhantes não são tratados como duplicados.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Pontos para revisar",String(findings.length),findings.length?"late":"paid"),kpiCard("Valores e atrasos",String(high.length),high.length?"late":"paid"),kpiCard("Classificações",String(medium.length),"open"),kpiCard("Sem categoria",String(findings.filter(x=>x.type==="Sem categoria").length),"entity"),kpiCard("Sem centro de custo",String(findings.filter(x=>x.type==="Sem centro de custo").length),"primary")]));wrap.append(htmlCard("Itens para conferência",simpleTable(["Ponto","Prioridade","Fornecedor","Vencimento","Detalhe"],findings.map(x=>[x.type,x.severity,x.record.entity,formatDateBR(x.record.date),x.detail])),"Sem alertas de lançamentos duplicados"));return wrap}
 function recurringGroups(){const map=new Map;payableFiltered().forEach(r=>{const key=`${normalize(r.entity)}|${normalize(r.description)}`,item=map.get(key)||{entity:r.entity,description:r.description,months:new Set,total:0,records:[]};item.months.add(r.month);item.total+=r.original;item.records.push(r);map.set(key,item)});return[...map.values()].filter(x=>x.months.size>=3).map(x=>({...x,average:x.total/x.records.length})).sort((a,b)=>b.total-a.total)}
 function renderRecurring(){const wrap=el("div"),groups=recurringGroups(),records=payableFiltered(),supplierMap=new Map;records.forEach(r=>supplierMap.set(r.entity,(supplierMap.get(r.entity)||0)+r.original));const suppliers=[...supplierMap].sort((a,b)=>b[1]-a[1]),total=records.reduce((s,r)=>s+r.original,0),top5=suppliers.slice(0,5).reduce((s,x)=>s+x[1],0);wrap.append(el("div",{class:"execHero"},[el("small",{},"RECORRÊNCIAS E CONCENTRAÇÃO"),el("h2",{},"Despesas fixas e dependência de fornecedores"),el("p",{},"Identificação de cobranças presentes em três ou mais competências e análise da concentração dos maiores fornecedores.")]));wrap.append(el("div",{class:"kpis"},[kpiCard("Recorrências",String(groups.length),"primary"),kpiCard("Valor recorrente",brl(groups.reduce((s,x)=>s+x.total,0)),"open"),kpiCard("Fornecedores",String(suppliers.length),"entity"),kpiCard("Top 5",brl(top5),"primary",`${(total?top5/total*100:0).toFixed(1).replace(".",",")}% do total`),kpiCard("Maior fornecedor",suppliers[0]?.[0]||"—",suppliers[0]&&total&&suppliers[0][1]/total>.35?"late":"paid",suppliers[0]?brl(suppliers[0][1]):"")]));wrap.append(el("div",{class:"grid2"},[htmlCard("Despesas recorrentes",simpleTable(["Fornecedor / despesa","Competências","Média","Total"],groups.map(x=>[`${x.entity} · ${x.description}`,String(x.months.size),brl(x.average),brl(x.total)]))),htmlCard("Concentração por fornecedor",simpleTable(["Fornecedor","Valor","Participação"],suppliers.slice(0,20).map(x=>[x[0],brl(x[1]),`${(total?x[1]/total*100:0).toFixed(1).replace(".",",")}%`])))]));return wrap}
 
-function render(){
+function legacyRender(){
   const app=
     document.getElementById("app");
 
@@ -4987,6 +5210,139 @@ function render(){
         ?"Dados compartilhados online · atualização automática para todas as pessoas com o link · análise executiva"
         :"Cópia local de segurança · configure o Supabase para compartilhamento online"
     )
+  );
+}
+
+function viewOptionsFor(source=state.source){
+  if(source==="extrato")return[
+    ["dashboard","Visão geral"],
+    ["lancamentos","Lançamentos"],
+    ["comparacao","Comparação"],
+    ["relatorio","Relatório executivo"]
+  ];
+  const common=[
+    ["dashboard","Visão geral"],
+    ["lancamentos","Lançamentos"],
+    ["categorias","Categorias"],
+    ["comparacao","Comparação"],
+    ["relatorio","Relatório executivo"]
+  ];
+  if(source!=="pagar")return common;
+  return[
+    ["dashboard","Visão geral"],
+    ["lancamentos","Lançamentos"],
+    ["tesouraria","Tesouraria"],
+    ["categorias","Categorias"],
+    ["comparacao","Comparação"],
+    ["recorrencias","Recorrências"],
+    ["auditoria","Revisão da base"],
+    ["relatorio","Relatório executivo"]
+  ];
+}
+
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML="";
+
+  const sourceTabs=[
+    ["pagar","Contas a Pagar"],
+    ["receber","Contas a Receber"],
+    ["extrato","Extrato Bancário"]
+  ];
+  const viewTabs=viewOptionsFor();
+  if(!viewTabs.some(([key])=>key===state.view)){
+    state.view="dashboard";
+    activateFilterScope(state.source,state.view);
+  }
+
+  const sourceLabel=CONFIG[state.source]?.label||"Extrato Bancário";
+  const viewLabel=viewTabs.find(([key])=>key===state.view)?.[1]||"Visão geral";
+  const updated=state.updated[state.source]
+    ?new Date(state.updated[state.source]).toLocaleString("pt-BR")
+    :"—";
+  const recordCount=state.data[state.source]?.length||0;
+
+  app.append(
+    el("div",{class:"header"},[
+      el("div",{class:"headerCopy"},[
+        el("div",{class:"eyebrow"},`DANE-SE FINANCEIRO · ${viewLabel.toUpperCase()}`),
+        el("h1",{class:"title"},sourceLabel),
+        el("div",{class:"sub"},state.data[state.source]
+          ?`${recordCount} lançamentos · atualização ${updated}`
+          :"Importe uma base para começar")
+      ]),
+      el("div",{class:"actions"},[
+        el("span",{class:`adminBadge${cloudReady?" online":""}`},cloudReady?(adminSession?"Administrador conectado":"Dados online"):"Modo local"),
+        cloudDb?el("button",{class:"btn secondary",onclick:adminSession?adminLogout:showAdminLogin},adminSession?"Sair":"Administrar"):null,
+        state.data[state.source]?el("button",{class:"btn editShortcut",onclick:()=>{state.view="lancamentos";activateFilterScope(state.source,state.view);render()}},"Editar lançamentos"):null,
+        state.data[state.source]?el("button",{class:"btn secondary",onclick:downloadPDF},"PDF"):null,
+        state.data[state.source]?el("button",{class:"btn secondary",onclick:downloadExcel},"Excel"):null,
+        state.data[state.source]&&(!cloudDb||adminSession)
+          ?el("button",{class:"btn secondary",onclick:()=>document.getElementById("main-file")?.click()},"Atualizar base")
+          :null,
+        state.data[state.source]&&(!cloudDb||adminSession)
+          ?el("button",{class:"btn danger",onclick:clearCurrentData},"Limpar base")
+          :null
+      ])
+    ]),
+    el("div",{class:"tabs sourceTabs"},sourceTabs.map(([key,label])=>
+      el("button",{
+        class:`tab${state.source===key?" active":""}`,
+        onclick:()=>{
+          state.source=key;
+          const allowed=viewOptionsFor(key);
+          if(!allowed.some(([viewKey])=>viewKey===state.view))state.view="dashboard";
+          activateFilterScope(state.source,state.view);
+          render();
+        }
+      },label)
+    )),
+    el("div",{class:"tabs viewtabs"},viewTabs.map(([key,label])=>
+      el("button",{
+        class:`tab${state.view===key?" active":""}`,
+        onclick:()=>{
+          state.view=key;
+          activateFilterScope(state.source,state.view);
+          render();
+        }
+      },label)
+    ))
+  );
+
+  if(state.error)app.append(el("div",{class:"error pageError"},state.error));
+
+  if(!state.data[state.source]){
+    app.append(renderEmpty());
+  }else{
+    app.append(state.view==="categorias"?renderCategoryFilters():renderFilters());
+    const comparisonFilters=state.view==="categorias"?state.categoryFilters:state.filters;
+    if(comparisonFilters.month1&&comparisonFilters.month2)app.append(universalMonthComparison());
+
+    if(state.view==="dashboard"){
+      if(state.source==="extrato")renderStatementDashboard(app);
+      else renderAccountsDashboard(app,state.source);
+    }else if(state.view==="lancamentos"){
+      app.append(renderLedger());
+    }else if(state.view==="tesouraria"){
+      app.append(renderTreasury());
+    }else if(state.view==="relatorio"){
+      app.append(renderExecutiveReport());
+    }else if(state.view==="comparacao"){
+      renderExpenseComparison(app);
+    }else if(state.view==="categorias"){
+      renderCategories(app);
+    }else if(state.view==="recorrencias"){
+      app.append(renderRecurring());
+    }else if(state.view==="auditoria"){
+      app.append(renderAutomaticAudit());
+    }
+  }
+
+  app.append(
+    el("input",{id:"main-file",type:"file",accept:".xlsx,.xls,.csv",onchange:event=>uploadFile(state.source,event.target.files[0])}),
+    el("div",{class:"footer"},cloudReady
+      ?"Dados compartilhados online · alterações refletidas em gráficos e relatórios"
+      :"Dados mantidos neste navegador · gráficos e relatórios atualizados automaticamente")
   );
 }
 
